@@ -10,8 +10,6 @@ services:
       - .env
     environment:
       - DATABASE_URI=mssql+pyodbc://financeiro:BlomaqFinanceiro$$@srvsqlblomaq01\dev:1433/Locador_2?driver=ODBC+Driver+17+for+SQL+Server
-    volumes:
-      - ./src/backend:/app
     restart: unless-stopped
 
   # Frontend React
@@ -23,9 +21,6 @@ services:
       - "3000:3000"
     environment:
       - REACT_APP_API_URL=http://localhost:8000
-    volumes:
-      - ./src/frontend:/app
-      - /app/node_modules
     depends_on:
       - backend
     restart: unless-stopped
