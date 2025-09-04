@@ -3,11 +3,11 @@ FROM node:18-alpine
 # Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar package.json e package-lock.json
-COPY package*.json ./
+# Copiar package.json
+COPY package.json ./
 
-# Instalar dependências
-RUN npm ci --only=production
+# Instalar todas as dependências (incluindo dev para o build)
+RUN npm install
 
 # Copiar código fonte
 COPY . .
@@ -15,8 +15,11 @@ COPY . .
 # Build da aplicação
 RUN npm run build
 
-# Instalar servidor estático
+# Instalar servidor estático globalmente
 RUN npm install -g serve
+
+# Remover dependências de desenvolvimento para diminuir o tamanho
+RUN npm prune --production
 
 # Expor porta
 EXPOSE 3000

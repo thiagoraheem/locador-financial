@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     MASTER_PASSWORD: str = "YpP7sPnjw2G/TO5357wt1w=="
     
     # Configurações do Banco de Dados
-    DATABASE_URI: str = "mssql+pyodbc://sa:password@localhost:1433/LocadorDB?driver=ODBC+Driver+17+for+SQL+Server"
+    DATABASE_URI: str = "mssql+pyodbc://financeiro:BlomaqFinanceiro$@srvsqlblomaq01\dev:1433/Locador_2?driver=ODBC+Driver+17+for+SQL+Server"
     
     # Configurações de CORS
     CORS_ORIGINS: List[AnyHttpUrl] = [

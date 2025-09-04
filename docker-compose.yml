@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Backend FastAPI
   backend:
@@ -8,14 +6,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URI=mssql+pyodbc://sa:YourPassword@db:1433/LocadorDB?driver=ODBC+Driver+17+for+SQL+Server
-      - SECRET_KEY=your-secret-key-here-change-in-production
-      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - DATABASE_URI=mssql+pyodbc://financeiro:BlomaqFinanceiro$$@srvsqlblomaq01\dev:1433/Locador_2?driver=ODBC+Driver+17+for+SQL+Server
     volumes:
       - ./src/backend:/app
-    depends_on:
-      - db
     restart: unless-stopped
 
   # Frontend React
@@ -34,19 +30,6 @@ services:
       - backend
     restart: unless-stopped
 
-  # SQL Server Database
-  db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrongPassword123!
-      - MSSQL_PID=Express
-    ports:
-      - "1433:1433"
-    volumes:
-      - sql_data:/var/opt/mssql
-    restart: unless-stopped
-
   # Redis (optional for caching and session management)
   redis:
     image: redis:7-alpine
@@ -57,5 +40,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  sql_data:
   redis_data:
