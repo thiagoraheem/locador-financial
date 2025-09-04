@@ -1,0 +1,2 @@
+# Adicionar gunicorn para produção
+gunicorn==21.2.0
