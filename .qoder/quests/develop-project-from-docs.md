@@ -32,6 +32,9 @@ This document outlines the design for developing a comprehensive financial web a
 - **Forms**: React Hook Form with Yup validation
 - **Routing**: React Router v6
 - **Charts**: Chart.js or Recharts for data visualization
+- **Localization**: Complete pt-BR localization with react-i18next
+- **Date/Time**: date-fns with pt-BR locale for date formatting
+- **Currency**: Brazilian Real (BRL) formatting and validation
 
 ### DevOps & Infrastructure
 - **Containerization**: Docker and Docker Compose
@@ -694,35 +697,150 @@ describe('LancamentoForm', () => {
 });
 ```
 
-#### E2E Tests (Cypress)
+#### E2E Tests (Cypress) - Localized
 ```typescript
-describe('Financial Authentication Flow', () => {
-  it('should authenticate with tbl_Funcionarios credentials', () => {
-    // Test complete authentication flow
+describe('Financial Authentication Flow - Portuguese', () => {
+  it('should authenticate with tbl_Funcionarios credentials in Portuguese', () => {
     cy.visit('/login');
+    
+    // Verify Portuguese interface
+    cy.contains('Sistema Financeiro Locador').should('be.visible');
+    cy.get('[data-cy=username-label]').should('contain', 'Usuário');
+    cy.get('[data-cy=password-label]').should('contain', 'Senha');
+    
+    // Test login flow
     cy.get('[data-cy=login-input]').type('admin');
     cy.get('[data-cy=password-input]').type('password123');
-    cy.get('[data-cy=login-button]').click();
+    cy.get('[data-cy=login-button]').should('contain', 'Entrar').click();
+    
+    // Verify Portuguese dashboard
     cy.url().should('include', '/dashboard');
-    cy.get('[data-cy=user-name]').should('contain', 'Admin User');
+    cy.contains('Dashboard Financeiro').should('be.visible');
+    cy.get('[data-cy=user-welcome]').should('contain', 'Bem-vindo');
   });
   
-  it('should reject inactive users', () => {
-    // Test dismissed employee rejection
+  it('should display error messages in Portuguese', () => {
+    cy.visit('/login');
+    cy.get('[data-cy=login-button]').click();
+    
+    // Verify Portuguese validation messages
+    cy.contains('Este campo é obrigatório').should('be.visible');
   });
   
-  it('should handle master password access', () => {
-    // Test master password authentication
+  it('should handle currency formatting in Portuguese', () => {
+    // Login first
+    cy.login('admin', 'password123');
+    
+    // Navigate to transactions
+    cy.get('[data-cy=nav-transactions]').should('contain', 'Lançamentos').click();
+    cy.get('[data-cy=new-transaction-btn]').should('contain', 'Novo Lançamento').click();
+    
+    // Test currency input
+    cy.get('[data-cy=amount-input]').type('1234.56');
+    cy.get('[data-cy=amount-display]').should('contain', 'R$ 1.234,56');
   });
 });
 
-describe('Financial Transactions with Audit', () => {
-  it('should create transaction with user audit trail', () => {
-    // Test complete transaction creation with audit
+describe('Financial Transactions with Portuguese UI', () => {
+  beforeEach(() => {
+    cy.login('admin', 'password123');
+    cy.visit('/lancamentos');
   });
   
-  it('should display user information in transaction history', () => {
-    // Test audit trail visibility in UI
+  it('should create transaction with Portuguese labels', () => {
+    cy.get('[data-cy=new-transaction-btn]').click();
+    
+    // Verify Portuguese form labels
+    cy.get('[data-cy=date-label]').should('contain', 'Data');
+    cy.get('[data-cy=amount-label]').should('contain', 'Valor');
+    cy.get('[data-cy=type-label]').should('contain', 'Tipo');
+    cy.get('[data-cy=description-label]').should('contain', 'Descrição');
+    
+    // Fill form with Portuguese options
+    cy.get('[data-cy=type-select]').click();
+    cy.get('[data-cy=type-income]').should('contain', 'Entrada').click();
+    cy.get('[data-cy=type-expense]').should('contain', 'Saída');
+    
+    // Test save button
+    cy.get('[data-cy=save-btn]').should('contain', 'Salvar');
+    cy.get('[data-cy=cancel-btn]').should('contain', 'Cancelar');
+  });
+  
+  it('should display transaction status in Portuguese', () => {
+    cy.get('[data-cy=transaction-list]').within(() => {
+      cy.get('[data-cy=status-confirmed]').should('contain', 'Confirmado');
+      cy.get('[data-cy=status-pending]').should('contain', 'Pendente');
+    });
+  });
+  
+  it('should show date in Brazilian format', () => {
+    cy.get('[data-cy=transaction-date]').should('match', /\d{2}\/\d{2}\/\d{4}/);
+  });
+});
+```
+
+### Localization Testing Strategy
+
+#### Translation Coverage Tests
+```typescript
+// Test to ensure all UI elements have Portuguese translations
+describe('Translation Coverage', () => {
+  const checkTranslationKeys = (page: string, requiredKeys: string[]) => {
+    cy.visit(page);
+    
+    requiredKeys.forEach(key => {
+      cy.get(`[data-translation-key="${key}"]`)
+        .should('exist')
+        .should('not.contain', key); // Should not display the key itself
+    });
+  };
+  
+  it('should have all login page translations', () => {
+    const requiredKeys = [
+      'auth.username',
+      'auth.password', 
+      'auth.login',
+      'validation.required'
+    ];
+    checkTranslationKeys('/login', requiredKeys);
+  });
+  
+  it('should have all dashboard translations', () => {
+    const requiredKeys = [
+      'dashboard.title',
+      'dashboard.totalBalance',
+      'dashboard.monthlyIncome',
+      'dashboard.monthlyExpenses'
+    ];
+    checkTranslationKeys('/dashboard', requiredKeys);
+  });
+});
+```
+
+#### Currency and Date Format Validation
+```typescript
+describe('Brazilian Formatting', () => {
+  it('should format currency correctly', () => {
+    const testAmounts = [
+      { input: 1000, expected: 'R$ 1.000,00' },
+      { input: 1234.56, expected: 'R$ 1.234,56' },
+      { input: 0.99, expected: 'R$ 0,99' }
+    ];
+    
+    testAmounts.forEach(({ input, expected }) => {
+      cy.window().then(win => {
+        const formatted = win.formatCurrency(input);
+        expect(formatted).to.equal(expected);
+      });
+    });
+  });
+  
+  it('should format dates in Brazilian format', () => {
+    cy.window().then(win => {
+      const date = new Date('2024-03-15');
+      const formatted = win.formatDate(date);
+      expect(formatted).to.equal('15/03/2024');
+    });
   });
 });
 ```
@@ -792,14 +910,17 @@ class JWTService {
 
 ### Frontend Authentication Integration
 
-#### Login Component with tbl_Funcionarios
+#### Login Component with tbl_Funcionarios (Localized)
 ```typescript
+import { useTranslation } from 'react-i18next';
+
 interface LoginFormData {
   login: string;
   senha: string;
 }
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const [loginForm] = useForm<LoginFormData>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -819,7 +940,7 @@ const LoginPage: React.FC = () => {
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error: any) {
-      setError(error.response?.data?.detail || 'Erro ao fazer login');
+      setError(error.response?.data?.detail || t('auth.loginError'));
     } finally {
       setIsLoading(false);
     }
@@ -832,8 +953,10 @@ const LoginPage: React.FC = () => {
       </Typography>
       
       <TextField
-        {...loginForm.register('login', { required: 'Login é obrigatório' })}
-        label="Login"
+        {...loginForm.register('login', { 
+          required: t('validation.required')
+        })}
+        label={t('auth.username')}
         fullWidth
         margin="normal"
         error={!!loginForm.formState.errors.login}
@@ -841,8 +964,10 @@ const LoginPage: React.FC = () => {
       />
       
       <TextField
-        {...loginForm.register('senha', { required: 'Senha é obrigatória' })}
-        label="Senha"
+        {...loginForm.register('senha', { 
+          required: t('validation.required')
+        })}
+        label={t('auth.password')}
         type="password"
         fullWidth
         margin="normal"
@@ -863,11 +988,170 @@ const LoginPage: React.FC = () => {
         sx={{ mt: 3, mb: 2 }}
         disabled={isLoading}
       >
-        {isLoading ? <CircularProgress size={24} /> : 'Entrar'}
+        {isLoading ? (
+          <CircularProgress size={24} />
+        ) : (
+          t('auth.login')
+        )}
       </Button>
     </Box>
   );
 };
+```
+
+#### Localized Transaction Form
+```typescript
+const LancamentoForm: React.FC<LancamentoFormProps> = ({ lancamento, onSubmit, onCancel }) => {
+  const { t } = useTranslation();
+  const { control, handleSubmit, formState: { errors } } = useForm<LancamentoCreate>();
+  
+  return (
+    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+      <Typography variant="h6" gutterBottom>
+        {lancamento ? t('transactions.editTransaction') : t('transactions.newTransaction')}
+      </Typography>
+      
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+            <Controller
+              name="Data"
+              control={control}
+              rules={{ required: t('validation.required') }}
+              render={({ field }) => (
+                <DatePicker
+                  label={t('transactions.date')}
+                  value={field.value ? new Date(field.value) : null}
+                  onChange={(date) => field.onChange(date?.toISOString())}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      variant: "outlined",
+                      error: !!errors.Data,
+                      helperText: errors.Data?.message
+                    }
+                  }}
+                />
+              )}
+            />
+          </LocalizationProvider>
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="Valor"
+            control={control}
+            rules={{ 
+              required: t('validation.required'),
+              min: { value: 0.01, message: t('validation.minimumAmount') }
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t('transactions.amount')}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                  inputComponent: CurrencyInput as any
+                }}
+                error={!!errors.Valor}
+                helperText={errors.Valor?.message}
+              />
+            )}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth error={!!errors.IndMov}>
+            <InputLabel>{t('transactions.type')}</InputLabel>
+            <Controller
+              name="IndMov"
+              control={control}
+              rules={{ required: t('validation.required') }}
+              render={({ field }) => (
+                <Select {...field} label={t('transactions.type')}>
+                  <MenuItem value="E">{t('transactions.income')}</MenuItem>
+                  <MenuItem value="S">{t('transactions.expense')}</MenuItem>
+                </Select>
+              )}
+            />
+            {errors.IndMov && (
+              <FormHelperText>{errors.IndMov.message}</FormHelperText>
+            )}
+          </FormControl>
+        </Grid>
+        
+        <Grid item xs={12}>
+          <Controller
+            name="Observacao"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t('transactions.observations')}
+                fullWidth
+                multiline
+                rows={3}
+                variant="outlined"
+                error={!!errors.Observacao}
+                helperText={errors.Observacao?.message}
+              />
+            )}
+          />
+        </Grid>
+        
+        <Grid item xs={12}>
+          <Box display="flex" justifyContent="flex-end" gap={2}>
+            <Button variant="outlined" onClick={onCancel}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="contained" type="submit">
+              {t('common.save')}
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+```
+
+#### Custom Currency Input Component
+```typescript
+import { IMaskInput } from 'react-imask';
+
+interface CurrencyInputProps {
+  onChange: (event: { target: { name: string; value: string } }) => void;
+  name: string;
+}
+
+const CurrencyInput = React.forwardRef<HTMLElement, CurrencyInputProps>(
+  function CurrencyInput(props, ref) {
+    const { onChange, ...other } = props;
+    
+    return (
+      <IMaskInput
+        {...other}
+        mask="R$ num"
+        blocks={{
+          num: {
+            mask: Number,
+            scale: 2,
+            thousandsSeparator: '.',
+            radix: ',',
+            mapToRadix: ['.'],
+            min: 0,
+            max: 999999999
+          }
+        }}
+        inputRef={ref}
+        onAccept={(value: any) => onChange({ target: { name: props.name, value } })}
+        overwrite
+      />
+    );
+  }
+);
 ```
 
 #### User Context Provider
@@ -1109,12 +1393,12 @@ const routes = [
 ];
 ```
 
-### Navigation Menu Structure
+### Navigation Menu Structure (Localized)
 ```mermaid
 graph TB
-    A[Dashboard] --> A1[Financial Summary]
-    A --> A2[Cash Flow Chart]
-    A --> A3[Quick Actions]
+    A[Dashboard] --> A1[Resumo Financeiro]
+    A --> A2[Gráfico de Fluxo de Caixa]
+    A --> A3[Ações Rápidas]
     
     B[Lançamentos] --> B1[Lista de Lançamentos]
     B --> B2[Novo Lançamento]
@@ -1139,10 +1423,73 @@ graph TB
     F --> F3[Análise por Categoria]
 ```
 
+#### Localized Menu Component
+```typescript
+const NavigationMenu: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const menuItems = [
+    { 
+      text: t('navigation.dashboard'), 
+      icon: <DashboardIcon />, 
+      path: '/dashboard' 
+    },
+    { 
+      text: t('navigation.transactions'), 
+      icon: <AttachMoneyIcon />, 
+      path: '/lancamentos' 
+    },
+    { 
+      text: t('navigation.accountsPayable'), 
+      icon: <AccountBalanceWalletIcon />, 
+      path: '/contas-pagar' 
+    },
+    { 
+      text: t('navigation.accountsReceivable'), 
+      icon: <AccountBalanceIcon />, 
+      path: '/contas-receber' 
+    },
+    { 
+      text: t('navigation.categories'), 
+      icon: <CategoryIcon />, 
+      path: '/categorias' 
+    },
+    { 
+      text: t('navigation.reports'), 
+      icon: <AssessmentIcon />, 
+      path: '/relatorios' 
+    }
+  ];
+  
+  return (
+    <List>
+      {menuItems.map((item) => (
+        <ListItem 
+          button 
+          key={item.path} 
+          onClick={() => navigate(item.path)}
+          selected={location.pathname === item.path}
+        >
+          <ListItemIcon>
+            {item.icon}
+          </ListItemIcon>
+          <ListItemText primary={item.text} />
+        </ListItem>
+      ))}
+    </List>
+  );
+};
+```
+
 ## Styling Strategy
 
 ### Material-UI Theme Configuration
 ```typescript
+import { createTheme } from '@mui/material/styles';
+import { ptBR } from '@mui/material/locale';
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -1175,7 +1522,212 @@ const theme = createTheme({
       xl: 1920
     }
   }
-});
+}, ptBR); // Apply pt-BR locale to Material-UI components
+```
+
+### Internationalization Setup
+
+#### i18n Configuration
+```typescript
+// src/i18n/index.ts
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import ptBR from './locales/pt-BR.json';
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources: {
+      'pt-BR': {
+        translation: ptBR
+      }
+    },
+    lng: 'pt-BR',
+    fallbackLng: 'pt-BR',
+    interpolation: {
+      escapeValue: false
+    },
+    react: {
+      useSuspense: false
+    }
+  });
+
+export default i18n;
+```
+
+#### Portuguese Translation Keys
+```json
+// src/i18n/locales/pt-BR.json
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "username": "Usuário",
+    "password": "Senha",
+    "loginError": "Usuário ou senha incorretos",
+    "sessionExpired": "Sessão expirada",
+    "welcomeBack": "Bem-vindo de volta"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Lançamentos",
+    "accountsPayable": "Contas a Pagar",
+    "accountsReceivable": "Contas a Receber",
+    "categories": "Categorias",
+    "reports": "Relatórios",
+    "settings": "Configurações"
+  },
+  "transactions": {
+    "title": "Lançamentos Financeiros",
+    "newTransaction": "Novo Lançamento",
+    "date": "Data",
+    "issueDate": "Data de Emissão",
+    "amount": "Valor",
+    "type": "Tipo",
+    "income": "Entrada",
+    "expense": "Saída",
+    "description": "Descrição",
+    "category": "Categoria",
+    "payee": "Favorecido",
+    "paymentMethod": "Forma de Pagamento",
+    "status": "Status",
+    "confirmed": "Confirmado",
+    "pending": "Pendente",
+    "frequency": "Frequência",
+    "unique": "Único",
+    "recurring": "Recorrente",
+    "observations": "Observações",
+    "confirmTransaction": "Confirmar Lançamento",
+    "confirmationMessage": "Tem certeza que deseja confirmar este lançamento?",
+    "deleteConfirmation": "Tem certeza que deseja excluir este lançamento?"
+  },
+  "accounts": {
+    "payable": {
+      "title": "Contas a Pagar",
+      "newAccount": "Nova Conta a Pagar",
+      "supplier": "Fornecedor",
+      "dueDate": "Data de Vencimento",
+      "totalAmount": "Valor Total",
+      "paidAmount": "Valor Pago",
+      "remainingAmount": "Valor Restante",
+      "documentNumber": "Número do Documento",
+      "status": {
+        "open": "Aberto",
+        "paid": "Pago",
+        "overdue": "Vencido",
+        "partial": "Parcialmente Pago"
+      }
+    },
+    "receivable": {
+      "title": "Contas a Receber",
+      "newAccount": "Nova Conta a Receber",
+      "customer": "Cliente",
+      "dueDate": "Data de Vencimento",
+      "totalAmount": "Valor Total",
+      "receivedAmount": "Valor Recebido",
+      "remainingAmount": "Valor Restante"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard Financeiro",
+    "totalBalance": "Saldo Total",
+    "monthlyIncome": "Receita Mensal",
+    "monthlyExpenses": "Despesas Mensais",
+    "cashFlow": "Fluxo de Caixa",
+    "recentTransactions": "Lançamentos Recentes",
+    "upcomingPayments": "Próximos Pagamentos",
+    "overdueAccounts": "Contas Vencidas",
+    "financialSummary": "Resumo Financeiro"
+  },
+  "reports": {
+    "title": "Relatórios",
+    "incomeExpenseReport": "Relatório de Receitas e Despesas",
+    "cashFlowReport": "Relatório de Fluxo de Caixa",
+    "categoryReport": "Relatório por Categoria",
+    "period": "Período",
+    "startDate": "Data Inicial",
+    "endDate": "Data Final",
+    "generateReport": "Gerar Relatório",
+    "exportPDF": "Exportar PDF",
+    "exportExcel": "Exportar Excel"
+  },
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "invalidEmail": "Email inválido",
+    "invalidDate": "Data inválida",
+    "invalidAmount": "Valor inválido",
+    "minimumAmount": "Valor deve ser maior que zero",
+    "maxLength": "Máximo de {{max}} caracteres",
+    "minLength": "Mínimo de {{min}} caracteres"
+  },
+  "messages": {
+    "saveSuccess": "Registro salvo com sucesso",
+    "deleteSuccess": "Registro excluído com sucesso",
+    "updateSuccess": "Registro atualizado com sucesso",
+    "confirmSuccess": "Operação confirmada com sucesso",
+    "errorOccurred": "Ocorreu um erro inesperado",
+    "networkError": "Erro de conexão com o servidor",
+    "validationError": "Verifique os dados informados"
+  }
+}
+```
+
+#### Date and Currency Formatting
+```typescript
+// src/utils/formatters.ts
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+export const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
+};
+
+export const formatDate = (date: string | Date, pattern: string = 'dd/MM/yyyy'): string => {
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  return format(dateObj, pattern, { locale: ptBR });
+};
+
+export const formatDateTime = (date: string | Date): string => {
+  return formatDate(date, 'dd/MM/yyyy HH:mm');
+};
+
+export const parseCurrency = (value: string): number => {
+  // Remove currency symbol and convert to number
+  const numericValue = value
+    .replace(/[R$\s]/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.');
+  
+  return parseFloat(numericValue) || 0;
+};
+
+// Custom input mask for currency
+export const currencyMask = (value: string): string => {
+  const numericValue = value.replace(/\D/g, '');
+  const formattedValue = (parseFloat(numericValue) / 100).toFixed(2);
+  return formatCurrency(parseFloat(formattedValue));
+};
 ```
 
 ### Responsive Design Breakpoints
