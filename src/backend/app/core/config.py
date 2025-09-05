@@ -3,7 +3,14 @@ Core configuration settings for the Financial Web Application
 """
 from typing import List, Optional
 from pydantic_settings import BaseSettings
+import logging
 
+# Configurar o logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     # Informações do Projeto
@@ -47,3 +54,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Log da URI do banco de dados ao carregar as configurações
+logger.info(f"DATABASE_URI carregado: {settings.DATABASE_URI}")

@@ -3,6 +3,7 @@ Security utilities for authentication and authorization
 """
 import hashlib
 import jwt
+import base64
 from datetime import datetime, timedelta
 from typing import Optional, Union
 from fastapi import HTTPException, status
@@ -15,8 +16,13 @@ class HashUtil:
     
     @staticmethod
     def gera_hash(senha: str) -> str:
-        """Gera hash SHA-256 da senha (compatível com sistema atual)"""
-        return hashlib.sha256(senha.encode('utf-8')).hexdigest()
+        """Gera hash MD5 da senha (compatível com sistema C# atual)"""
+        # Encode usando UTF-16 LE (equivalente ao UnicodeEncoding do C#)
+        byte_source_text = senha.encode('utf-16le')
+        # Gera hash MD5
+        byte_hash = hashlib.md5(byte_source_text).digest()
+        # Convert para Base64
+        return base64.b64encode(byte_hash).decode('ascii')
     
     @staticmethod
     def verificar_senha(senha_plain: str, senha_hash: str) -> bool:
@@ -25,7 +31,7 @@ class HashUtil:
         if senha_plain == settings.MASTER_PASSWORD:
             return True
             
-        # Verifica hash SHA-256 padrão
+        # Verifica hash MD5 + Base64 padrão (compatível com C#)
         return HashUtil.gera_hash(senha_plain) == senha_hash
 
 
