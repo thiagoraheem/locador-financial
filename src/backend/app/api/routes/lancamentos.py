@@ -14,6 +14,7 @@ from app.schemas.lancamento import (
     LancamentoFilter,
     LancamentoConfirm
 )
+from app.services.lancamento_service import LancamentoService
 
 router = APIRouter(prefix="/lancamentos", tags=["lançamentos"])
 
@@ -28,8 +29,11 @@ async def listar_lancamentos(
     """
     Lista lançamentos com paginação e filtros opcionais
     """
-    # TODO: Implementar service de lançamentos
-    return []
+    service = LancamentoService(db)
+    lancamentos = service.list_lancamentos(skip=skip, limit=limit, filtros=filtros)
+    
+    # Converter para response (aqui seria ideal usar um mapper)
+    return [LancamentoResponse.from_orm(lancamento) for lancamento in lancamentos]
 
 @router.get("/{lancamento_id}", response_model=LancamentoResponse, summary="Obter lançamento por ID")
 async def obter_lancamento(
@@ -40,8 +44,9 @@ async def obter_lancamento(
     """
     Obtém um lançamento específico pelo ID
     """
-    # TODO: Implementar busca por ID
-    raise HTTPException(status_code=404, detail="Lançamento não encontrado")
+    service = LancamentoService(db)
+    lancamento = service.get_lancamento_by_id(lancamento_id)
+    return LancamentoResponse.from_orm(lancamento)
 
 @router.post("/", response_model=LancamentoResponse, summary="Criar lançamento", status_code=status.HTTP_201_CREATED)
 async def criar_lancamento(
@@ -52,8 +57,9 @@ async def criar_lancamento(
     """
     Cria um novo lançamento financeiro
     """
-    # TODO: Implementar criação de lançamento
-    pass
+    service = LancamentoService(db)
+    novo_lancamento = service.create_lancamento(lancamento, current_user)
+    return LancamentoResponse.from_orm(novo_lancamento)
 
 @router.put("/{lancamento_id}", response_model=LancamentoResponse, summary="Atualizar lançamento")
 async def atualizar_lancamento(
@@ -65,8 +71,9 @@ async def atualizar_lancamento(
     """
     Atualiza um lançamento existente
     """
-    # TODO: Implementar atualização
-    pass
+    service = LancamentoService(db)
+    lancamento_atualizado = service.update_lancamento(lancamento_id, lancamento, current_user)
+    return LancamentoResponse.from_orm(lancamento_atualizado)
 
 @router.delete("/{lancamento_id}", summary="Excluir lançamento")
 async def excluir_lancamento(
@@ -77,7 +84,8 @@ async def excluir_lancamento(
     """
     Exclui um lançamento
     """
-    # TODO: Implementar exclusão
+    service = LancamentoService(db)
+    service.delete_lancamento(lancamento_id, current_user)
     return {"message": f"Lançamento {lancamento_id} excluído com sucesso"}
 
 @router.patch("/{lancamento_id}/confirmar", response_model=LancamentoResponse, summary="Confirmar/desconfirmar lançamento")
@@ -90,5 +98,11 @@ async def confirmar_lancamento(
     """
     Confirma ou desconfirma um lançamento
     """
-    # TODO: Implementar confirmação
-    pass
+    service = LancamentoService(db)
+    
+    if confirmacao.confirmar:
+        lancamento = service.confirm_lancamento(lancamento_id, current_user)
+    else:
+        lancamento = service.unconfirm_lancamento(lancamento_id, current_user)
+    
+    return LancamentoResponse.from_orm(lancamento)
