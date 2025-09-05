@@ -2,7 +2,128 @@
 
 ## 1. Análise de Requisitos Técnicos
 
-### 1.1 Requisitos Funcionais
+### 1.1 Tabelas Principais do Sistema
+
+O aplicativo web financeiro será construído sobre as seguintes tabelas principais do sistema Locador:
+
+#### 1.1.1 tbl_Empresa
+**Descrição**: Tabela central que armazena informações das empresas do sistema.
+
+**Campos Principais**:
+- `CodEmpresa` (int, PK): Código único da empresa
+- `NomEmpresa` (string): Nome fantasia da empresa
+- `RazaoSocial` (string): Razão social da empresa
+- `CNPJ` (string): CNPJ da empresa
+- `Endereco`, `Bairro`, `CEP`, `Municipio`, `Estado`: Dados de endereço
+- `Telefone`, `Email`: Dados de contato
+- `FlgPadrao` (bool): Indica se é a empresa padrão do sistema
+- `DatCadastro`, `NomUsuario`, `DatAlteracao`, `NomUsuarioAlteracao`: Campos de auditoria
+
+**Relacionamentos**:
+- Um para muitos com `tbl_Conta` (uma empresa pode ter várias contas bancárias)
+- Um para muitos com `tbl_AccountsPayable` e `tbl_AccountsReceivable`
+- Um para muitos com `tbl_FINLancamentos`
+
+#### 1.1.2 tbl_Banco
+**Descrição**: Tabela de cadastro de bancos do sistema financeiro nacional.
+
+**Campos Principais**:
+- `Codigo` (int, PK): Código do banco (padrão FEBRABAN)
+- `Digito` (string): Dígito verificador do banco
+- `Nome` (string): Nome do banco
+
+**Relacionamentos**:
+- Um para muitos com `tbl_Conta` (um banco pode ter várias contas)
+- Um para muitos com `tbl_ClientesContas`
+
+#### 1.1.3 tbl_Conta
+**Descrição**: Tabela que armazena as contas bancárias das empresas.
+
+**Campos Principais**:
+- `idConta` (int, PK): Identificador único da conta
+- `CodEmpresa` (int, FK): Referência à empresa proprietária
+- `Banco` (int, FK): Referência ao banco
+- `Agencia`, `AgenciaDigito`: Dados da agência
+- `Conta`, `ContaDigito`: Dados da conta
+- `NomConta` (string): Nome/descrição da conta
+- `Saldo` (decimal): Saldo atual da conta
+- `FlgContaPadrao` (bool): Indica se é a conta padrão da empresa
+- `TipoPix`, `ValorPix`: Dados para PIX
+- `EnableAPI` (bool): Habilita integração via API bancária
+- `ConfiguracaoAPI` (string): Configurações da API bancária
+- `DatCadastro`, `NomUsuario`, `DatAlteracao`, `NomUsuarioAlteracao`: Campos de auditoria
+
+**Relacionamentos**:
+- Muitos para um com `tbl_Empresa`
+- Muitos para um com `tbl_Banco`
+- Um para muitos com `tbl_FINLancamentos`
+- Um para muitos com `tbl_AccountsPayable` e `tbl_AccountsReceivable`
+
+#### 1.1.4 tbl_Clientes
+**Descrição**: Tabela de cadastro de clientes do sistema.
+
+**Campos Principais**:
+- `CodCliente` (int, PK): Código único do cliente
+- `DesCliente` (string): Nome/descrição do cliente
+- `RazaoSocial` (string): Razão social (para PJ)
+- `FlgTipoPessoa` (string): Tipo de pessoa (F=Física, J=Jurídica)
+- `CPF`, `RG`: Documentos para pessoa física
+- `CNPJ`, `IE`, `IM`: Documentos para pessoa jurídica
+- `Endereco`, `Bairro`, `CEP`, `Municipio`, `Estado`: Dados de endereço
+- `Telefone`, `Email`: Dados de contato (múltiplos)
+- `FlgLiberado` (bool): Status de liberação do cliente
+- `FlgVIP` (bool): Cliente VIP
+- `DatCadastro`, `NomUsuario`, `DatAlteracao`, `NomUsuarioAlteracao`: Campos de auditoria
+
+**Relacionamentos**:
+- Um para muitos com `tbl_AccountsReceivable`
+- Um para muitos com `tbl_Locacao`
+- Um para muitos com `tbl_Orcamento`
+
+### 1.2 Integridade Referencial e Relacionamentos
+
+#### Relacionamentos Principais
+
+**tbl_Empresa (Tabela Central)**
+- É referenciada por `tbl_Conta.CodEmpresa`
+- É referenciada por `tbl_AccountsPayable.CodEmpresa`
+- É referenciada por `tbl_AccountsReceivable.CodEmpresa`
+- É referenciada por `tbl_FINLancamentos.CodEmpresa`
+
+**tbl_Banco**
+- É referenciada por `tbl_Conta.Banco`
+- É referenciada por `tbl_ClientesContas.Banco`
+
+**tbl_Conta**
+- Referencia `tbl_Empresa.CodEmpresa`
+- Referencia `tbl_Banco.Codigo`
+- É referenciada por `tbl_FINLancamentos.idConta`
+- É referenciada por `tbl_AccountsPayable.idConta`
+- É referenciada por `tbl_AccountsReceivable.idConta`
+
+**tbl_Clientes**
+- É referenciada por `tbl_AccountsReceivable.CodCliente`
+- É referenciada por `tbl_Locacao.CodCliente`
+- É referenciada por `tbl_Orcamento.CodCliente`
+
+#### Regras de Integridade
+
+1. **Exclusão em Cascata**: Não permitida para preservar histórico financeiro
+2. **Exclusão Lógica**: Implementar flags de status para "exclusão" de registros
+3. **Validações de Referência**:
+   - Empresa deve existir antes de criar conta bancária
+   - Banco deve existir antes de criar conta
+   - Cliente deve existir antes de criar contas a receber
+   - Conta deve existir antes de criar lançamentos
+
+4. **Constraints de Negócio**:
+   - Uma empresa deve ter pelo menos uma conta bancária ativa
+   - Apenas uma empresa pode ser marcada como padrão
+   - Apenas uma conta por empresa pode ser marcada como padrão
+   - CNPJ deve ser único por empresa
+   - CPF/CNPJ deve ser único por cliente
+
+### 1.3 Requisitos Funcionais
 
 Com base na análise do modelo de dados financeiro existente, o aplicativo web deverá implementar as seguintes funcionalidades:
 
@@ -14,6 +135,39 @@ Com base na análise do modelo de dados financeiro existente, o aplicativo web d
 - **Geração de Token JWT**: Criar tokens JWT para autenticação stateless nas requisições da API.
 - **Controle de Sessão**: Gerenciar sessões ativas e permitir logout seguro.
 - **Auditoria de Operações**: Registrar ID do usuário logado nos campos de auditoria das tabelas financeiras (`IdUserCreate`, `IdUserAlter`, `NomUsuario`).
+
+#### Gestão de Empresas
+- **Create**: Cadastro de novas empresas com validação de CNPJ
+- **Read**: Consulta de empresas com filtros por nome, CNPJ, status
+- **Update**: Atualização de dados cadastrais, endereço e configurações
+- **Delete**: Exclusão lógica de empresas (verificar dependências)
+- Definição de empresa padrão do sistema
+- Gestão de configurações específicas por empresa
+
+#### Gestão de Bancos
+- **Create**: Cadastro de novos bancos com código FEBRABAN
+- **Read**: Consulta de bancos por código ou nome
+- **Update**: Atualização de dados do banco
+- **Delete**: Exclusão de bancos (verificar contas vinculadas)
+- Validação de códigos FEBRABAN
+
+#### Gestão de Contas Bancárias
+- **Create**: Cadastro de novas contas bancárias vinculadas à empresa
+- **Read**: Consulta de contas por empresa, banco, status
+- **Update**: Atualização de dados da conta, saldo, configurações
+- **Delete**: Exclusão de contas (verificar movimentações)
+- Definição de conta padrão por empresa
+- Configuração de integração com APIs bancárias
+- Gestão de dados PIX
+
+#### Gestão de Clientes
+- **Create**: Cadastro de novos clientes (PF/PJ) com validação de documentos
+- **Read**: Consulta de clientes com filtros avançados
+- **Update**: Atualização de dados cadastrais, endereço, contatos
+- **Delete**: Exclusão lógica de clientes (verificar dependências)
+- Controle de status de liberação
+- Gestão de clientes VIP
+- Validação de CPF/CNPJ
 
 #### Gestão de Lançamentos Financeiros
 - Cadastro, edição, exclusão e consulta de lançamentos financeiros

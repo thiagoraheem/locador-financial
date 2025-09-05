@@ -4050,4 +4050,1508 @@ class DashboardRepository:
         return result
 ```
 
+## 9. Modelos SQLAlchemy para Tabelas Principais
+
+### 9.1 Modelo Empresa
+
+#### models/empresa.py
+
+```python
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from app.core.database import Base
+from app.mixins.audit import UserAuditMixin
+
+class TblEmpresa(Base, UserAuditMixin):
+    __tablename__ = "tbl_Empresa"
+    
+    CodEmpresa = Column(Integer, primary_key=True, index=True)
+    NomEmpresa = Column(String(100), nullable=False)
+    RazaoSocial = Column(String(200), nullable=True)
+    CNPJ = Column(String(18), unique=True, nullable=True)
+    IE = Column(String(20), nullable=True)
+    IM = Column(String(20), nullable=True)
+    
+    # Endereço
+    Endereco = Column(String(200), nullable=True)
+    Bairro = Column(String(100), nullable=True)
+    CEP = Column(String(10), nullable=True)
+    Municipio = Column(String(100), nullable=True)
+    Estado = Column(String(2), nullable=True)
+    
+    # Contato
+    Telefone = Column(String(20), nullable=True)
+    Email = Column(String(100), nullable=True)
+    
+    # Configurações
+    FlgPadrao = Column(Boolean, default=False)
+    Settings = Column(Text, nullable=True)
+    NomRepresentante = Column(String(100), nullable=True)
+    
+    # Relacionamentos
+    contas = relationship("TblConta", back_populates="empresa")
+    lancamentos = relationship("TblFINLancamentos", back_populates="empresa")
+    contas_pagar = relationship("TblAccountsPayable", back_populates="empresa")
+    contas_receber = relationship("TblAccountsReceivable", back_populates="empresa")
+```
+
+### 9.2 Modelo Banco
+
+#### models/banco.py
+
+```python
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+from app.core.database import Base
+
+class TblBanco(Base):
+    __tablename__ = "tbl_Banco"
+    
+    Codigo = Column(Integer, primary_key=True, index=True)
+    Digito = Column(String(1), nullable=True)
+    Nome = Column(String(100), nullable=False)
+    
+    # Relacionamentos
+    contas = relationship("TblConta", back_populates="banco")
+    clientes_contas = relationship("TblClientesContas", back_populates="banco")
+    boletos = relationship("TblBoleto", back_populates="banco")
+```
+
+### 9.3 Modelo Conta
+
+#### models/conta.py
+
+```python
+from sqlalchemy import Column, Integer, String, Boolean, Numeric, ForeignKey, Text
+from sqlalchemy.orm import relationship
+from app.core.database import Base
+from app.mixins.audit import UserAuditMixin
+
+class TblConta(Base, UserAuditMixin):
+    __tablename__ = "tbl_Conta"
+    
+    idConta = Column(Integer, primary_key=True, index=True)
+    CodEmpresa = Column(Integer, ForeignKey("tbl_Empresa.CodEmpresa"), nullable=False)
+    Banco = Column(Integer, ForeignKey("tbl_Banco.Codigo"), nullable=False)
+    
+    # Dados da conta
+    Agencia = Column(String(10), nullable=True)
+    AgenciaDigito = Column(String(1), nullable=True)
+    Conta = Column(String(20), nullable=True)
+    ContaDigito = Column(String(2), nullable=True)
+    NomConta = Column(String(100), nullable=False)
+    
+    # Saldo e configurações
+    Saldo = Column(Numeric(18, 2), default=0)
+    FlgContaPadrao = Column(Boolean, default=False)
+    Carteira = Column(String(10), nullable=True)
+    
+    # PIX
+    TipoPix = Column(String(20), nullable=True)  # CPF, CNPJ, EMAIL, TELEFONE, CHAVE_ALEATORIA
+    ValorPix = Column(String(100), nullable=True)
+    
+    # API Bancária
+    EnableAPI = Column(Boolean, default=False)
+    ConfiguracaoAPI = Column(Text, nullable=True)
+    
+    # Relacionamentos
+    empresa = relationship("TblEmpresa", back_populates="contas")
+    banco = relationship("TblBanco", back_populates="contas")
+    lancamentos = relationship("TblFINLancamentos", back_populates="conta")
+    contas_pagar = relationship("TblAccountsPayable", back_populates="conta")
+    contas_receber = relationship("TblAccountsReceivable", back_populates="conta")
+```
+
+### 9.4 Modelo Cliente
+
+#### models/cliente.py
+
+```python
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy.orm import relationship
+from app.core.database import Base
+from app.mixins.audit import UserAuditMixin
+
+class TblClientes(Base, UserAuditMixin):
+    __tablename__ = "tbl_Clientes"
+    
+    CodCliente = Column(Integer, primary_key=True, index=True)
+    DesCliente = Column(String(200), nullable=False)
+    RazaoSocial = Column(String(200), nullable=True)
+    FlgTipoPessoa = Column(String(1), nullable=False)  # F=Física, J=Jurídica
+    
+    # Documentos Pessoa Física
+    CPF = Column(String(14), nullable=True)
+    RG = Column(String(20), nullable=True)
+    CNH = Column(String(20), nullable=True)
+    
+    # Documentos Pessoa Jurídica
+    CNPJ = Column(String(18), nullable=True)
+    IE = Column(String(20), nullable=True)
+    IM = Column(String(20), nullable=True)
+    
+    # Endereço
+    Endereco = Column(String(200), nullable=True)
+    Bairro = Column(String(100), nullable=True)
+    CEP = Column(String(10), nullable=True)
+    Municipio = Column(String(100), nullable=True)
+    Estado = Column(String(2), nullable=True)
+    
+    # Contatos
+    Telefone1 = Column(String(20), nullable=True)
+    Telefone2 = Column(String(20), nullable=True)
+    Email1 = Column(String(100), nullable=True)
+    Email2 = Column(String(100), nullable=True)
+    
+    # Status e configurações
+    FlgLiberado = Column(Boolean, default=True)
+    FlgNegativado = Column(Boolean, default=False)
+    FlgVIP = Column(Boolean, default=False)
+    IsRevisaoCadastralPendente = Column(Boolean, default=False)
+    IsForeigner = Column(Boolean, default=False)
+    
+    # Dados de pagamento
+    LimiteCredito = Column(String(50), nullable=True)
+    FormaPagamento = Column(String(50), nullable=True)
+    
+    # Relacionamentos
+    contas_receber = relationship("TblAccountsReceivable", back_populates="cliente")
+    locacoes = relationship("TblLocacao", back_populates="cliente")
+    orcamentos = relationship("TblOrcamento", back_populates="cliente")
+    boletos = relationship("TblBoleto", back_populates="cliente")
+```
+
+## 10. Schemas Pydantic para Tabelas Principais
+
+### 10.1 Schemas Empresa
+
+#### schemas/empresa.py
+
+```python
+from pydantic import BaseModel, validator
+from typing import Optional, List
+from datetime import datetime
+
+class EmpresaBase(BaseModel):
+    NomEmpresa: str
+    RazaoSocial: Optional[str] = None
+    CNPJ: Optional[str] = None
+    IE: Optional[str] = None
+    IM: Optional[str] = None
+    Endereco: Optional[str] = None
+    Bairro: Optional[str] = None
+    CEP: Optional[str] = None
+    Municipio: Optional[str] = None
+    Estado: Optional[str] = None
+    Telefone: Optional[str] = None
+    Email: Optional[str] = None
+    FlgPadrao: bool = False
+    Settings: Optional[str] = None
+    NomRepresentante: Optional[str] = None
+    
+    @validator('CNPJ')
+    def validate_cnpj(cls, v):
+        if v and len(v.replace('.', '').replace('/', '').replace('-', '')) != 14:
+            raise ValueError('CNPJ deve ter 14 dígitos')
+        return v
+    
+    @validator('Estado')
+    def validate_estado(cls, v):
+        if v and len(v) != 2:
+            raise ValueError('Estado deve ter 2 caracteres')
+        return v.upper() if v else v
+
+class EmpresaCreate(EmpresaBase):
+    pass
+
+class EmpresaUpdate(BaseModel):
+    NomEmpresa: Optional[str] = None
+    RazaoSocial: Optional[str] = None
+    CNPJ: Optional[str] = None
+    IE: Optional[str] = None
+    IM: Optional[str] = None
+    Endereco: Optional[str] = None
+    Bairro: Optional[str] = None
+    CEP: Optional[str] = None
+    Municipio: Optional[str] = None
+    Estado: Optional[str] = None
+    Telefone: Optional[str] = None
+    Email: Optional[str] = None
+    FlgPadrao: Optional[bool] = None
+    Settings: Optional[str] = None
+    NomRepresentante: Optional[str] = None
+
+class EmpresaInDB(EmpresaBase):
+    CodEmpresa: int
+    DatCadastro: Optional[datetime] = None
+    NomUsuario: Optional[str] = None
+    DatAlteracao: Optional[datetime] = None
+    NomUsuarioAlteracao: Optional[str] = None
+    IdUserCreate: Optional[int] = None
+    IdUserAlter: Optional[int] = None
+    
+    class Config:
+        from_attributes = True
+
+class Empresa(EmpresaInDB):
+    pass
+```
+
+### 10.2 Schemas Banco
+
+#### schemas/banco.py
+
+```python
+from pydantic import BaseModel, validator
+from typing import Optional
+
+class BancoBase(BaseModel):
+    Codigo: int
+    Digito: Optional[str] = None
+    Nome: str
+    
+    @validator('Codigo')
+    def validate_codigo(cls, v):
+        if v < 1 or v > 999:
+            raise ValueError('Código do banco deve estar entre 1 e 999')
+        return v
+    
+    @validator('Digito')
+    def validate_digito(cls, v):
+        if v and len(v) != 1:
+            raise ValueError('Dígito deve ter 1 caractere')
+        return v
+
+class BancoCreate(BancoBase):
+    pass
+
+class BancoUpdate(BaseModel):
+    Digito: Optional[str] = None
+    Nome: Optional[str] = None
+
+class BancoInDB(BancoBase):
+    class Config:
+        from_attributes = True
+
+class Banco(BancoInDB):
+    pass
+```
+
+### 10.3 Schemas Conta
+
+#### schemas/conta.py
+
+```python
+from pydantic import BaseModel, validator
+from typing import Optional
+from datetime import datetime
+from decimal import Decimal
+
+class ContaBase(BaseModel):
+    CodEmpresa: int
+    Banco: int
+    Agencia: Optional[str] = None
+    AgenciaDigito: Optional[str] = None
+    Conta: Optional[str] = None
+    ContaDigito: Optional[str] = None
+    NomConta: str
+    Saldo: Optional[Decimal] = 0
+    FlgContaPadrao: bool = False
+    Carteira: Optional[str] = None
+    TipoPix: Optional[str] = None
+    ValorPix: Optional[str] = None
+    EnableAPI: bool = False
+    ConfiguracaoAPI: Optional[str] = None
+    
+    @validator('TipoPix')
+    def validate_tipo_pix(cls, v):
+        if v and v not in ['CPF', 'CNPJ', 'EMAIL', 'TELEFONE', 'CHAVE_ALEATORIA']:
+            raise ValueError('Tipo PIX inválido')
+        return v
+    
+    @validator('Saldo')
+    def validate_saldo(cls, v):
+        if v is not None and v < 0:
+            raise ValueError('Saldo não pode ser negativo')
+        return v
+
+class ContaCreate(ContaBase):
+    pass
+
+class ContaUpdate(BaseModel):
+    CodEmpresa: Optional[int] = None
+    Banco: Optional[int] = None
+    Agencia: Optional[str] = None
+    AgenciaDigito: Optional[str] = None
+    Conta: Optional[str] = None
+    ContaDigito: Optional[str] = None
+    NomConta: Optional[str] = None
+    Saldo: Optional[Decimal] = None
+    FlgContaPadrao: Optional[bool] = None
+    Carteira: Optional[str] = None
+    TipoPix: Optional[str] = None
+    ValorPix: Optional[str] = None
+    EnableAPI: Optional[bool] = None
+    ConfiguracaoAPI: Optional[str] = None
+
+class ContaInDB(ContaBase):
+    idConta: int
+    DatCadastro: Optional[datetime] = None
+    NomUsuario: Optional[str] = None
+    DatAlteracao: Optional[datetime] = None
+    NomUsuarioAlteracao: Optional[str] = None
+    IdUserCreate: Optional[int] = None
+    IdUserAlter: Optional[int] = None
+    
+    class Config:
+        from_attributes = True
+
+class Conta(ContaInDB):
+    pass
+```
+
+### 10.4 Schemas Cliente
+
+#### schemas/cliente.py
+
+```python
+from pydantic import BaseModel, validator
+from typing import Optional
+from datetime import datetime
+
+class ClienteBase(BaseModel):
+    DesCliente: str
+    RazaoSocial: Optional[str] = None
+    FlgTipoPessoa: str  # F=Física, J=Jurídica
+    CPF: Optional[str] = None
+    RG: Optional[str] = None
+    CNH: Optional[str] = None
+    CNPJ: Optional[str] = None
+    IE: Optional[str] = None
+    IM: Optional[str] = None
+    Endereco: Optional[str] = None
+    Bairro: Optional[str] = None
+    CEP: Optional[str] = None
+    Municipio: Optional[str] = None
+    Estado: Optional[str] = None
+    Telefone1: Optional[str] = None
+    Telefone2: Optional[str] = None
+    Email1: Optional[str] = None
+    Email2: Optional[str] = None
+    FlgLiberado: bool = True
+    FlgNegativado: bool = False
+    FlgVIP: bool = False
+    IsRevisaoCadastralPendente: bool = False
+    IsForeigner: bool = False
+    LimiteCredito: Optional[str] = None
+    FormaPagamento: Optional[str] = None
+    
+    @validator('FlgTipoPessoa')
+    def validate_tipo_pessoa(cls, v):
+        if v not in ['F', 'J']:
+            raise ValueError('Tipo de pessoa deve ser F (Física) ou J (Jurídica)')
+        return v.upper()
+    
+    @validator('CPF')
+    def validate_cpf(cls, v, values):
+        if values.get('FlgTipoPessoa') == 'F' and v:
+            # Validação básica de CPF
+            cpf_digits = v.replace('.', '').replace('-', '')
+            if len(cpf_digits) != 11:
+                raise ValueError('CPF deve ter 11 dígitos')
+        return v
+    
+    @validator('CNPJ')
+    def validate_cnpj(cls, v, values):
+        if values.get('FlgTipoPessoa') == 'J' and v:
+            # Validação básica de CNPJ
+            cnpj_digits = v.replace('.', '').replace('/', '').replace('-', '')
+            if len(cnpj_digits) != 14:
+                raise ValueError('CNPJ deve ter 14 dígitos')
+        return v
+    
+    @validator('Estado')
+    def validate_estado(cls, v):
+        if v and len(v) != 2:
+            raise ValueError('Estado deve ter 2 caracteres')
+        return v.upper() if v else v
+
+class ClienteCreate(ClienteBase):
+    pass
+
+class ClienteUpdate(BaseModel):
+    DesCliente: Optional[str] = None
+    RazaoSocial: Optional[str] = None
+    FlgTipoPessoa: Optional[str] = None
+    CPF: Optional[str] = None
+    RG: Optional[str] = None
+    CNH: Optional[str] = None
+    CNPJ: Optional[str] = None
+    IE: Optional[str] = None
+    IM: Optional[str] = None
+    Endereco: Optional[str] = None
+    Bairro: Optional[str] = None
+    CEP: Optional[str] = None
+    Municipio: Optional[str] = None
+    Estado: Optional[str] = None
+    Telefone1: Optional[str] = None
+    Telefone2: Optional[str] = None
+    Email1: Optional[str] = None
+    Email2: Optional[str] = None
+    FlgLiberado: Optional[bool] = None
+    FlgNegativado: Optional[bool] = None
+    FlgVIP: Optional[bool] = None
+    IsRevisaoCadastralPendente: Optional[bool] = None
+    IsForeigner: Optional[bool] = None
+    LimiteCredito: Optional[str] = None
+    FormaPagamento: Optional[str] = None
+
+class ClienteInDB(ClienteBase):
+    CodCliente: int
+    DatCadastro: Optional[datetime] = None
+    NomUsuario: Optional[str] = None
+    DatAlteracao: Optional[datetime] = None
+    NomUsuarioAlteracao: Optional[str] = None
+    IdUserCreate: Optional[int] = None
+    IdUserAlter: Optional[int] = None
+    
+    class Config:
+        from_attributes = True
+
+class Cliente(ClienteInDB):
+    pass
+```
+
+## 11. Serviços CRUD para Tabelas Principais
+
+### 11.1 Serviço Empresa
+
+#### services/empresa_service.py
+
+```python
+from sqlalchemy.orm import Session
+from sqlalchemy import and_
+from typing import List, Optional
+from fastapi import HTTPException, status
+
+from app.models.empresa import TblEmpresa
+from app.models.funcionario import TblFuncionarios
+from app.schemas.empresa import EmpresaCreate, EmpresaUpdate
+from app.repositories.base_repository import BaseRepository
+
+class EmpresaService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.repository = BaseRepository(TblEmpresa, db)
+    
+    def create_empresa(self, empresa_data: EmpresaCreate, current_user: dict) -> TblEmpresa:
+        """Criar nova empresa com auditoria"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        # Verificar se CNPJ já existe
+        if empresa_data.CNPJ:
+            existing = self.db.query(TblEmpresa).filter(
+                TblEmpresa.CNPJ == empresa_data.CNPJ
+            ).first()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="CNPJ já cadastrado no sistema"
+                )
+        
+        # Se marcada como padrão, desmarcar outras
+        if empresa_data.FlgPadrao:
+            self.db.query(TblEmpresa).filter(
+                TblEmpresa.FlgPadrao == True
+            ).update({"FlgPadrao": False})
+        
+        # Criar empresa
+        empresa_dict = empresa_data.dict()
+        empresa_dict.update({
+            'IdUserCreate': current_user['cod_funcionario'],
+            'NomUsuario': current_user['NomUsuario']
+        })
+        
+        return self.repository.create(empresa_dict)
+    
+    def get_empresa(self, cod_empresa: int) -> Optional[TblEmpresa]:
+        """Obter empresa por código"""
+        return self.repository.get_by_id(cod_empresa, 'CodEmpresa')
+    
+    def get_empresas(
+        self, 
+        skip: int = 0, 
+        limit: int = 100,
+        nome: Optional[str] = None,
+        cnpj: Optional[str] = None,
+        ativa: Optional[bool] = None
+    ) -> List[TblEmpresa]:
+        """Listar empresas com filtros"""
+        query = self.db.query(TblEmpresa)
+        
+        if nome:
+            query = query.filter(
+                TblEmpresa.NomEmpresa.ilike(f"%{nome}%")
+            )
+        
+        if cnpj:
+            query = query.filter(TblEmpresa.CNPJ == cnpj)
+        
+        return query.offset(skip).limit(limit).all()
+    
+    def update_empresa(
+        self, 
+        cod_empresa: int, 
+        empresa_data: EmpresaUpdate, 
+        current_user: dict
+    ) -> Optional[TblEmpresa]:
+        """Atualizar empresa com auditoria"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        empresa = self.get_empresa(cod_empresa)
+        if not empresa:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Empresa não encontrada"
+            )
+        
+        # Verificar CNPJ duplicado
+        if empresa_data.CNPJ and empresa_data.CNPJ != empresa.CNPJ:
+            existing = self.db.query(TblEmpresa).filter(
+                and_(
+                    TblEmpresa.CNPJ == empresa_data.CNPJ,
+                    TblEmpresa.CodEmpresa != cod_empresa
+                )
+            ).first()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="CNPJ já cadastrado no sistema"
+                )
+        
+        # Se marcada como padrão, desmarcar outras
+        if empresa_data.FlgPadrao:
+            self.db.query(TblEmpresa).filter(
+                and_(
+                    TblEmpresa.FlgPadrao == True,
+                    TblEmpresa.CodEmpresa != cod_empresa
+                )
+            ).update({"FlgPadrao": False})
+        
+        # Atualizar dados
+        update_data = empresa_data.dict(exclude_unset=True)
+        update_data.update({
+            'IdUserAlter': current_user['cod_funcionario'],
+            'NomUsuarioAlteracao': current_user['NomUsuario']
+        })
+        
+        return self.repository.update(cod_empresa, update_data, 'CodEmpresa')
+    
+    def delete_empresa(self, cod_empresa: int, current_user: dict) -> bool:
+        """Exclusão lógica de empresa"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        empresa = self.get_empresa(cod_empresa)
+        if not empresa:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Empresa não encontrada"
+            )
+        
+        # Verificar dependências (contas, lançamentos, etc.)
+        if empresa.contas:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Não é possível excluir empresa com contas bancárias vinculadas"
+            )
+        
+        # Exclusão lógica - implementar flag de status se necessário
+        # Por enquanto, exclusão física
+        return self.repository.delete(cod_empresa, 'CodEmpresa')
+    
+    def _validate_user_exists(self, user_id: int) -> bool:
+        """Validar se o usuário existe na tabela tbl_Funcionarios"""
+        user = self.db.query(TblFuncionarios).filter(
+            TblFuncionarios.cod_funcionario == user_id
+        ).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Usuário com ID {user_id} não encontrado na tabela tbl_Funcionarios"
+            )
+        
+        return True
+```
+
+### 11.2 Serviço Banco
+
+#### services/banco_service.py
+
+```python
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from fastapi import HTTPException, status
+
+from app.models.banco import TblBanco
+from app.schemas.banco import BancoCreate, BancoUpdate
+from app.repositories.base_repository import BaseRepository
+
+class BancoService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.repository = BaseRepository(TblBanco, db)
+    
+    def create_banco(self, banco_data: BancoCreate) -> TblBanco:
+        """Criar novo banco"""
+        # Verificar se código já existe
+        existing = self.db.query(TblBanco).filter(
+            TblBanco.Codigo == banco_data.Codigo
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Código do banco já cadastrado"
+            )
+        
+        return self.repository.create(banco_data.dict())
+    
+    def get_banco(self, codigo: int) -> Optional[TblBanco]:
+        """Obter banco por código"""
+        return self.repository.get_by_id(codigo, 'Codigo')
+    
+    def get_bancos(
+        self, 
+        skip: int = 0, 
+        limit: int = 100,
+        nome: Optional[str] = None
+    ) -> List[TblBanco]:
+        """Listar bancos com filtros"""
+        query = self.db.query(TblBanco)
+        
+        if nome:
+            query = query.filter(
+                TblBanco.Nome.ilike(f"%{nome}%")
+            )
+        
+        return query.offset(skip).limit(limit).all()
+    
+    def update_banco(
+        self, 
+        codigo: int, 
+        banco_data: BancoUpdate
+    ) -> Optional[TblBanco]:
+        """Atualizar banco"""
+        banco = self.get_banco(codigo)
+        if not banco:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Banco não encontrado"
+            )
+        
+        update_data = banco_data.dict(exclude_unset=True)
+        return self.repository.update(codigo, update_data, 'Codigo')
+    
+    def delete_banco(self, codigo: int) -> bool:
+        """Excluir banco"""
+        banco = self.get_banco(codigo)
+        if not banco:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Banco não encontrado"
+            )
+        
+        # Verificar dependências
+        if banco.contas:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Não é possível excluir banco com contas vinculadas"
+            )
+        
+        return self.repository.delete(codigo, 'Codigo')
+```
+
+### 11.3 Serviço Conta
+
+#### services/conta_service.py
+
+```python
+from sqlalchemy.orm import Session
+from sqlalchemy import and_
+from typing import List, Optional
+from fastapi import HTTPException, status
+
+from app.models.conta import TblConta
+from app.models.empresa import TblEmpresa
+from app.models.banco import TblBanco
+from app.models.funcionario import TblFuncionarios
+from app.schemas.conta import ContaCreate, ContaUpdate
+from app.repositories.base_repository import BaseRepository
+
+class ContaService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.repository = BaseRepository(TblConta, db)
+    
+    def create_conta(self, conta_data: ContaCreate, current_user: dict) -> TblConta:
+        """Criar nova conta bancária com auditoria"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        # Validar empresa existe
+        empresa = self.db.query(TblEmpresa).filter(
+            TblEmpresa.CodEmpresa == conta_data.CodEmpresa
+        ).first()
+        if not empresa:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Empresa não encontrada"
+            )
+        
+        # Validar banco existe
+        banco = self.db.query(TblBanco).filter(
+            TblBanco.Codigo == conta_data.Banco
+        ).first()
+        if not banco:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Banco não encontrado"
+            )
+        
+        # Se marcada como padrão, desmarcar outras da mesma empresa
+        if conta_data.FlgContaPadrao:
+            self.db.query(TblConta).filter(
+                and_(
+                    TblConta.CodEmpresa == conta_data.CodEmpresa,
+                    TblConta.FlgContaPadrao == True
+                )
+            ).update({"FlgContaPadrao": False})
+        
+        # Criar conta
+        conta_dict = conta_data.dict()
+        conta_dict.update({
+            'IdUserCreate': current_user['cod_funcionario'],
+            'NomUsuario': current_user['NomUsuario']
+        })
+        
+        return self.repository.create(conta_dict)
+    
+    def get_conta(self, id_conta: int) -> Optional[TblConta]:
+        """Obter conta por ID"""
+        return self.repository.get_by_id(id_conta, 'idConta')
+    
+    def get_contas(
+        self, 
+        skip: int = 0, 
+        limit: int = 100,
+        cod_empresa: Optional[int] = None,
+        banco: Optional[int] = None,
+        nome_conta: Optional[str] = None
+    ) -> List[TblConta]:
+        """Listar contas com filtros"""
+        query = self.db.query(TblConta)
+        
+        if cod_empresa:
+            query = query.filter(TblConta.CodEmpresa == cod_empresa)
+        
+        if banco:
+            query = query.filter(TblConta.Banco == banco)
+        
+        if nome_conta:
+            query = query.filter(
+                TblConta.NomConta.ilike(f"%{nome_conta}%")
+            )
+        
+        return query.offset(skip).limit(limit).all()
+    
+    def update_conta(
+        self, 
+        id_conta: int, 
+        conta_data: ContaUpdate, 
+        current_user: dict
+    ) -> Optional[TblConta]:
+        """Atualizar conta com auditoria"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        conta = self.get_conta(id_conta)
+        if not conta:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conta não encontrada"
+            )
+        
+        # Validar empresa se alterada
+        if conta_data.CodEmpresa and conta_data.CodEmpresa != conta.CodEmpresa:
+            empresa = self.db.query(TblEmpresa).filter(
+                TblEmpresa.CodEmpresa == conta_data.CodEmpresa
+            ).first()
+            if not empresa:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Empresa não encontrada"
+                )
+        
+        # Validar banco se alterado
+        if conta_data.Banco and conta_data.Banco != conta.Banco:
+            banco = self.db.query(TblBanco).filter(
+                TblBanco.Codigo == conta_data.Banco
+            ).first()
+            if not banco:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Banco não encontrado"
+                )
+        
+        # Se marcada como padrão, desmarcar outras da mesma empresa
+        if conta_data.FlgContaPadrao:
+            empresa_id = conta_data.CodEmpresa or conta.CodEmpresa
+            self.db.query(TblConta).filter(
+                and_(
+                    TblConta.CodEmpresa == empresa_id,
+                    TblConta.FlgContaPadrao == True,
+                    TblConta.idConta != id_conta
+                )
+            ).update({"FlgContaPadrao": False})
+        
+        # Atualizar dados
+        update_data = conta_data.dict(exclude_unset=True)
+        update_data.update({
+            'IdUserAlter': current_user['cod_funcionario'],
+            'NomUsuarioAlteracao': current_user['NomUsuario']
+        })
+        
+        return self.repository.update(id_conta, update_data, 'idConta')
+    
+    def delete_conta(self, id_conta: int, current_user: dict) -> bool:
+        """Excluir conta bancária"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        conta = self.get_conta(id_conta)
+        if not conta:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conta não encontrada"
+            )
+        
+        # Verificar dependências (lançamentos, etc.)
+        if conta.lancamentos:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Não é possível excluir conta com lançamentos vinculados"
+            )
+        
+        return self.repository.delete(id_conta, 'idConta')
+    
+    def _validate_user_exists(self, user_id: int) -> bool:
+        """Validar se o usuário existe na tabela tbl_Funcionarios"""
+        user = self.db.query(TblFuncionarios).filter(
+            TblFuncionarios.cod_funcionario == user_id
+        ).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Usuário com ID {user_id} não encontrado na tabela tbl_Funcionarios"
+            )
+        
+        return True
+```
+
+### 11.4 Serviço Cliente
+
+#### services/cliente_service.py
+
+```python
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
+from typing import List, Optional
+from fastapi import HTTPException, status
+
+from app.models.cliente import TblClientes
+from app.models.funcionario import TblFuncionarios
+from app.schemas.cliente import ClienteCreate, ClienteUpdate
+from app.repositories.base_repository import BaseRepository
+
+class ClienteService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.repository = BaseRepository(TblClientes, db)
+    
+    def create_cliente(self, cliente_data: ClienteCreate, current_user: dict) -> TblClientes:
+        """Criar novo cliente com auditoria"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        # Validar documentos únicos
+        self._validate_unique_documents(cliente_data)
+        
+        # Criar cliente
+        cliente_dict = cliente_data.dict()
+        cliente_dict.update({
+            'IdUserCreate': current_user['cod_funcionario'],
+            'NomUsuario': current_user['NomUsuario']
+        })
+        
+        return self.repository.create(cliente_dict)
+    
+    def get_cliente(self, cod_cliente: int) -> Optional[TblClientes]:
+        """Obter cliente por código"""
+        return self.repository.get_by_id(cod_cliente, 'CodCliente')
+    
+    def get_clientes(
+        self, 
+        skip: int = 0, 
+        limit: int = 100,
+        nome: Optional[str] = None,
+        documento: Optional[str] = None,
+        tipo_pessoa: Optional[str] = None,
+        liberado: Optional[bool] = None,
+        vip: Optional[bool] = None
+    ) -> List[TblClientes]:
+        """Listar clientes com filtros"""
+        query = self.db.query(TblClientes)
+        
+        if nome:
+            query = query.filter(
+                or_(
+                    TblClientes.DesCliente.ilike(f"%{nome}%"),
+                    TblClientes.RazaoSocial.ilike(f"%{nome}%")
+                )
+            )
+        
+        if documento:
+            query = query.filter(
+                or_(
+                    TblClientes.CPF == documento,
+                    TblClientes.CNPJ == documento
+                )
+            )
+        
+        if tipo_pessoa:
+            query = query.filter(TblClientes.FlgTipoPessoa == tipo_pessoa)
+        
+        if liberado is not None:
+            query = query.filter(TblClientes.FlgLiberado == liberado)
+        
+        if vip is not None:
+            query = query.filter(TblClientes.FlgVIP == vip)
+        
+        return query.offset(skip).limit(limit).all()
+    
+    def update_cliente(
+        self, 
+        cod_cliente: int, 
+        cliente_data: ClienteUpdate, 
+        current_user: dict
+    ) -> Optional[TblClientes]:
+        """Atualizar cliente com auditoria"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        cliente = self.get_cliente(cod_cliente)
+        if not cliente:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cliente não encontrado"
+            )
+        
+        # Validar documentos únicos se alterados
+        self._validate_unique_documents(cliente_data, cod_cliente)
+        
+        # Atualizar dados
+        update_data = cliente_data.dict(exclude_unset=True)
+        update_data.update({
+            'IdUserAlter': current_user['cod_funcionario'],
+            'NomUsuarioAlteracao': current_user['NomUsuario']
+        })
+        
+        return self.repository.update(cod_cliente, update_data, 'CodCliente')
+    
+    def delete_cliente(self, cod_cliente: int, current_user: dict) -> bool:
+        """Exclusão lógica de cliente"""
+        # Validar usuário
+        self._validate_user_exists(current_user['cod_funcionario'])
+        
+        cliente = self.get_cliente(cod_cliente)
+        if not cliente:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cliente não encontrado"
+            )
+        
+        # Verificar dependências
+        if cliente.contas_receber or cliente.locacoes:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Não é possível excluir cliente com movimentações vinculadas"
+            )
+        
+        # Exclusão lógica - marcar como não liberado
+        update_data = {
+            'FlgLiberado': False,
+            'IdUserAlter': current_user['cod_funcionario'],
+            'NomUsuarioAlteracao': current_user['NomUsuario']
+        }
+        
+        self.repository.update(cod_cliente, update_data, 'CodCliente')
+        return True
+    
+    def _validate_unique_documents(self, cliente_data, exclude_id: Optional[int] = None):
+        """Validar unicidade de documentos"""
+        query_conditions = []
+        
+        # Verificar CPF
+        if hasattr(cliente_data, 'CPF') and cliente_data.CPF:
+            query_conditions.append(TblClientes.CPF == cliente_data.CPF)
+        
+        # Verificar CNPJ
+        if hasattr(cliente_data, 'CNPJ') and cliente_data.CNPJ:
+            query_conditions.append(TblClientes.CNPJ == cliente_data.CNPJ)
+        
+        if query_conditions:
+            query = self.db.query(TblClientes).filter(or_(*query_conditions))
+            
+            if exclude_id:
+                query = query.filter(TblClientes.CodCliente != exclude_id)
+            
+            existing = query.first()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="CPF ou CNPJ já cadastrado no sistema"
+                )
+    
+    def _validate_user_exists(self, user_id: int) -> bool:
+        """Validar se o usuário existe na tabela tbl_Funcionarios"""
+        user = self.db.query(TblFuncionarios).filter(
+            TblFuncionarios.cod_funcionario == user_id
+        ).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Usuário com ID {user_id} não encontrado na tabela tbl_Funcionarios"
+            )
+        
+        return True
+```
+
+## 12. Controllers/Rotas para Novas Entidades
+
+### 12.1 Router Empresa
+
+#### routers/empresa_router.py
+
+```python
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from typing import List, Optional
+
+from app.database import get_db
+from app.schemas.empresa import (
+    Empresa, EmpresaCreate, EmpresaUpdate, EmpresaInDB
+)
+from app.services.empresa_service import EmpresaService
+from app.dependencies.auth import get_current_user_from_request
+
+router = APIRouter(
+    prefix="/empresas",
+    tags=["empresas"]
+)
+
+@router.post("/", response_model=EmpresaInDB, status_code=status.HTTP_201_CREATED)
+def create_empresa(
+    empresa: EmpresaCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Criar nova empresa"""
+    service = EmpresaService(db)
+    return service.create_empresa(empresa, current_user)
+
+@router.get("/", response_model=List[EmpresaInDB])
+def list_empresas(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    nome: Optional[str] = Query(None, description="Filtrar por nome da empresa"),
+    cnpj: Optional[str] = Query(None, description="Filtrar por CNPJ"),
+    db: Session = Depends(get_db)
+):
+    """Listar empresas com filtros"""
+    service = EmpresaService(db)
+    return service.get_empresas(
+        skip=skip, 
+        limit=limit, 
+        nome=nome, 
+        cnpj=cnpj
+    )
+
+@router.get("/{cod_empresa}", response_model=EmpresaInDB)
+def get_empresa(
+    cod_empresa: int,
+    db: Session = Depends(get_db)
+):
+    """Obter empresa por código"""
+    service = EmpresaService(db)
+    empresa = service.get_empresa(cod_empresa)
+    if not empresa:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Empresa não encontrada"
+        )
+    return empresa
+
+@router.put("/{cod_empresa}", response_model=EmpresaInDB)
+def update_empresa(
+    cod_empresa: int,
+    empresa: EmpresaUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Atualizar empresa"""
+    service = EmpresaService(db)
+    updated_empresa = service.update_empresa(cod_empresa, empresa, current_user)
+    if not updated_empresa:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Empresa não encontrada"
+        )
+    return updated_empresa
+
+@router.delete("/{cod_empresa}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_empresa(
+    cod_empresa: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Excluir empresa"""
+    service = EmpresaService(db)
+    if not service.delete_empresa(cod_empresa, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Empresa não encontrada"
+        )
+```
+
+### 12.2 Router Banco
+
+#### routers/banco_router.py
+
+```python
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from typing import List, Optional
+
+from app.database import get_db
+from app.schemas.banco import Banco, BancoCreate, BancoUpdate, BancoInDB
+from app.services.banco_service import BancoService
+
+router = APIRouter(
+    prefix="/bancos",
+    tags=["bancos"]
+)
+
+@router.post("/", response_model=BancoInDB, status_code=status.HTTP_201_CREATED)
+def create_banco(
+    banco: BancoCreate,
+    db: Session = Depends(get_db)
+):
+    """Criar novo banco"""
+    service = BancoService(db)
+    return service.create_banco(banco)
+
+@router.get("/", response_model=List[BancoInDB])
+def list_bancos(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    nome: Optional[str] = Query(None, description="Filtrar por nome do banco"),
+    codigo: Optional[int] = Query(None, description="Filtrar por código do banco"),
+    db: Session = Depends(get_db)
+):
+    """Listar bancos com filtros"""
+    service = BancoService(db)
+    return service.get_bancos(
+        skip=skip, 
+        limit=limit, 
+        nome=nome, 
+        codigo=codigo
+    )
+
+@router.get("/{codigo}", response_model=BancoInDB)
+def get_banco(
+    codigo: int,
+    db: Session = Depends(get_db)
+):
+    """Obter banco por código"""
+    service = BancoService(db)
+    banco = service.get_banco(codigo)
+    if not banco:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Banco não encontrado"
+        )
+    return banco
+
+@router.put("/{codigo}", response_model=BancoInDB)
+def update_banco(
+    codigo: int,
+    banco: BancoUpdate,
+    db: Session = Depends(get_db)
+):
+    """Atualizar banco"""
+    service = BancoService(db)
+    updated_banco = service.update_banco(codigo, banco)
+    if not updated_banco:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Banco não encontrado"
+        )
+    return updated_banco
+
+@router.delete("/{codigo}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_banco(
+    codigo: int,
+    db: Session = Depends(get_db)
+):
+    """Excluir banco"""
+    service = BancoService(db)
+    if not service.delete_banco(codigo):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Banco não encontrado"
+        )
+```
+
+### 12.3 Router Conta
+
+#### routers/conta_router.py
+
+```python
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from typing import List, Optional
+
+from app.database import get_db
+from app.schemas.conta import Conta, ContaCreate, ContaUpdate, ContaInDB
+from app.services.conta_service import ContaService
+from app.dependencies.auth import get_current_user_from_request
+
+router = APIRouter(
+    prefix="/contas",
+    tags=["contas"]
+)
+
+@router.post("/", response_model=ContaInDB, status_code=status.HTTP_201_CREATED)
+def create_conta(
+    conta: ContaCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Criar nova conta bancária"""
+    service = ContaService(db)
+    return service.create_conta(conta, current_user)
+
+@router.get("/", response_model=List[ContaInDB])
+def list_contas(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    cod_empresa: Optional[int] = Query(None, description="Filtrar por empresa"),
+    banco: Optional[int] = Query(None, description="Filtrar por banco"),
+    nome_conta: Optional[str] = Query(None, description="Filtrar por nome da conta"),
+    db: Session = Depends(get_db)
+):
+    """Listar contas com filtros"""
+    service = ContaService(db)
+    return service.get_contas(
+        skip=skip, 
+        limit=limit, 
+        cod_empresa=cod_empresa,
+        banco=banco,
+        nome_conta=nome_conta
+    )
+
+@router.get("/{id_conta}", response_model=ContaInDB)
+def get_conta(
+    id_conta: int,
+    db: Session = Depends(get_db)
+):
+    """Obter conta por ID"""
+    service = ContaService(db)
+    conta = service.get_conta(id_conta)
+    if not conta:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conta não encontrada"
+        )
+    return conta
+
+@router.put("/{id_conta}", response_model=ContaInDB)
+def update_conta(
+    id_conta: int,
+    conta: ContaUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Atualizar conta"""
+    service = ContaService(db)
+    updated_conta = service.update_conta(id_conta, conta, current_user)
+    if not updated_conta:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conta não encontrada"
+        )
+    return updated_conta
+
+@router.delete("/{id_conta}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_conta(
+    id_conta: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Excluir conta"""
+    service = ContaService(db)
+    if not service.delete_conta(id_conta, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conta não encontrada"
+        )
+```
+
+### 12.4 Router Cliente
+
+#### routers/cliente_router.py
+
+```python
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from typing import List, Optional
+
+from app.database import get_db
+from app.schemas.cliente import Cliente, ClienteCreate, ClienteUpdate, ClienteInDB
+from app.services.cliente_service import ClienteService
+from app.dependencies.auth import get_current_user_from_request
+
+router = APIRouter(
+    prefix="/clientes",
+    tags=["clientes"]
+)
+
+@router.post("/", response_model=ClienteInDB, status_code=status.HTTP_201_CREATED)
+def create_cliente(
+    cliente: ClienteCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Criar novo cliente"""
+    service = ClienteService(db)
+    return service.create_cliente(cliente, current_user)
+
+@router.get("/", response_model=List[ClienteInDB])
+def list_clientes(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    nome: Optional[str] = Query(None, description="Filtrar por nome/razão social"),
+    documento: Optional[str] = Query(None, description="Filtrar por CPF/CNPJ"),
+    tipo_pessoa: Optional[str] = Query(None, description="Filtrar por tipo de pessoa (F/J)"),
+    liberado: Optional[bool] = Query(None, description="Filtrar por status liberado"),
+    vip: Optional[bool] = Query(None, description="Filtrar por status VIP"),
+    db: Session = Depends(get_db)
+):
+    """Listar clientes com filtros"""
+    service = ClienteService(db)
+    return service.get_clientes(
+        skip=skip, 
+        limit=limit, 
+        nome=nome,
+        documento=documento,
+        tipo_pessoa=tipo_pessoa,
+        liberado=liberado,
+        vip=vip
+    )
+
+@router.get("/{cod_cliente}", response_model=ClienteInDB)
+def get_cliente(
+    cod_cliente: int,
+    db: Session = Depends(get_db)
+):
+    """Obter cliente por código"""
+    service = ClienteService(db)
+    cliente = service.get_cliente(cod_cliente)
+    if not cliente:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente não encontrado"
+        )
+    return cliente
+
+@router.put("/{cod_cliente}", response_model=ClienteInDB)
+def update_cliente(
+    cod_cliente: int,
+    cliente: ClienteUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Atualizar cliente"""
+    service = ClienteService(db)
+    updated_cliente = service.update_cliente(cod_cliente, cliente, current_user)
+    if not updated_cliente:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente não encontrado"
+        )
+    return updated_cliente
+
+@router.delete("/{cod_cliente}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_cliente(
+    cod_cliente: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_from_request)
+):
+    """Exclusão lógica de cliente"""
+    service = ClienteService(db)
+    if not service.delete_cliente(cod_cliente, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente não encontrado"
+        )
+```
+
+### 12.5 Atualização do main.py para incluir as novas rotas
+
+#### main.py (atualização)
+
+```python
+# ... imports existentes ...
+from app.routers import (
+    auth_router, 
+    lancamentos_router, 
+    contas_pagar_router,
+    empresa_router,  # Nova rota
+    banco_router,    # Nova rota
+    conta_router,    # Nova rota
+    cliente_router   # Nova rota
+)
+
+# ... configuração existente ...
+
+# Incluir rotas existentes
+app.include_router(auth_router.router)
+app.include_router(lancamentos_router.router)
+app.include_router(contas_pagar_router.router)
+
+# Incluir novas rotas
+app.include_router(empresa_router.router, prefix="/api/v1")
+app.include_router(banco_router.router, prefix="/api/v1")
+app.include_router(conta_router.router, prefix="/api/v1")
+app.include_router(cliente_router.router, prefix="/api/v1")
+
+# ... resto da configuração ...
+```
+
 Estes exemplos de código complementam o planejamento principal e fornecem uma base sólida para o desenvolvimento do aplicativo web financeiro, abrangendo tanto o backend em Python/FastAPI quanto o frontend em React/TypeScript, com foco em responsividade para dispositivos móveis e integração com o banco de dados SQL Server existente.
