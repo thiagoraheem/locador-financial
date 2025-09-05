@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     environment:
-      - DATABASE_URI=mssql+pyodbc://financeiro:BlomaqFinanceiro$$@54.232.194.197:1433/Locador_2?driver=ODBC+Driver+17+for+SQL+Server&timeout=30
+      - DATABASE_URI=mssql+pyodbc://user:password@host:1433/database?driver=ODBC+Driver+17+for+SQL+Server
     restart: unless-stopped
 
   # Frontend React
