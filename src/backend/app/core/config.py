@@ -3,7 +3,6 @@ Core configuration settings for the Financial Web Application
 """
 from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl
 
 
 class Settings(BaseSettings):
@@ -22,10 +21,10 @@ class Settings(BaseSettings):
     MASTER_PASSWORD: str = "YpP7sPnjw2G/TO5357wt1w=="
     
     # Configurações do Banco de Dados
-    DATABASE_URI: str = "mssql+pyodbc://financeiro:BlomaqFinanceiro$@srvsqlblomaq01\dev:1433/Locador_2?driver=ODBC+Driver+17+for+SQL+Server"
+    DATABASE_URI: str = "mssql+pyodbc://financeiro:BlomaqFinanceiro$@54.232.194.197:1433/Locador_2?driver=ODBC+Driver+17+for+SQL+Server"
     
     # Configurações de CORS
-    CORS_ORIGINS: List[AnyHttpUrl] = [
+    CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8080",

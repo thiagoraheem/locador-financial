@@ -16,10 +16,11 @@ app = FastAPI(
 # Configuração de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],  # More permissive for development
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Inclusão dos routers
@@ -41,3 +42,17 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "locador-financial-api"}
+
+@app.get("/test-db")
+async def test_database():
+    """Test database connectivity"""
+    try:
+        from app.core.database import get_db
+        from sqlalchemy import text
+        db = next(get_db())
+        # Simple query to test connection
+        result = db.execute(text("SELECT 1 as test"))
+        row = result.fetchone()
+        return {"status": "ok", "database": "connected", "test_result": row[0] if row else None}
+    except Exception as e:
+        return {"status": "error", "database": "disconnected", "error": str(e)}
