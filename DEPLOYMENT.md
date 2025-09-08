@@ -86,8 +86,8 @@ docker-compose logs --tail=100 backend
 ```
 
 ### Health Checks
-- Backend: http://localhost:8000/health
-- Frontend: http://localhost:3000
+- Backend: http://localhost:8001/health
+- Frontend: http://localhost:5600
 
 ## Backup e Restauração
 

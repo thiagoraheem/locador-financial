@@ -61,9 +61,9 @@ locador-financial/
 1. Clone o repositório
 2. Execute: `docker-compose up --build`
 3. Acesse:
-   - Frontend: http://localhost:3000
-   - Backend: http://localhost:8000
-   - Swagger UI: http://localhost:8000/docs
+   - Frontend: http://localhost:5600
+   - Backend: http://localhost:8001
+   - Swagger UI: http://localhost:8001/docs
 
 ### Desenvolvimento Local
 
@@ -71,7 +71,7 @@ locador-financial/
 ```bash
 cd src/backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 #### Frontend
@@ -115,12 +115,12 @@ npm start
 ```env
 DATABASE_URI=mssql+pyodbc://user:pass@server/database
 SECRET_KEY=your-jwt-secret-key
-CORS_ORIGINS=http://localhost:3000
+CORS_ORIGINS=http://localhost:5600
 ```
 
 ### Configuração do Frontend
 ```env
-REACT_APP_API_URL=http://localhost:8000
+REACT_APP_API_URL=http://localhost:8001
 REACT_APP_LOCALES=pt-BR
 ```
 
@@ -142,7 +142,7 @@ npm test
 
 - [Planejamento Detalhado](docs/planejamento-app-web-financeiro.md)
 - [Exemplos de Código](docs/exemplos-codigo-app-web-financeiro.md)
-- [API Documentation](http://localhost:8000/docs) (quando executando)
+- [API Documentation](http://localhost:8001/docs) (quando executando)
 
 ## Contribuição
 

@@ -22,7 +22,7 @@ RUN npm install -g serve
 RUN npm prune --production
 
 # Expor porta
-EXPOSE 3000
+EXPOSE 5600
 
 # Comando para executar a aplicação
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["serve", "-s", "build", "-l", "5600"]

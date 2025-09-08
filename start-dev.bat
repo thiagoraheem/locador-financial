@@ -41,17 +41,17 @@ REM Verificar status dos serviços
 echo 🔍 Verificando status dos serviços...
 
 REM Verificar backend
-curl -f http://localhost:8000/health >nul 2>&1
+curl -f http://localhost:8001/health >nul 2>&1
 if %errorlevel% equ 0 (
-    echo ✅ Backend: OK (http://localhost:8000)
+    echo ✅ Backend: OK (http://localhost:8001)
 ) else (
     echo ❌ Backend: Falha ao conectar
 )
 
 REM Verificar frontend
-curl -f http://localhost:3000 >nul 2>&1
+curl -f http://localhost:5600 >nul 2>&1
 if %errorlevel% equ 0 (
-    echo ✅ Frontend: OK (http://localhost:3000)
+    echo ✅ Frontend: OK (http://localhost:5600)
 ) else (
     echo ❌ Frontend: Falha ao conectar
 )
@@ -60,10 +60,10 @@ echo.
 echo 🎉 Sistema iniciado!
 echo.
 echo 📋 URLs úteis:
-echo    Frontend: http://localhost:3000
-echo    Backend: http://localhost:8000
-echo    API Docs: http://localhost:8000/docs
-echo    Health Check: http://localhost:8000/health
+echo    Frontend: http://localhost:5600
+echo    Backend: http://localhost:8001
+echo    API Docs: http://localhost:8001/docs
+echo    Health Check: http://localhost:8001/health
 echo.
 echo 📊 Para ver logs:
 echo    docker-compose logs -f backend

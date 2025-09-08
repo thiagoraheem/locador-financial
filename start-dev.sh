@@ -38,15 +38,15 @@ sleep 10
 echo "🔍 Verificando status dos serviços..."
 
 # Verificar backend
-if curl -f http://localhost:8000/health &> /dev/null; then
-    echo "✅ Backend: OK (http://localhost:8000)"
+if curl -f http://localhost:8001/health &> /dev/null; then
+    echo "✅ Backend: OK (http://localhost:8001)"
 else
     echo "❌ Backend: Falha ao conectar"
 fi
 
 # Verificar frontend
-if curl -f http://localhost:3000 &> /dev/null; then
-    echo "✅ Frontend: OK (http://localhost:3000)"
+if curl -f http://localhost:5600 &> /dev/null; then
+    echo "✅ Frontend: OK (http://localhost:5600)"
 else
     echo "❌ Frontend: Falha ao conectar"
 fi
@@ -62,10 +62,10 @@ echo ""
 echo "🎉 Sistema iniciado!"
 echo ""
 echo "📋 URLs úteis:"
-echo "   Frontend: http://localhost:3000"
-echo "   Backend: http://localhost:8000"
-echo "   API Docs: http://localhost:8000/docs"
-echo "   Health Check: http://localhost:8000/health"
+echo "   Frontend: http://localhost:5600"
+echo "   Backend: http://localhost:8001"
+echo "   API Docs: http://localhost:8001/docs"
+echo "   Health Check: http://localhost:8001/health"
 echo ""
 echo "📊 Para ver logs:"
 echo "   docker-compose logs -f backend"
