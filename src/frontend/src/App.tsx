@@ -10,6 +10,10 @@ import { LancamentosPage } from './features/lancamentos/pages/LancamentosPage';
 import { CategoriasPage } from './features/categorias/pages/CategoriasPage';
 import { ContasPagarPage } from './features/contas-pagar/pages/ContasPagarPage';
 import { ContasReceberPage } from './features/contas-receber/pages/ContasReceberPage';
+import { EmpresasPage } from './features/empresas/pages/EmpresasPage';
+import { BancosPage } from './features/bancos/pages/BancosPage';
+import { ContasPage } from './features/contas/pages/ContasPage';
+import { ClientesPage } from './features/clientes/pages/ClientesPage';
 
 function App() {
   const { ready } = useTranslation();
@@ -33,6 +37,10 @@ function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="lancamentos" element={<LancamentosPage />} />
         <Route path="categorias" element={<CategoriasPage />} />
+        <Route path="empresas" element={<EmpresasPage />} />
+        <Route path="bancos" element={<BancosPage />} />
+        <Route path="contas" element={<ContasPage />} />
+        <Route path="clientes" element={<ClientesPage />} />
         <Route path="contas-pagar" element={<ContasPagarPage />} />
         <Route path="contas-receber" element={<ContasReceberPage />} />
       </Route>

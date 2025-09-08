@@ -3,7 +3,7 @@ FastAPI application main module for Financial Web Application
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import auth, lancamentos, contas_pagar, contas_receber, categorias, dashboard
+from app.api.routes import auth, lancamentos, contas_pagar, contas_receber, categorias, dashboard, empresas, bancos, contas, clientes
 from app.core.config import settings
 
 app = FastAPI(
@@ -30,6 +30,10 @@ app.include_router(contas_pagar.router, prefix=settings.API_V1_STR)
 app.include_router(contas_receber.router, prefix=settings.API_V1_STR)
 app.include_router(categorias.router, prefix=settings.API_V1_STR)
 app.include_router(dashboard.router, prefix=settings.API_V1_STR)
+app.include_router(empresas.router, prefix=settings.API_V1_STR)
+app.include_router(bancos.router, prefix=settings.API_V1_STR)
+app.include_router(contas.router, prefix=settings.API_V1_STR)
+app.include_router(clientes.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():

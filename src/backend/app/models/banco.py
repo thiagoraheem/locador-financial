@@ -20,7 +20,6 @@ class Banco(Base, LoginAuditMixin):
     
     # Relacionamentos
     contas = relationship("Conta", back_populates="banco")
-    clientes_contas = relationship("ClienteConta", back_populates="banco")
     
     def __repr__(self):
         return f"<Banco(Codigo={self.Codigo}, Nome='{self.Nome}')>"

@@ -49,9 +49,6 @@ class Cliente(Base, LoginAuditMixin):
     
     # Relacionamentos
     contas_receber = relationship("AccountsReceivable", back_populates="cliente")
-    locacoes = relationship("Locacao", back_populates="cliente")
-    orcamentos = relationship("Orcamento", back_populates="cliente")
-    contas_bancarias = relationship("ClienteConta", back_populates="cliente")
     
     def __repr__(self):
         return f"<Cliente(CodCliente={self.CodCliente}, DesCliente='{self.DesCliente}', Tipo={self.FlgTipoPessoa})>"

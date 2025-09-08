@@ -13,7 +13,7 @@ def test_root_endpoint(client: TestClient):
     assert response.status_code == 200
     data = response.json()
     assert "message" in data
-    assert "Sistema Financeiro" in data["message"]
+    assert "API Financeira do Sistema Locador" == data["message"]
 
 def test_openapi_docs(client: TestClient):
     """Testa se a documentação OpenAPI está disponível"""

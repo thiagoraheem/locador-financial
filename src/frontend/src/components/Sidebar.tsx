@@ -19,6 +19,9 @@ import {
   PaymentOutlined as PaymentOutlinedIcon,
   RequestQuoteOutlined as RequestQuoteOutlinedIcon,
   Assessment as AssessmentIcon,
+  Business as BusinessIcon,
+  AccountBalanceOutlined as AccountBalanceOutlinedIcon,
+  People as PeopleIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -62,6 +65,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
       text: t('nav.categorias'),
       icon: <CategoryIcon />,
       path: '/categorias',
+    },
+    {
+      text: t('nav.empresas'),
+      icon: <BusinessIcon />,
+      path: '/empresas',
+    },
+    {
+      text: t('nav.bancos'),
+      icon: <AccountBalanceOutlinedIcon />,
+      path: '/bancos',
+    },
+    {
+      text: t('nav.contas'),
+      icon: <AccountBalanceIcon />,
+      path: '/contas',
+    },
+    {
+      text: t('nav.clientes'),
+      icon: <PeopleIcon />,
+      path: '/clientes',
     },
     {
       text: t('nav.contas_pagar'),
