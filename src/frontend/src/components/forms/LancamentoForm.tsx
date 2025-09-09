@@ -29,20 +29,20 @@ import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface LancamentoFormData {
-  Data: Date | null;
-  DataEmissao: Date | null;
-  CodEmpresa: number | null;
-  idConta: number | null;
+  Data: Date;
+  DataEmissao: Date;
+  CodEmpresa?: number | null;
+  idConta?: number | null;
   CodFavorecido: number;
   CodCategoria: number;
   Valor: number;
   IndMov: 'E' | 'S';
-  NumDocto: string;
+  NumDocto?: string;
   CodFormaPagto: number;
   FlgFrequencia: 'U' | 'R';
-  Observacao: string;
+  Observacao?: string;
 }
 
 interface LancamentoFormProps {

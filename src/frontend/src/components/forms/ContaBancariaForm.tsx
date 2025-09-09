@@ -28,24 +28,24 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface ContaBancariaFormData {
   CodEmpresa: number;
   Banco: number;
   Agencia: string;
-  AgenciaDigito: string;
+  AgenciaDigito?: string;
   Conta: string;
-  ContaDigito: string;
+  ContaDigito?: string;
   NomConta: string;
   TipoConta: 'CC' | 'CP' | 'CS';
   Saldo: number;
-  FlgContaPadrao: boolean;
+  FlgContaPadrao?: boolean;
   FlgAtivo: 'S' | 'N';
-  TipoPix: string;
-  ValorPix: string;
-  EnableAPI: boolean;
-  ConfiguracaoAPI: string;
-  TokenAPI: string;
+  TipoPix?: string;
+  ValorPix?: string;
+  EnableAPI?: boolean;
+  ConfiguracaoAPI?: string;
+  TokenAPI?: string;
 }
 
 interface ContaBancariaFormProps {

@@ -93,6 +93,15 @@ export const CategoriasTable: React.FC<CategoriasTableProps> = ({ onEdit, onCrea
     }
   };
 
+  // Handle pagination changes
+  const handlePaginationModelChange = (model: GridPaginationModel) => {
+    setPaginationModel(model);
+    dispatch(setPagination({
+      skip: model.page * model.pageSize,
+      limit: model.pageSize,
+    }));
+  };
+
   // Columns definition
   const columns: GridColDef[] = [
     {

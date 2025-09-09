@@ -24,19 +24,19 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface EmpresaFormData {
   NomEmpresa: string;
   RazaoSocial: string;
   CNPJ: string;
-  Endereco: string;
-  Bairro: string;
-  CEP: string;
-  Municipio: string;
-  Estado: string;
-  Telefone: string;
-  Email: string;
-  FlgPadrao: boolean;
+  Endereco?: string;
+  Bairro?: string;
+  CEP?: string;
+  Municipio?: string;
+  Estado?: string;
+  Telefone?: string;
+  Email?: string;
+  FlgPadrao?: boolean;
   FlgAtivo: 'S' | 'N';
 }
 

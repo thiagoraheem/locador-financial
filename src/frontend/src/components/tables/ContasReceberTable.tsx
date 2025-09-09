@@ -97,13 +97,22 @@ export const ContasReceberTable: React.FC<ContasReceberTableProps> = ({ onEdit, 
     }
   };
 
+  // Handle pagination changes
+  const handlePaginationModelChange = (model: GridPaginationModel) => {
+    setPaginationModel(model);
+    dispatch(setPagination({
+      skip: model.page * model.pageSize,
+      limit: model.pageSize,
+    }));
+  };
+
   // Columns definition
   const columns: GridColDef[] = [
     {
       field: 'DataVencimento',
       headerName: t('contas_receber.data_vencimento'),
       width: 120,
-      valueFormatter: (value) => value ? format(new Date(value), 'dd/MM/yyyy', { locale: ptBR }) : '',
+      valueFormatter: (value: string) => value ? format(new Date(value), 'dd/MM/yyyy', { locale: ptBR }) : '',
     },
     {
       field: 'cliente_nome',
@@ -121,13 +130,13 @@ export const ContasReceberTable: React.FC<ContasReceberTableProps> = ({ onEdit, 
       field: 'Valor',
       headerName: t('contas_receber.valor'),
       width: 120,
-      valueFormatter: (value) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
+      valueFormatter: (value: number) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
     },
     {
       field: 'ValorRecebido',
       headerName: t('contas_receber.valor_recebido'),
       width: 120,
-      valueFormatter: (value) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
+      valueFormatter: (value: number) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
     },
     {
       field: 'Status',

@@ -16,10 +16,10 @@ import {
   CircularProgress,
   Alert,
   FormHelperText,
-  DatePicker,
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useForm, Controller } from 'react-hook-form';
@@ -28,26 +28,26 @@ import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { ptBR } from 'date-fns/locale';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface ContaReceberFormData {
   CodEmpresa: number;
   CodCliente: number;
-  idConta: number | null;
-  CodCategoria: number | null;
+  idConta?: number | null;
+  CodCategoria?: number | null;
   DataEmissao: Date | null;
   DataVencimento: Date | null;
   DataRecebimento?: Date | null;
   Valor: number;
   Status: 'A' | 'R' | 'V' | 'C';
-  NumeroDocumento: string;
-  NumParcela: number;
-  TotalParcelas: number;
-  DiasAtraso: number;
-  FlgProtestado: boolean;
+  NumeroDocumento?: string;
+  NumParcela?: number | null;
+  TotalParcelas?: number | null;
+  DiasAtraso?: number | null;
+  FlgProtestado?: boolean;
   DataProtesto?: Date | null;
-  Observacao: string;
-  NotaFiscal: string;
-  SerieNF: string;
+  Observacao?: string;
+  NotaFiscal?: string;
+  SerieNF?: string;
 }
 
 interface ContaReceberFormProps {

@@ -22,12 +22,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface CategoriaFormData {
   NomCategoria: string;
-  Descricao: string;
+  Descricao?: string | null;
   TipoCategoria: 'R' | 'D' | 'T';
-  CodCategoriaPai: number | null;
+  CodCategoriaPai?: number | null;
   FlgAtivo: 'S' | 'N';
 }
 
@@ -43,11 +43,11 @@ interface CategoriaFormProps {
 // Validation schema
 const categoriaSchema = yup.object({
   NomCategoria: yup.string().required('validation.required').max(100, 'validation.max_length'),
-  Descricao: yup.string().max(500, 'validation.max_length'),
+  Descricao: yup.string().max(500, 'validation.max_length').nullable(),
   TipoCategoria: yup.string().oneOf(['R', 'D', 'T']).required('validation.required'),
   CodCategoriaPai: yup.number().nullable(),
   FlgAtivo: yup.string().oneOf(['S', 'N']).required('validation.required'),
-});
+}).required();
 
 export const CategoriaForm: React.FC<CategoriaFormProps> = ({
   open,
@@ -83,7 +83,7 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
         NomCategoria: initialData.NomCategoria || '',
         Descricao: initialData.Descricao || '',
         TipoCategoria: initialData.TipoCategoria || 'R',
-        CodCategoriaPai: initialData.CodCategoriaPai || null,
+        CodCategoriaPai: initialData.CodCategoriaPai !== undefined ? initialData.CodCategoriaPai : null,
         FlgAtivo: initialData.FlgAtivo || 'S',
       });
     } else if (open && !initialData) {
@@ -102,12 +102,7 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
   };
 
   const handleFormSubmit = (data: CategoriaFormData) => {
-    const formattedData = {
-      ...data,
-      CodCategoriaPai: data.CodCategoriaPai ? Number(data.CodCategoriaPai) : null,
-    };
-    
-    onSubmit(formattedData);
+    onSubmit(data);
   };
 
   return (

@@ -122,7 +122,7 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
       field: 'Data',
       headerName: t('lancamentos.data'),
       width: 120,
-      valueFormatter: (value) => value ? format(new Date(value), 'dd/MM/yyyy', { locale: ptBR }) : '',
+      valueFormatter: (value: string) => value ? format(new Date(value), 'dd/MM/yyyy', { locale: ptBR }) : '',
     },
     {
       field: 'favorecido_nome',
@@ -152,7 +152,7 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
       field: 'Valor',
       headerName: t('lancamentos.valor'),
       width: 120,
-      valueFormatter: (value) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
+      valueFormatter: (value: number) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
     },
     {
       field: 'FlgConfirmacao',

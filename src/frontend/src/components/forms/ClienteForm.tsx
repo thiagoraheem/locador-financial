@@ -24,29 +24,29 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface ClienteFormData {
   DesCliente: string;
-  RazaoSocial: string;
+  RazaoSocial?: string;
   FlgTipoPessoa: 'F' | 'J';
-  CPF: string;
-  RG: string;
-  CNPJ: string;
-  IE: string;
-  IM: string;
-  Endereco: string;
-  Bairro: string;
-  CEP: string;
-  Municipio: string;
-  Estado: string;
-  Telefone1: string;
-  Telefone2: string;
-  Email1: string;
-  Email2: string;
-  FlgLiberado: boolean;
-  FlgVIP: boolean;
+  CPF?: string;
+  RG?: string;
+  CNPJ?: string;
+  IE?: string;
+  IM?: string;
+  Endereco?: string;
+  Bairro?: string;
+  CEP?: string;
+  Municipio?: string;
+  Estado?: string;
+  Telefone1?: string;
+  Telefone2?: string;
+  Email1?: string;
+  Email2?: string;
+  FlgLiberado?: boolean;
+  FlgVIP?: boolean;
   FlgAtivo: 'S' | 'N';
-  Observacoes: string;
+  Observacoes?: string;
 }
 
 interface ClienteFormProps {

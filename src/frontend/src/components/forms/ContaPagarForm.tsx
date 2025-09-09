@@ -16,8 +16,8 @@ import {
   CircularProgress,
   Alert,
   FormHelperText,
-  DatePicker,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useForm, Controller } from 'react-hook-form';
@@ -26,22 +26,22 @@ import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { ptBR } from 'date-fns/locale';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface ContaPagarFormData {
   CodEmpresa: number;
   CodFornecedor: number;
-  idConta: number | null;
-  CodCategoria: number | null;
+  idConta?: number | null;
+  CodCategoria?: number | null;
   DataEmissao: Date | null;
   DataVencimento: Date | null;
   Valor: number;
   Status: 'A' | 'P' | 'V' | 'C';
-  NumeroDocumento: string;
-  NumParcela: number;
-  TotalParcelas: number;
-  Observacao: string;
-  CodigoBarras: string;
-  LinhaDigitavel: string;
+  NumeroDocumento?: string;
+  NumParcela?: number | null;
+  TotalParcelas?: number | null;
+  Observacao?: string;
+  CodigoBarras?: string;
+  LinhaDigitavel?: string;
 }
 
 interface ContaPagarFormProps {

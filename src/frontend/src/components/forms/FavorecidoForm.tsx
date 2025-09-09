@@ -22,14 +22,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 
-// Types for the form
+// Types for the form - adjust to match yup schema exactly
 interface FavorecidoFormData {
   NomFavorecido: string;
   TipoFavorecido: 'F' | 'J';
   CPF_CNPJ: string;
-  Telefone: string;
-  Email: string;
-  Endereco: string;
+  Telefone?: string;
+  Email?: string;
+  Endereco?: string;
   FlgAtivo: 'S' | 'N';
 }
 
