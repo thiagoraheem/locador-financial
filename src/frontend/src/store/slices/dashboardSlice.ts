@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction, AsyncThunk } from '@reduxjs/toolkit';
 import { dashboardApi } from '../../services/dashboardApi';
 import {
   FinancialSummary,
@@ -133,7 +133,7 @@ export const dashboardSlice = createSlice({
         state.error = action.payload as string;
       })
       // Fetch revenue categories
-      .addCase(fetchCategorySummary.fulfilled, (state, action: PayloadAction<CategorySummary[]>) => {
+      .addCase(fetchCategorySummary.fulfilled, (state, action) => {
         if (action.meta.arg === 'E') {
           state.revenueCategories = action.payload;
         } else {
@@ -151,7 +151,7 @@ export const dashboardSlice = createSlice({
         state.error = action.payload as string;
       })
       // Fetch top favorecidos
-      .addCase(fetchTopFavorecidos.fulfilled, (state, action: PayloadAction<TopFavorecido[]>) => {
+      .addCase(fetchTopFavorecidos.fulfilled, (state, action) => {
         if (action.meta.arg.tipo === 'E') {
           state.topReceitas = action.payload;
         } else {

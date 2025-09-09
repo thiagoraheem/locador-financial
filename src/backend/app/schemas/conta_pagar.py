@@ -80,6 +80,7 @@ class AccountsPayableResponse(AccountsPayableBase):
     NomUsuario: str
     DtCreate: datetime
     DtAlter: Optional[datetime] = None
+    fornecedor_nome: Optional[str] = Field(None, description="Nome do fornecedor")
     
     class Config:
         from_attributes = True

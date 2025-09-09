@@ -59,6 +59,7 @@ export interface AccountsReceivableResponse extends AccountsReceivableBase {
   NomUsuario: string;
   DtCreate: string;
   DtAlter?: string;
+  cliente_nome?: string;
 }
 
 // Payment types

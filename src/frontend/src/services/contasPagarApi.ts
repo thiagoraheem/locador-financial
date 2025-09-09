@@ -53,6 +53,7 @@ export interface AccountsPayableResponse extends AccountsPayableBase {
   NomUsuario: string;
   DtCreate: string;
   DtAlter?: string;
+  fornecedor_nome?: string;
 }
 
 // Payment types

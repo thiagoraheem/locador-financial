@@ -53,15 +53,15 @@ interface PagamentoContaPagarFormProps {
 // Validation schema
 const pagamentoContaPagarSchema = yup.object({
   CodAccountsPayable: yup.number().required('validation.required').positive('validation.positive_number'),
-  idConta: yup.number().nullable().positive('validation.positive_number'),
-  CodFormaPagto: yup.number().nullable().positive('validation.positive_number'),
+  idConta: yup.number().nullable().optional().positive('validation.positive_number'),
+  CodFormaPagto: yup.number().nullable().optional().positive('validation.positive_number'),
   DataPagamento: yup.date().required('validation.required').nullable(),
   ValorPago: yup.number().required('validation.required').positive('validation.positive_number'),
-  Desconto: yup.number().nullable().min(0, 'validation.positive_number'),
-  Juros: yup.number().nullable().min(0, 'validation.positive_number'),
-  Multa: yup.number().nullable().min(0, 'validation.positive_number'),
-  NumeroDocumento: yup.string().max(50, 'validation.max_length'),
-  Observacao: yup.string().max(500, 'validation.max_length'),
+  Desconto: yup.number().optional().min(0, 'validation.positive_number'),
+  Juros: yup.number().optional().min(0, 'validation.positive_number'),
+  Multa: yup.number().optional().min(0, 'validation.positive_number'),
+  NumeroDocumento: yup.string().optional().max(50, 'validation.max_length'),
+  Observacao: yup.string().optional().max(500, 'validation.max_length'),
 });
 
 export const PagamentoContaPagarForm: React.FC<PagamentoContaPagarFormProps> = ({

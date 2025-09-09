@@ -4,12 +4,13 @@ Service layer for Accounts Receivable module
 from typing import List, Optional
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, desc, asc
 from fastapi import HTTPException, status
 
 from app.models.accounts_receivable import AccountsReceivable, AccountsReceivablePayment
 from app.models.funcionario import TblFuncionarios
+from app.models.cliente import Cliente
 from app.schemas.conta_receber import (
     AccountsReceivableCreate, 
     AccountsReceivableUpdate, 
@@ -55,7 +56,9 @@ class ContaReceberService:
 
     def get_conta_receber_by_id(self, conta_receber_id: int) -> AccountsReceivable:
         """Get accounts receivable by ID"""
-        conta_receber = self.db.query(AccountsReceivable).filter(
+        conta_receber = self.db.query(AccountsReceivable).options(
+            joinedload(AccountsReceivable.cliente)
+        ).filter(
             AccountsReceivable.CodAccountsReceivable == conta_receber_id
         ).first()
 
@@ -65,6 +68,10 @@ class ContaReceberService:
                 detail=f"Conta a receber com ID {conta_receber_id} não encontrada"
             )
 
+        # Add cliente_nome to the response
+        if conta_receber.cliente:
+            conta_receber.cliente_nome = conta_receber.cliente.DesCliente
+        
         return conta_receber
 
     def list_contas_receber(
@@ -79,7 +86,9 @@ class ContaReceberService:
     ) -> List[AccountsReceivable]:
         """List accounts receivable with filters"""
         
-        query = self.db.query(AccountsReceivable)
+        query = self.db.query(AccountsReceivable).options(
+            joinedload(AccountsReceivable.cliente)
+        )
         
         # Apply filters
         if status:
@@ -101,7 +110,14 @@ class ContaReceberService:
         query = query.order_by(AccountsReceivable.DataVencimento)
         
         # Apply pagination
-        return query.offset(skip).limit(limit).all()
+        contas_receber = query.offset(skip).limit(limit).all()
+        
+        # Add cliente_nome to each record
+        for conta in contas_receber:
+            if conta.cliente:
+                conta.cliente_nome = conta.cliente.DesCliente
+        
+        return contas_receber
 
     def update_conta_receber(
         self, 

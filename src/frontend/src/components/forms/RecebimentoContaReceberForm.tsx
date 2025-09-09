@@ -53,15 +53,15 @@ interface RecebimentoContaReceberFormProps {
 // Validation schema
 const recebimentoContaReceberSchema = yup.object({
   CodAccountsReceivable: yup.number().required('validation.required').positive('validation.positive_number'),
-  idConta: yup.number().nullable().positive('validation.positive_number'),
-  CodFormaPagto: yup.number().nullable().positive('validation.positive_number'),
+  idConta: yup.number().nullable().optional().positive('validation.positive_number'),
+  CodFormaPagto: yup.number().nullable().optional().positive('validation.positive_number'),
   DataRecebimento: yup.date().required('validation.required').nullable(),
   ValorRecebido: yup.number().required('validation.required').positive('validation.positive_number'),
-  Desconto: yup.number().nullable().min(0, 'validation.positive_number'),
-  Juros: yup.number().nullable().min(0, 'validation.positive_number'),
-  Multa: yup.number().nullable().min(0, 'validation.positive_number'),
-  NumeroDocumento: yup.string().max(50, 'validation.max_length'),
-  Observacao: yup.string().max(500, 'validation.max_length'),
+  Desconto: yup.number().optional().min(0, 'validation.positive_number'),
+  Juros: yup.number().optional().min(0, 'validation.positive_number'),
+  Multa: yup.number().optional().min(0, 'validation.positive_number'),
+  NumeroDocumento: yup.string().optional().max(50, 'validation.max_length'),
+  Observacao: yup.string().optional().max(500, 'validation.max_length'),
 });
 
 export const RecebimentoContaReceberForm: React.FC<RecebimentoContaReceberFormProps> = ({

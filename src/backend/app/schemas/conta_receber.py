@@ -90,6 +90,7 @@ class AccountsReceivableResponse(AccountsReceivableBase):
     NomUsuario: str
     DtCreate: datetime
     DtAlter: Optional[datetime] = None
+    cliente_nome: Optional[str] = Field(None, description="Nome do cliente")
     
     class Config:
         from_attributes = True

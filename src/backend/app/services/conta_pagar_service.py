@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 
 from app.models.accounts_payable import AccountsPayable, AccountsPayablePayment
 from app.models.funcionario import TblFuncionarios
+from app.models.favorecido import Favorecido
 from app.schemas.conta_pagar import (
     AccountsPayableCreate, 
     AccountsPayableUpdate, 
@@ -55,7 +56,9 @@ class ContaPagarService:
 
     def get_conta_pagar_by_id(self, conta_pagar_id: int) -> AccountsPayable:
         """Get accounts payable by ID"""
-        conta_pagar = self.db.query(AccountsPayable).filter(
+        conta_pagar = self.db.query(AccountsPayable).join(
+            Favorecido, AccountsPayable.CodFornecedor == Favorecido.CodFavorecido
+        ).filter(
             AccountsPayable.CodAccountsPayable == conta_pagar_id
         ).first()
 
@@ -64,6 +67,12 @@ class ContaPagarService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Conta a pagar com ID {conta_pagar_id} não encontrada"
             )
+
+        # Add fornecedor_nome
+        if hasattr(conta_pagar, 'fornecedor') and conta_pagar.fornecedor:
+            conta_pagar.fornecedor_nome = conta_pagar.fornecedor.NomFavorecido
+        else:
+            conta_pagar.fornecedor_nome = None
 
         return conta_pagar
 
@@ -79,7 +88,9 @@ class ContaPagarService:
     ) -> List[AccountsPayable]:
         """List accounts payable with filters"""
         
-        query = self.db.query(AccountsPayable)
+        query = self.db.query(AccountsPayable).join(
+            Favorecido, AccountsPayable.CodFornecedor == Favorecido.CodFavorecido
+        )
         
         # Apply filters
         if status:
@@ -101,7 +112,16 @@ class ContaPagarService:
         query = query.order_by(AccountsPayable.DataVencimento)
         
         # Apply pagination
-        return query.offset(skip).limit(limit).all()
+        contas = query.offset(skip).limit(limit).all()
+        
+        # Add fornecedor_nome to each conta
+        for conta in contas:
+            if hasattr(conta, 'fornecedor') and conta.fornecedor:
+                conta.fornecedor_nome = conta.fornecedor.NomFavorecido
+            else:
+                conta.fornecedor_nome = None
+        
+        return contas
 
     def update_conta_pagar(
         self, 
