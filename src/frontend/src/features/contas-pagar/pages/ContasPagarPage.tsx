@@ -1,17 +1,85 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Button,
-  Paper,
   useTheme,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { ContasPagarTable } from '../../../components/tables/ContasPagarTable';
+import { ContaPagarForm } from '../../../components/forms/ContaPagarForm';
+import { PagamentoContaPagarForm } from '../../../components/forms/PagamentoContaPagarForm';
+import { AccountsPayableResponse } from '../../../services/contasPagarApi';
+import { useAppDispatch } from '../../../store';
+import { createContaPagar, updateContaPagar, pagarContaPagar } from '../../../store/slices/contasPagarSlice';
 
 export const ContasPagarPage: React.FC = () => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const dispatch = useAppDispatch();
+  
+  const [openForm, setOpenForm] = useState(false);
+  const [openPagamentoForm, setOpenPagamentoForm] = useState(false);
+  const [editingConta, setEditingConta] = useState<AccountsPayableResponse | null>(null);
+  const [pagandoConta, setPagandoConta] = useState<AccountsPayableResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCreate = () => {
+    setEditingConta(null);
+    setOpenForm(true);
+  };
+
+  const handleEdit = (conta: AccountsPayableResponse) => {
+    setEditingConta(conta);
+    setOpenForm(true);
+  };
+
+  const handlePagar = (conta: AccountsPayableResponse) => {
+    setPagandoConta(conta);
+    setOpenPagamentoForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setOpenForm(false);
+    setEditingConta(null);
+  };
+
+  const handleClosePagamentoForm = () => {
+    setOpenPagamentoForm(false);
+    setPagandoConta(null);
+    setError(null);
+  };
+
+  const handleSubmitForm = (data: any) => {
+    if (editingConta) {
+      dispatch(updateContaPagar({ id: editingConta.CodAccountsPayable, data }))
+        .then(() => {
+          handleCloseForm();
+        });
+    } else {
+      dispatch(createContaPagar(data))
+        .then(() => {
+          handleCloseForm();
+        });
+    }
+  };
+
+  const handleSubmitPagamentoForm = (data: any) => {
+    if (pagandoConta) {
+      setLoading(true);
+      setError(null);
+      
+      dispatch(pagarContaPagar({ id: pagandoConta.CodAccountsPayable, paymentData: data }))
+        .then(() => {
+          handleClosePagamentoForm();
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message || t('messages.error_occurred'));
+          setLoading(false);
+        });
+    }
+  };
 
   return (
     <Box>
@@ -30,41 +98,34 @@ export const ContasPagarPage: React.FC = () => {
             Gerencie suas contas a pagar
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => {
-            // TODO: Implementar abertura do modal de criação
-            console.log('Nova conta a pagar');
-          }}
-        >
-          {t('contas_pagar.nova')}
-        </Button>
       </Box>
 
       {/* Content */}
-      <Paper sx={{ p: 3, minHeight: 400 }}>
-        <Box
-          sx={{
-            height: 300,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: theme.palette.grey[50],
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="h6" color="textSecondary" sx={{ textAlign: 'center' }}>
-            Módulo de Contas a Pagar
-            <br />
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              Gestão de fornecedores e pagamentos
-              <br />
-              (A ser implementado)
-            </Typography>
-          </Typography>
-        </Box>
-      </Paper>
+      <ContasPagarTable 
+        onEdit={handleEdit}
+        onCreate={handleCreate}
+        onPagar={handlePagar}
+      />
+      
+      {/* Form Dialog */}
+      <ContaPagarForm
+        open={openForm}
+        onClose={handleCloseForm}
+        onSubmit={handleSubmitForm}
+        initialData={editingConta}
+      />
+      
+      {/* Payment Form Dialog */}
+      {pagandoConta && (
+        <PagamentoContaPagarForm
+          open={openPagamentoForm}
+          onClose={handleClosePagamentoForm}
+          onSubmit={handleSubmitPagamentoForm}
+          contaPagar={pagandoConta}
+          loading={loading}
+          error={error}
+        />
+      )}
     </Box>
   );
 };

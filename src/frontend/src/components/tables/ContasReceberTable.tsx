@@ -15,6 +15,7 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Grid,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -22,6 +23,7 @@ import {
   Delete as DeleteIcon,
   Payment as PaymentIcon,
 } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
@@ -216,54 +218,118 @@ export const ContasReceberTable: React.FC<ContasReceberTableProps> = ({ onEdit, 
   return (
     <Box sx={{ height: 600, width: '100%' }}>
       {/* Filter controls */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-        <TextField
-          label={t('contas_receber.cliente')}
-          value={localFilters.cod_cliente || ''}
-          onChange={(e) => handleFilterChange('cod_cliente', e.target.value ? parseInt(e.target.value) : undefined)}
-          type="number"
-          size="small"
-        />
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            label={t('contas_receber.cliente')}
+            value={localFilters.cod_cliente || ''}
+            onChange={(e) => handleFilterChange('cod_cliente', e.target.value ? parseInt(e.target.value) : undefined)}
+            type="number"
+            size="small"
+            fullWidth
+          />
+        </Grid>
         
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>{t('contas_receber.status')}</InputLabel>
-          <Select
-            value={localFilters.status || ''}
-            label={t('contas_receber.status')}
-            onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
-          >
-            <MenuItem value="A">{t('contas_receber.aberto')}</MenuItem>
-            <MenuItem value="R">{t('contas_receber.recebido')}</MenuItem>
-            <MenuItem value="V">{t('contas_receber.vencido')}</MenuItem>
-            <MenuItem value="C">{t('actions.cancel')}</MenuItem>
-          </Select>
-        </FormControl>
+        <Grid item xs={12} sm={6} md={3}>
+          <FormControl size="small" fullWidth>
+            <InputLabel>{t('contas_receber.status')}</InputLabel>
+            <Select
+              value={localFilters.status || ''}
+              label={t('contas_receber.status')}
+              onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
+            >
+              <MenuItem value="A">{t('contas_receber.aberto')}</MenuItem>
+              <MenuItem value="R">{t('contas_receber.recebido')}</MenuItem>
+              <MenuItem value="V">{t('contas_receber.vencido')}</MenuItem>
+              <MenuItem value="C">{t('actions.cancel')}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
         
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Button
-            variant="contained"
-            onClick={handleApplyFilters}
+        <Grid item xs={12} sm={6} md={3}>
+          <DatePicker
+            label={t('contas_receber.data_vencimento_inicio')}
+            value={localFilters.data_vencimento_inicio ? new Date(localFilters.data_vencimento_inicio) : null}
+            onChange={(date) => handleFilterChange('data_vencimento_inicio', date ? format(date, 'yyyy-MM-dd') : undefined)}
+            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <DatePicker
+            label={t('contas_receber.data_vencimento_fim')}
+            value={localFilters.data_vencimento_fim ? new Date(localFilters.data_vencimento_fim) : null}
+            onChange={(date) => handleFilterChange('data_vencimento_fim', date ? format(date, 'yyyy-MM-dd') : undefined)}
+            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            label={t('contas_receber.valor_minimo')}
+            value={localFilters.valor_min || ''}
+            onChange={(e) => handleFilterChange('valor_min', e.target.value ? parseFloat(e.target.value) : undefined)}
+            type="number"
             size="small"
-          >
-            {t('actions.filter')}
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleClearFilters}
+            fullWidth
+            InputProps={{
+              inputProps: { min: 0, step: 0.01 }
+            }}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            label={t('contas_receber.valor_maximo')}
+            value={localFilters.valor_max || ''}
+            onChange={(e) => handleFilterChange('valor_max', e.target.value ? parseFloat(e.target.value) : undefined)}
+            type="number"
             size="small"
-          >
-            {t('actions.clear')}
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onCreate}
+            fullWidth
+            InputProps={{
+              inputProps: { min: 0, step: 0.01 }
+            }}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            label={t('contas.empresa')}
+            value={localFilters.cod_empresa || ''}
+            onChange={(e) => handleFilterChange('cod_empresa', e.target.value ? parseInt(e.target.value) : undefined)}
+            type="number"
             size="small"
-          >
-            {t('contas_receber.nova')}
-          </Button>
-        </Box>
-      </Box>
+            fullWidth
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', height: '100%' }}>
+            <Button
+              variant="contained"
+              onClick={handleApplyFilters}
+              size="small"
+            >
+              {t('actions.filter')}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleClearFilters}
+              size="small"
+            >
+              {t('actions.clear')}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={onCreate}
+              size="small"
+            >
+              {t('contas_receber.nova')}
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
 
       {/* Data Grid */}
       <DataGrid

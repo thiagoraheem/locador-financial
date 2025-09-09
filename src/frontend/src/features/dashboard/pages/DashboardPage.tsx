@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -16,6 +16,29 @@ import {
   RequestQuote as RequestQuoteIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { useAppDispatch, useAppSelector } from '../../../store';
+import { 
+  fetchFinancialSummary, 
+  fetchCashFlow, 
+  fetchCategorySummary, 
+  fetchOverdueSummary, 
+  fetchTopFavorecidos 
+} from '../../../store/slices/dashboardSlice';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 
 interface StatCardProps {
   title: string;
@@ -77,43 +100,97 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend })
 export const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const dispatch = useAppDispatch();
+  
+  const {
+    financialSummary,
+    cashFlow,
+    revenueCategories,
+    expenseCategories,
+    overdueSummary,
+    topReceitas,
+    topDespesas,
+    loading,
+    error
+  } = useAppSelector((state) => state.dashboard);
 
-  // Dados mockados - em uma implementação real, viriam da API
-  const stats = [
+  // Load dashboard data on component mount
+  useEffect(() => {
+    dispatch(fetchFinancialSummary());
+    dispatch(fetchCashFlow(12));
+    dispatch(fetchCategorySummary('E'));
+    dispatch(fetchCategorySummary('S'));
+    dispatch(fetchOverdueSummary());
+    dispatch(fetchTopFavorecidos({ tipo: 'E', limit: 5 }));
+    dispatch(fetchTopFavorecidos({ tipo: 'S', limit: 5 }));
+  }, [dispatch]);
+
+  // Format currency
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  // Format number
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat('pt-BR').format(value);
+  };
+
+  // Prepare data for charts
+  const cashFlowData = cashFlow ? cashFlow.saldo_mensal.map((item, index) => ({
+    name: item.mes_ano,
+    saldo: item.saldo,
+    entrada: cashFlow.entradas[index]?.valor || 0,
+    saida: cashFlow.saidas[index]?.valor || 0
+  })) : [];
+
+  const revenueCategoryData = revenueCategories.map((item, index) => ({
+    name: item.categoria,
+    value: item.valor,
+    color: theme.palette.success.light
+  }));
+
+  const expenseCategoryData = expenseCategories.map((item, index) => ({
+    name: item.categoria,
+    value: item.valor,
+    color: theme.palette.error.light
+  }));
+
+  // Stats data
+  const stats = financialSummary ? [
     {
       title: t('dashboard.total_receitas'),
-      value: 'R$ 45.230,00',
+      value: formatCurrency(financialSummary.total_receitas),
       icon: <TrendingUpIcon />,
       color: theme.palette.success.main,
-      trend: { value: 12.5, isPositive: true },
     },
     {
       title: t('dashboard.total_despesas'),
-      value: 'R$ 32.150,00',
+      value: formatCurrency(financialSummary.total_despesas),
       icon: <TrendingDownIcon />,
       color: theme.palette.error.main,
-      trend: { value: 5.2, isPositive: false },
     },
     {
       title: t('dashboard.saldo_atual'),
-      value: 'R$ 13.080,00',
+      value: formatCurrency(financialSummary.saldo),
       icon: <AccountBalanceIcon />,
       color: theme.palette.info.main,
-      trend: { value: 8.3, isPositive: true },
     },
     {
       title: t('dashboard.contas_pagar'),
-      value: 'R$ 8.450,00',
+      value: formatNumber(financialSummary.contas_a_pagar),
       icon: <PaymentIcon />,
       color: theme.palette.warning.main,
     },
     {
       title: t('dashboard.contas_receber'),
-      value: 'R$ 15.200,00',
+      value: formatNumber(financialSummary.contas_a_receber),
       icon: <RequestQuoteIcon />,
       color: theme.palette.primary.main,
     },
-  ];
+  ] : [];
 
   return (
     <Box>
@@ -144,22 +221,51 @@ export const DashboardPage: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               {t('dashboard.fluxo_caixa')}
             </Typography>
-            <Box
-              sx={{
-                height: 300,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: theme.palette.grey[50],
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body1" color="textSecondary">
-                Gráfico de Fluxo de Caixa
-                <br />
-                (A ser implementado)
-              </Typography>
-            </Box>
+            {cashFlowData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={cashFlowData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="saldo" 
+                    stroke={theme.palette.info.main} 
+                    name={t('dashboard.saldo')} 
+                    strokeWidth={2}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="entrada" 
+                    stroke={theme.palette.success.main} 
+                    name={t('dashboard.entradas')} 
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="saida" 
+                    stroke={theme.palette.error.main} 
+                    name={t('dashboard.saidas')} 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box
+                sx={{
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: theme.palette.grey[50],
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="body1" color="textSecondary">
+                  {loading ? t('messages.loading') : t('messages.no_data')}
+                </Typography>
+              </Box>
+            )}
           </Paper>
         </Grid>
 
@@ -169,24 +275,48 @@ export const DashboardPage: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               {t('dashboard.ultimos_lancamentos')}
             </Typography>
-            <Box
-              sx={{
-                height: 300,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: theme.palette.grey[50],
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body1" color="textSecondary" sx={{ textAlign: 'center' }}>
-                Lista dos Últimos
-                <br />
-                Lançamentos
-                <br />
-                (A ser implementado)
-              </Typography>
-            </Box>
+            {topReceitas.length > 0 || topDespesas.length > 0 ? (
+              <Box sx={{ height: 300, overflowY: 'auto' }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: theme.palette.success.main }}>
+                  {t('dashboard.top_receitas')}
+                </Typography>
+                {topReceitas.map((item, index) => (
+                  <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">{item.nome}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {formatCurrency(item.valor)}
+                    </Typography>
+                  </Box>
+                ))}
+                
+                <Typography variant="subtitle2" sx={{ mb: 1, mt: 2, color: theme.palette.error.main }}>
+                  {t('dashboard.top_despesas')}
+                </Typography>
+                {topDespesas.map((item, index) => (
+                  <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">{item.nome}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {formatCurrency(item.valor)}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: theme.palette.grey[50],
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="body1" color="textSecondary" sx={{ textAlign: 'center' }}>
+                  {loading ? t('messages.loading') : t('messages.no_data')}
+                </Typography>
+              </Box>
+            )}
           </Paper>
         </Grid>
       </Grid>

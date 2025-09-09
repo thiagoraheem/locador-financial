@@ -140,6 +140,8 @@ npm test
 
 ## Documentação
 
+- [Guia do Usuário](docs/USER_GUIDE.md)
+- [Documentação da API](docs/API_DOCUMENTATION.md)
 - [Planejamento Detalhado](docs/planejamento-app-web-financeiro.md)
 - [Exemplos de Código](docs/exemplos-codigo-app-web-financeiro.md)
 - [API Documentation](http://localhost:8001/docs) (quando executando)

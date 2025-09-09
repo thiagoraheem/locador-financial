@@ -11,6 +11,7 @@ import { favorecidosSlice } from './slices/favorecidosSlice';
 import { lancamentosSlice } from './slices/lancamentosSlice';
 import { contasSlice } from './slices/contasSlice';
 import { bancosSlice } from './slices/bancosSlice';
+import dashboardSlice from './slices/dashboardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ export const store = configureStore({
     lancamentos: lancamentosSlice.reducer,
     contas: contasSlice.reducer,
     bancos: bancosSlice.reducer,
+    dashboard: dashboardSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
