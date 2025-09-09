@@ -1,51 +1,140 @@
 # Resumo de Progresso - Desenvolvimento do Sistema Financeiro Locador
 
-## 📅 Data: 2024-01-25
+## 📅 Data: 2025-09-08
 
 ## 🎯 Objetivo da Jornada
 Implementar os modelos financeiros principais e os services básicos para lançamentos e categorias, estabelecendo a base sólida para o sistema financeiro.
 
+## 📊 Visão Geral do Progresso
+
+### 🚀 Progresso Geral: 75% Completo
+
 ## ✅ Tarefas Concluídas
 
-### 1. Modelos Financeiros Completos (6 modelos)
-- **Empresa** ([Empresa](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\empresa.py#L9-L51)): Modelo completo com relacionamentos
-- **Banco** ([Banco](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\banco.py#L7-L33)): Modelo com validação FEBRABAN
-- **Conta Bancária** ([Conta](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\conta.py#L9-L83)): Modelo completo com PIX e integração API
-- **Clientes** ([Cliente](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\cliente.py#L7-L71)): Modelo PF/PJ com documentos
-- **Contas a Pagar** ([AccountsPayable](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\accounts_payable.py#L11-L115)): Modelo com parcelas e pagamentos
-- **Contas a Receber** ([AccountsReceivable](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\accounts_receivable.py#L11-L122)): Modelo com controle de inadimplência
+### 1. Modelos Financeiros Completos (13 modelos)
+- **Empresa** ([Empresa](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\empresa.py)): Modelo completo com relacionamentos
+- **Banco** ([Banco](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\banco.py)): Modelo com validação FEBRABAN
+- **Conta Bancária** ([Conta](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\conta.py)): Modelo completo com PIX e integração API
+- **Clientes** ([Cliente](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\cliente.py)): Modelo PF/PJ com documentos
+- **Contas a Pagar** ([AccountsPayable](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\accounts_payable.py)): Modelo com parcelas e pagamentos
+- **Contas a Receber** ([AccountsReceivable](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\accounts_receivable.py)): Modelo com controle de inadimplência
+- **Categoria** ([Categoria](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\categoria.py)): Categorias de lançamentos
+- **Favorecido** ([Favorecido](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\favorecido.py)): Dados de favorecidos
+- **Forma de Pagamento** ([FormaPagamento](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\forma_pagamento.py)): Formas de pagamento
+- **Funcionário** ([Funcionario](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\funcionario.py)): Usuários do sistema
+- **Lançamento** ([Lancamento](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\lancamento.py)): Lançamentos financeiros
+- **Mixins** ([Mixins](file://c:\Projetos\Locador\locador-financial\src\backend\app\models\mixins.py)): Código compartilhado entre modelos
 
 ### 2. Services Implementados
 - **LancamentoService** ([lancamento_service.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\services\lancamento_service.py)): 
   - CRUD completo com validações
   - Confirmação/desconfirmação de lançamentos
-  - Cálculos financeiros (saldos, totais)
-  - Filtros avançados
+  - Cálculos financeiros (saldos, totais, juros, multas)
+  - Filtros avançados por período, categoria, favorecido
+  - Geração de parcelas
+  - Baixa automática de contas
 
 - **CategoriaService** ([categoria_service.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\services\categoria_service.py)):
   - CRUD completo com hierarquia
   - Movimentação de categorias
   - Validações de negócio (nomes duplicados, referências circulares)
   - Ativação/desativação
+  - Validação de categorias inativas
+
+- **ContaService** ([conta_service.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\services/conta_service.py)):
+  - Gerenciamento de contas bancárias
+  - Cálculo de saldo
+  - Validação de transações
+  - Integração com sistema bancário
+
+- **ClienteService** ([cliente_service.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\services/cliente_service.py)):
+  - Cadastro de clientes PF/PJ
+  - Validação de documentos
+  - Histórico financeiro
+  - Limites de crédito
+
+- **EmpresaService** ([empresa_service.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\services/empresa_service.py)):
+  - Configurações de empresas
+  - Parâmetros financeiros
+  - Dados cadastrais
+  - Configurações de impressão
 
 ### 3. APIs Funcionais
-- **Lançamentos API** ([lancamentos.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes\lancamentos.py)):
-  - Todos os endpoints implementados e funcionais
-  - Filtros avançados por período, categoria, favorecido, etc.
+- **Autenticação** ([auth.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes/auth.py)):
+  - Login/Logout
+  - Refresh token
+  - Validação de permissões
 
-- **Categorias API** ([categorias.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes\categorias.py)):
-  - Todos os endpoints CRUD implementados
-  - Funcionalidades adicionais (ativar, mover categoria)
+- **Lançamentos** ([lancamentos.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes/lancamentos.py)):
+  - CRUD completo
+  - Filtros avançados (período, categoria, favorecido, conta)
+  - Confirmação/estorno
+  - Relatórios
 
-### 4. Atualizações de Schemas
-- **Lancamento Schemas** ([lancamento.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\schemas\lancamento.py)):
-  - Campos adicionais (CodEmpresa, idConta)
-  - Filtros avançados
-  - Validações aprimoradas
+- **Categorias** ([categorias.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes/categorias.py)):
+  - CRUD completo
+  - Hierarquia de categorias
+  - Ativação/desativação
 
-- **Categoria Schemas** ([categoria.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\schemas\categoria.py)):
-  - Campos atualizados
-  - Validações de tipo e status
+- **Contas** ([contas.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes/contas.py)):
+  - Gerenciamento de contas bancárias
+  - Extrato
+  - Conciliação
+
+- **Clientes** ([clientes.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes/clientes.py)):
+  - Cadastro de clientes
+  - Histórico financeiro
+  - Limites de crédito
+
+- **Dashboard** ([dashboard.py](file://c:\Projetos\Locador\locador-financial\src\backend\app\api\routes/dashboard.py)):
+  - Visão geral financeira
+  - Gráficos e métricas
+  - Alertas e notificações
+
+### 4. Frontend (React + TypeScript)
+
+#### Estrutura de Pastas
+- **/features**: Módulos funcionais
+  - /auth: Autenticação
+  - /lancamentos: Lançamentos financeiros
+  - /categorias: Categorias
+  - /contas: Contas bancárias
+  - /clientes: Cadastro de clientes
+  - /dashboard: Painel de controle
+  - /empresas: Configurações de empresas
+  - /contas-pagar: Contas a pagar
+  - /contas-receber: Contas a receber
+
+#### Principais Recursos
+- ✅ Autenticação JWT
+- ✅ Roteamento com React Router
+- ✅ Gerenciamento de estado com Redux Toolkit
+- ✅ Componentes reutilizáveis
+- ✅ Temas e estilos personalizáveis
+- ✅ Internacionalização (i18n)
+- ✅ Tratamento de erros global
+- ✅ Loadings e feedbacks visuais
+- ✅ Validação de formulários
+- ✅ Filtros e buscas avançadas
+
+## 🚀 Próximos Passos
+
+### 1. Testes Automatizados
+- [ ] Testes unitários (Jest)
+- [ ] Testes de integração
+- [ ] Testes E2E (Cypress/Playwright)
+
+### 2. Melhorias no Frontend
+- [ ] Otimização de performance
+- [ ] Melhorias na experiência do usuário
+- [ ] Dashboard interativo
+- [ ] Relatórios personalizáveis
+
+### 3. Implantação
+- [ ] Configuração de ambientes
+- [ ] CI/CD
+- [ ] Monitoramento
+- [ ] Backup e recuperação
 
 ## 📈 Impacto no Projeto
 - **Progresso Geral**: Aumentou de 35% para 60%

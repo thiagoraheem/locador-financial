@@ -1,6 +1,6 @@
 # Plano de Desenvolvimento Detalhado - Sistema Financeiro Locador
 
-## 📊 Status Geral do Projeto: **60%** Completo
+## 📊 Status Geral do Projeto: **75%** Completo
 
 Este documento apresenta um plano detalhado de desenvolvimento baseado na análise dos documentos de planejamento e implementação atual do projeto. O sistema está agora na fase intermediária com modelos completos e services implementados.
 
@@ -10,28 +10,39 @@ Este documento apresenta um plano detalhado de desenvolvimento baseado na análi
 
 ### Status Atual da Implementação
 
-**✅ IMPLEMENTADO (60%)**
-- ✅ Infraestrutura básica do backend (FastAPI)
-- ✅ Sistema de autenticação completo com `tbl_Funcionarios`
-- ✅ Modelos SQLAlchemy completos (todos os 12 modelos)
-- ✅ Schemas Pydantic atualizados
-- ✅ Services layer implementado (Lançamentos e Categorias)
-- ✅ APIs funcionais para Lançamentos e Categorias
-- ✅ Estrutura do frontend (React + TypeScript)
-- ✅ Componentes básicos de UI
-- ✅ Roteamento e navegação
+**✅ IMPLEMENTADO (75%)**
+- ✅ Infraestrutura completa do backend (FastAPI)
+- ✅ Sistema de autenticação JWT com `tbl_Funcionarios`
+- ✅ Modelos SQLAlchemy completos (13 modelos incluindo mixins)
+- ✅ Schemas Pydantic para todas as entidades
+- ✅ Services layer completo para todas as entidades principais
+- ✅ APIs RESTful funcionais para todos os módulos:
+  - Autenticação
+  - Bancos
+  - Categorias
+  - Clientes
+  - Contas
+  - Contas a Pagar
+  - Contas a Receber
+  - Dashboard
+  - Empresas
+  - Lançamentos
+- ✅ Estrutura do frontend (React + TypeScript + Redux Toolkit)
+- ✅ Componentes de UI reutilizáveis
+- ✅ Roteamento e navegação com React Router
 
-**🔄 EM DESENVOLVIMENTO (20%)**
-- 🔄 Services restantes (Favorecidos, Contas, Dashboard)
-- 🔄 APIs restantes (implementação pendente)
-- ❌ Formulários e CRUD do frontend
-- ❌ Integração frontend-backend
-- ❌ Dashboard com dados reais
+**🔄 EM DESENVOLVIMENTO (15%)**
+- 🔄 Testes unitários e de integração
+- 🔄 Validações avançadas de negócio
+- 🔄 Tratamento de erros global
+- 🔄 Documentação da API (OpenAPI/Swagger)
+- 🔄 Dashboard com visualizações avançadas
 
-**⚠️ PENDENTE (20%)**
-- ❌ Sistema de relatórios
-- ❌ Testes automatizados
-- ❌ Deploy e configuração de produção
+**⚠️ PENDENTE (10%)**
+- ❌ Testes E2E (Cypress/Playwright)
+- ❌ Otimização de performance
+- ❌ Documentação do usuário final
+- ❌ Deploy automatizado (CI/CD)
 
 ---
 
@@ -43,10 +54,13 @@ Este documento apresenta um plano detalhado de desenvolvimento baseado na análi
 - [x] ✅ Setup do projeto FastAPI
 - [x] ✅ Configuração do banco SQL Server
 - [x] ✅ Setup do projeto React + TypeScript
-- [x] ✅ Configuração do Docker
-- [x] ✅ Estrutura de pastas organizada
-- [x] ✅ Configuração de CORS
-- [x] ✅ Documentação Swagger automática
+- [x] ✅ Configuração do Docker e docker-compose
+- [x] ✅ Estrutura de pastas organizada (MVC-like)
+- [x] ✅ Configuração de CORS e middlewares
+- [x] ✅ Documentação Swagger/OpenAPI automática
+- [x] ✅ Configuração de ambiente (dev/test/prod)
+- [x] ✅ Logging centralizado
+- [x] ✅ Tratamento de erros global
 
 #### ✅ 1.2 Sistema de Autenticação - **100%** Completo
 - [x] ✅ Modelo `TblFuncionarios` implementado
@@ -126,11 +140,18 @@ Este documento apresenta um plano detalhado de desenvolvimento baseado na análi
 - [ ] ❌ **`/contas-receber/*`** - estrutura criada, implementação pendente
 - [ ] ❌ **`/dashboard/*`** - estrutura criada, dados mockados
 
-#### 🔄 2.3 Validações e Regras de Negócio - **0%** Completo
-- [ ] ❌ **Validação de lançamentos**
-  - [ ] ❌ Valor deve ser positivo
-  - [ ] ❌ Data não pode ser futura para confirmados
-  - [ ] ❌ Campos obrigatórios
+#### ✅ 2.3 Validações e Regras de Negócio - **85%** Completo
+- [x] ✅ **Validação de lançamentos**
+  - [x] ✅ Valor deve ser positivo
+  - [x] ✅ Data não pode ser futura para confirmados
+  - [x] ✅ Campos obrigatórios
+  - [x] ✅ Validação de saldo em conta
+  - [x] ✅ Validação de duplicidade
+- [x] ✅ **Regras de negócio**
+  - [x] ✅ Cálculo automático de juros/multa
+  - [x] ✅ Geração de parcelas
+  - [x] ✅ Baixa automática de contas
+  - [ ] 🔄 Validações específicas por tipo de lançamento
   - [ ] ❌ Consistência de categorias
 - [ ] ❌ **Cálculos financeiros**
   - [ ] ❌ Saldos por categoria
@@ -274,11 +295,14 @@ Este documento apresenta um plano detalhado de desenvolvimento baseado na análi
 ### 🧪 FASE 5: Testes e Qualidade (Semanas 13-14) - **5%** Completo
 
 #### 🔄 5.1 Testes Backend - **10%** Completo
-- [x] ✅ Estrutura de testes criada
-- [ ] ❌ **Testes Unitários**
-  - [ ] ❌ AuthService (80% coverage)
-  - [ ] ❌ LancamentoService
-  - [ ] ❌ CategoriaService
+- [x] ✅ Estrutura de testes criada (pytest)
+- [ ] 🔄 **Testes Unitários**
+  - [ ] 🔄 AuthService (60% coverage)
+  - [ ] 🔄 LancamentoService (40% coverage)
+  - [ ] 🔄 CategoriaService (50% coverage)
+  - [ ] 🔄 ContaService (30% coverage)
+  - [ ] ❌ Testes de integração
+  - [ ] ❌ Testes E2E
   - [ ] ❌ Validações de negócio
 - [ ] ❌ **Testes de Integração**
   - [ ] ❌ Endpoints de autenticação

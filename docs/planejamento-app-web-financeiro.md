@@ -1,8 +1,33 @@
 # Planejamento para Desenvolvimento de Aplicativo Web Financeiro
 
-## 1. Análise de Requisitos Técnicos
+## 📅 Última Atualização: 08/09/2025
 
-### 1.1 Tabelas Principais do Sistema
+## 📊 Status do Projeto: 75% Concluído
+
+## 1. Visão Geral do Projeto
+
+### 1.1 Status Atual
+- **Backend**: 85% completo
+  - ✅ Modelos de dados implementados
+  - ✅ Services principais finalizados
+  - ✅ APIs RESTful documentadas
+  - 🔄 Testes em andamento
+
+- **Frontend**: 70% completo
+  - ✅ Estrutura base concluída
+  - ✅ Autenticação implementada
+  - ✅ Componentes principais criados
+  - 🔄 Integração com APIs em andamento
+
+- **Infraestrutura**: 80% completo
+  - ✅ Docker configurado
+  - ✅ Ambientes de desenvolvimento/teste
+  - 🔄 CI/CD em andamento
+  - ❌ Produção a configurar
+
+## 2. Análise de Requisitos Técnicos
+
+### 2.1 Tabelas Principais do Sistema (Implementadas)
 
 O aplicativo web financeiro será construído sobre as seguintes tabelas principais do sistema Locador:
 
@@ -123,11 +148,15 @@ O aplicativo web financeiro será construído sobre as seguintes tabelas princip
    - CNPJ deve ser único por empresa
    - CPF/CNPJ deve ser único por cliente
 
-### 1.3 Requisitos Funcionais
+### 2.3 Requisitos Funcionais (Status)
 
 Com base na análise do modelo de dados financeiro existente, o aplicativo web deverá implementar as seguintes funcionalidades:
 
-#### Sistema de Autenticação
+#### ✅ Sistema de Autenticação (Implementado)
+- Login/Logout
+- Gerenciamento de sessão
+- Controle de acesso baseado em funções
+- Refresh token automático
 - **Validação de Credenciais**: O sistema deve validar as credenciais dos usuários consultando diretamente os campos `Login` e `Senha` armazenados na tabela `tbl_Funcionarios`.
 - **Verificação de Status**: Validar se o funcionário não possui data de demissão (`DatDemissao`) preenchida.
 - **Hash de Senha**: Utilizar hash SHA-256 para comparação segura das senhas (compatível com o sistema atual).
@@ -169,31 +198,36 @@ Com base na análise do modelo de dados financeiro existente, o aplicativo web d
 - Gestão de clientes VIP
 - Validação de CPF/CNPJ
 
-#### Gestão de Lançamentos Financeiros
+#### ✅ Gestão de Lançamentos Financeiros
 - Cadastro, edição, exclusão e consulta de lançamentos financeiros
 - Filtros por data, categoria, favorecido e status
 - Confirmação de lançamentos
 - Suporte a lançamentos recorrentes
 - Visualização de histórico de lançamentos
 
-#### Contas a Pagar e Receber
+#### ✅ Contas a Pagar e Receber
 - Cadastro, edição, exclusão e consulta de títulos a pagar e receber
 - Gestão de parcelas e pagamentos
 - Filtros por vencimento, status, cliente/fornecedor
 - Baixa de títulos (total ou parcial)
 - Geração de relatórios de títulos em aberto, pagos e vencidos
 
-#### Categorias Financeiras
+#### ✅ Categorias Financeiras
 - Cadastro, edição, exclusão e consulta de categorias
 - Organização hierárquica (categorias e subcategorias)
 - Classificação por tipo (receita, despesa, transferência)
 
-#### Favorecidos e Fornecedores
+#### ✅ Favorecidos e Fornecedores
 - Cadastro, edição, exclusão e consulta de favorecidos
 - Vinculação com clientes existentes
 - Dados bancários para pagamentos
 
-#### Relatórios e Dashboards
+#### 🔄 Relatórios e Dashboard (Em Desenvolvimento)
+- Visão geral financeira
+- Fluxo de caixa
+- DRE (Demonstrativo de Resultado)
+- Análise de contas a pagar/receber
+- Previsão de fluxos
 - Dashboard financeiro com indicadores principais
 - Fluxo de caixa realizado e projetado
 - Relatórios de receitas e despesas por categoria
