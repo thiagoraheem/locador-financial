@@ -152,7 +152,10 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
       field: 'Valor',
       headerName: t('lancamentos.valor'),
       width: 120,
-      valueFormatter: (value: number) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
+      valueFormatter: (value: number) => {
+        const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+        return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
+      },
     },
     {
       field: 'FlgConfirmacao',

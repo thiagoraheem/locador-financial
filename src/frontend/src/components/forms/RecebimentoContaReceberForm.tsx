@@ -175,17 +175,17 @@ export const RecebimentoContaReceberForm: React.FC<RecebimentoContaReceberFormPr
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2">
-                  <strong>{t('contas_receber.valor_original')}:</strong> {`R$ ${valorOriginal.toFixed(2)}`.replace('.', ',')}
+                  <strong>{t('contas_receber.valor_original')}:</strong> {`R$ ${(typeof valorOriginal === 'number' && !isNaN(valorOriginal) ? valorOriginal : 0).toFixed(2)}`.replace('.', ',')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2">
-                  <strong>{t('contas_receber.valor_recebido')}:</strong> {`R$ ${(contaReceber.ValorRecebido || 0).toFixed(2)}`.replace('.', ',')}
+                  <strong>{t('contas_receber.valor_recebido')}:</strong> {`R$ ${(typeof (contaReceber.ValorRecebido || 0) === 'number' && !isNaN(contaReceber.ValorRecebido || 0) ? (contaReceber.ValorRecebido || 0) : 0).toFixed(2)}`.replace('.', ',')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2">
-                  <strong>{t('contas_receber.valor_a_receber')}:</strong> {`R$ ${valorAReceber.toFixed(2)}`.replace('.', ',')}
+                  <strong>{t('contas_receber.valor_a_receber')}:</strong> {`R$ ${(typeof valorAReceber === 'number' && !isNaN(valorAReceber) ? valorAReceber : 0).toFixed(2)}`.replace('.', ',')}
                 </Typography>
               </Grid>
             </Grid>

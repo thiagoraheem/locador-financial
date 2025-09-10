@@ -20,6 +20,36 @@ from app.services.conta_pagar_service import ContaPagarService
 
 router = APIRouter(prefix="/contas-pagar", tags=["contas a pagar"])
 
+def map_accounts_payable_to_response(conta) -> AccountsPayableResponse:
+    """Mapeia o modelo AccountsPayable para o schema AccountsPayableResponse"""
+    response_data = {
+        "CodEmpresa": conta.IdCompany,
+        "CodFornecedor": conta.IdCustomer,
+        "idConta": conta.IdBankAccount,
+        "CodCategoria": conta.IdChartOfAccounts,
+        "DataEmissao": conta.IssuanceDate,
+        "DataVencimento": conta.DueDate,
+        "DataPagamento": conta.PaymentDate,
+        "Valor": conta.Amount,
+        "ValorPago": conta.PaidAmount,
+        "Desconto": conta.DiscountAmount,
+        "Juros": conta.InterestAmount,
+        "Multa": conta.FineAmount,
+        "Status": "A",  # Status padrão, ajustar conforme lógica de negócio
+        "NumeroDocumento": conta.DocumentNumber,
+        "NumParcela": conta.Installment if conta.Installment and conta.Installment > 0 else 1,
+        "TotalParcelas": conta.TotalInstallments if conta.TotalInstallments and conta.TotalInstallments > 0 else 1,
+        "Observacao": conta.Description,
+        "CodigoBarras": None,  # Campo não existe no modelo atual
+        "LinhaDigitavel": None,  # Campo não existe no modelo atual
+        "CodAccountsPayable": conta.IdAccountsPayable,
+        "NomUsuario": "Sistema",  # Ajustar conforme necessário
+        "DtCreate": conta.DateCreate,
+        "DtAlter": conta.DateUpdate,
+        "fornecedor_nome": None  # Será preenchido pelo join com Favorecido
+    }
+    return AccountsPayableResponse(**response_data)
+
 @router.get("/", response_model=List[AccountsPayableResponse], summary="Listar contas a pagar")
 async def listar_contas_pagar(
     skip: int = Query(0, ge=0, description="Registros a pular"),
@@ -45,7 +75,7 @@ async def listar_contas_pagar(
         data_vencimento_inicio=data_vencimento_inicio,
         data_vencimento_fim=data_vencimento_fim
     )
-    return [AccountsPayableResponse.from_orm(conta) for conta in contas]
+    return [map_accounts_payable_to_response(conta) for conta in contas]
 
 @router.get("/{conta_pagar_id}", response_model=AccountsPayableResponse, summary="Obter conta a pagar por ID")
 async def obter_conta_pagar(
@@ -58,7 +88,7 @@ async def obter_conta_pagar(
     """
     service = ContaPagarService(db)
     conta = service.get_conta_pagar_by_id(conta_pagar_id)
-    return AccountsPayableResponse.from_orm(conta)
+    return map_accounts_payable_to_response(conta)
 
 @router.post("/", response_model=AccountsPayableResponse, summary="Criar conta a pagar", status_code=status.HTTP_201_CREATED)
 async def criar_conta_pagar(
@@ -71,7 +101,7 @@ async def criar_conta_pagar(
     """
     service = ContaPagarService(db)
     nova_conta = service.create_conta_pagar(conta, current_user)
-    return AccountsPayableResponse.from_orm(nova_conta)
+    return map_accounts_payable_to_response(nova_conta)
 
 @router.put("/{conta_pagar_id}", response_model=AccountsPayableResponse, summary="Atualizar conta a pagar")
 async def atualizar_conta_pagar(
@@ -85,7 +115,7 @@ async def atualizar_conta_pagar(
     """
     service = ContaPagarService(db)
     conta_atualizada = service.update_conta_pagar(conta_pagar_id, conta, current_user)
-    return AccountsPayableResponse.from_orm(conta_atualizada)
+    return map_accounts_payable_to_response(conta_atualizada)
 
 @router.delete("/{conta_pagar_id}", summary="Cancelar conta a pagar")
 async def cancelar_conta_pagar(
@@ -112,7 +142,7 @@ async def pagar_conta_pagar(
     """
     service = ContaPagarService(db)
     conta_atualizada = service.pay_conta_pagar(conta_pagar_id, pagamento, current_user)
-    return AccountsPayableResponse.from_orm(conta_atualizada)
+    return map_accounts_payable_to_response(conta_atualizada)
 
 @router.put("/pagamentos/{payment_id}", response_model=AccountsPayablePaymentResponse, summary="Atualizar pagamento")
 async def atualizar_pagamento(

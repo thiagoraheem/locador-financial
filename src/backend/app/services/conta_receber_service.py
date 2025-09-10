@@ -56,9 +56,7 @@ class ContaReceberService:
 
     def get_conta_receber_by_id(self, conta_receber_id: int) -> AccountsReceivable:
         """Get accounts receivable by ID"""
-        conta_receber = self.db.query(AccountsReceivable).options(
-            joinedload(AccountsReceivable.cliente)
-        ).filter(
+        conta_receber = self.db.query(AccountsReceivable).filter(
             AccountsReceivable.CodAccountsReceivable == conta_receber_id
         ).first()
 
@@ -68,9 +66,11 @@ class ContaReceberService:
                 detail=f"Conta a receber com ID {conta_receber_id} não encontrada"
             )
 
-        # Add cliente_nome to the response
-        if conta_receber.cliente:
-            conta_receber.cliente_nome = conta_receber.cliente.DesCliente
+        # Add cliente_nome to the response by querying Cliente table
+        if conta_receber.IdCustomer:
+            cliente = self.db.query(Cliente).filter(Cliente.CodCliente == conta_receber.IdCustomer).first()
+            if cliente:
+                conta_receber.cliente_nome = cliente.DesCliente
         
         return conta_receber
 
@@ -86,9 +86,7 @@ class ContaReceberService:
     ) -> List[AccountsReceivable]:
         """List accounts receivable with filters"""
         
-        query = self.db.query(AccountsReceivable).options(
-            joinedload(AccountsReceivable.cliente)
-        )
+        query = self.db.query(AccountsReceivable)
         
         # Apply filters
         if status:
@@ -101,21 +99,23 @@ class ContaReceberService:
             query = query.filter(AccountsReceivable.CodCliente == cliente_id)
         
         if data_vencimento_inicio:
-            query = query.filter(AccountsReceivable.DataVencimento >= data_vencimento_inicio)
+            query = query.filter(AccountsReceivable.DueDate >= data_vencimento_inicio)
         
         if data_vencimento_fim:
-            query = query.filter(AccountsReceivable.DataVencimento <= data_vencimento_fim)
+            query = query.filter(AccountsReceivable.DueDate <= data_vencimento_fim)
         
         # Order by due date
-        query = query.order_by(AccountsReceivable.DataVencimento)
+        query = query.order_by(AccountsReceivable.DueDate)
         
         # Apply pagination
         contas_receber = query.offset(skip).limit(limit).all()
         
-        # Add cliente_nome to each record
+        # Add cliente_nome to each record by querying Cliente table
         for conta in contas_receber:
-            if conta.cliente:
-                conta.cliente_nome = conta.cliente.DesCliente
+            if conta.IdCustomer:
+                cliente = self.db.query(Cliente).filter(Cliente.CodCliente == conta.IdCustomer).first()
+                if cliente:
+                    conta.cliente_nome = cliente.DesCliente
         
         return contas_receber
 

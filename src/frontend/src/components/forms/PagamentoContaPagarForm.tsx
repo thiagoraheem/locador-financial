@@ -175,17 +175,17 @@ export const PagamentoContaPagarForm: React.FC<PagamentoContaPagarFormProps> = (
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2">
-                  <strong>{t('contas_pagar.valor_original')}:</strong> {`R$ ${valorOriginal.toFixed(2)}`.replace('.', ',')}
+                  <strong>{t('contas_pagar.valor_original')}:</strong> {`R$ ${(typeof valorOriginal === 'number' && !isNaN(valorOriginal) ? valorOriginal : 0).toFixed(2)}`.replace('.', ',')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2">
-                  <strong>{t('contas_pagar.valor_pago')}:</strong> {`R$ ${(contaPagar.ValorPago || 0).toFixed(2)}`.replace('.', ',')}
+                  <strong>{t('contas_pagar.valor_pago')}:</strong> {`R$ ${(typeof (contaPagar.ValorPago || 0) === 'number' && !isNaN(contaPagar.ValorPago || 0) ? (contaPagar.ValorPago || 0) : 0).toFixed(2)}`.replace('.', ',')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2">
-                  <strong>{t('contas_pagar.valor_a_pagar')}:</strong> {`R$ ${valorAPagar.toFixed(2)}`.replace('.', ',')}
+                  <strong>{t('contas_pagar.valor_a_pagar')}:</strong> {`R$ ${(typeof valorAPagar === 'number' && !isNaN(valorAPagar) ? valorAPagar : 0).toFixed(2)}`.replace('.', ',')}
                 </Typography>
               </Grid>
             </Grid>

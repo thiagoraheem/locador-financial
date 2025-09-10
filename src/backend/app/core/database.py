@@ -11,11 +11,12 @@ engine = create_engine(
     settings.DATABASE_URI,
     pool_pre_ping=True,
     pool_recycle=300,
-    pool_size=5,
-    max_overflow=0,
+    pool_size=10,  # Aumentado de 5 para 10
+    max_overflow=20,  # Aumentado de 0 para 20
+    pool_timeout=60,  # Aumentado timeout do pool
     connect_args={
         "TrustServerCertificate": "yes",
-        "timeout": 30
+        "timeout": 60  # Aumentado timeout de conexão
     } if "mssql" in settings.DATABASE_URI else {}
 )
 

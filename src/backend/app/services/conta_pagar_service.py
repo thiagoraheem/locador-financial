@@ -57,9 +57,9 @@ class ContaPagarService:
     def get_conta_pagar_by_id(self, conta_pagar_id: int) -> AccountsPayable:
         """Get accounts payable by ID"""
         conta_pagar = self.db.query(AccountsPayable).join(
-            Favorecido, AccountsPayable.CodFornecedor == Favorecido.CodFavorecido
+            Favorecido, AccountsPayable.IdCustomer == Favorecido.CodFavorecido
         ).filter(
-            AccountsPayable.CodAccountsPayable == conta_pagar_id
+            AccountsPayable.IdAccountsPayable == conta_pagar_id
         ).first()
 
         if not conta_pagar:
@@ -89,27 +89,26 @@ class ContaPagarService:
         """List accounts payable with filters"""
         
         query = self.db.query(AccountsPayable).join(
-            Favorecido, AccountsPayable.CodFornecedor == Favorecido.CodFavorecido
+            Favorecido, AccountsPayable.IdCustomer == Favorecido.CodFavorecido
         )
         
         # Apply filters
-        if status:
-            query = query.filter(AccountsPayable.Status == status)
+        # Note: Status field doesn't exist in AccountsPayable model - removing filter
         
         if empresa_id:
-            query = query.filter(AccountsPayable.CodEmpresa == empresa_id)
+            query = query.filter(AccountsPayable.IdCompany == empresa_id)
         
         if fornecedor_id:
-            query = query.filter(AccountsPayable.CodFornecedor == fornecedor_id)
+            query = query.filter(AccountsPayable.IdCustomer == fornecedor_id)
         
         if data_vencimento_inicio:
-            query = query.filter(AccountsPayable.DataVencimento >= data_vencimento_inicio)
+            query = query.filter(AccountsPayable.DueDate >= data_vencimento_inicio)
         
         if data_vencimento_fim:
-            query = query.filter(AccountsPayable.DataVencimento <= data_vencimento_fim)
+            query = query.filter(AccountsPayable.DueDate <= data_vencimento_fim)
         
         # Order by due date
-        query = query.order_by(AccountsPayable.DataVencimento)
+        query = query.order_by(AccountsPayable.DueDate)
         
         # Apply pagination
         contas = query.offset(skip).limit(limit).all()

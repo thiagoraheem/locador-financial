@@ -132,13 +132,19 @@ export const ContasPagarTable: React.FC<ContasPagarTableProps> = ({ onEdit, onCr
       field: 'Valor',
       headerName: t('contas_pagar.valor'),
       width: 120,
-      valueFormatter: (value: number) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
+      valueFormatter: (value: number) => {
+        const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+        return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
+      },
     },
     {
       field: 'ValorPago',
       headerName: t('contas_pagar.valor_pago'),
       width: 120,
-      valueFormatter: (value: number) => value ? `R$ ${value.toFixed(2)}`.replace('.', ',') : 'R$ 0,00',
+      valueFormatter: (value: number) => {
+        const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+        return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
+      },
     },
     {
       field: 'Status',
