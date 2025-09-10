@@ -44,8 +44,6 @@ class Conta(Base, LoginAuditMixin):
     empresa = relationship("Empresa", back_populates="contas_bancarias")
     banco = relationship("Banco", back_populates="contas")
     lancamentos = relationship("Lancamento", back_populates="conta")
-    contas_pagar = relationship("AccountsPayable", back_populates="conta")
-    contas_receber = relationship("AccountsReceivable", back_populates="conta")
     
     def __repr__(self):
         return f"<Conta(idConta={self.idConta}, NomConta='{self.NomConta}', Banco={self.Banco})>"

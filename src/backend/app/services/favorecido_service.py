@@ -214,7 +214,7 @@ class FavorecidoService:
         # Check if favorecido has related accounts payable
         from app.models.accounts_payable import AccountsPayable
         accounts_payable_count = self.db.query(AccountsPayable).filter(
-            AccountsPayable.CodFornecedor == favorecido_id
+            AccountsPayable.IdSupplier == favorecido_id
         ).count()
         
         if accounts_payable_count > 0:

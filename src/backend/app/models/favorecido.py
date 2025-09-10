@@ -24,8 +24,5 @@ class Favorecido(Base, LoginAuditMixin):
     # Relacionamento com lançamentos
     lancamentos = relationship("Lancamento", back_populates="favorecido")
     
-    # Relacionamento com contas a pagar
-    contas_pagar = relationship("AccountsPayable", back_populates="fornecedor")
-    
     def __repr__(self):
         return f"<Favorecido(CodFavorecido={self.CodFavorecido}, NomFavorecido='{self.NomFavorecido}')>"

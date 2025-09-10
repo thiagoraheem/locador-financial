@@ -47,8 +47,7 @@ class Cliente(Base, LoginAuditMixin):
     # Observações
     Observacoes = Column(Text, comment="Observações gerais sobre o cliente")
     
-    # Relacionamentos
-    contas_receber = relationship("AccountsReceivable", back_populates="cliente")
+    # Relacionamentos removidos devido a incompatibilidade com estrutura atual
     
     def __repr__(self):
         return f"<Cliente(CodCliente={self.CodCliente}, DesCliente='{self.DesCliente}', Tipo={self.FlgTipoPessoa})>"

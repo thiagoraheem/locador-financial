@@ -24,10 +24,10 @@ class DashboardService:
         """Get financial summary with main indicators"""
         
         # Get total revenues (confirmed entries)
-        total_receitas = self._get_total_lancamentos('E', empresa_id)
+        total_receitas = self._get_total_lancamentos(True, empresa_id)
         
         # Get total expenses (confirmed exits)
-        total_despesas = self._get_total_lancamentos('S', empresa_id)
+        total_despesas = self._get_total_lancamentos(False, empresa_id)
         
         # Calculate current balance
         saldo = total_receitas - total_despesas
@@ -54,10 +54,10 @@ class DashboardService:
         start_date = end_date - timedelta(days=30 * months)
         
         # Get monthly entries
-        entradas = self._get_monthly_totals('E', start_date, end_date, empresa_id)
+        entradas = self._get_monthly_totals(True, start_date, end_date, empresa_id)
         
         # Get monthly exits
-        saidas = self._get_monthly_totals('S', start_date, end_date, empresa_id)
+        saidas = self._get_monthly_totals(False, start_date, end_date, empresa_id)
         
         # Calculate balance
         saldo_mensal = []
@@ -84,7 +84,7 @@ class DashboardService:
             "saldo_mensal": saldo_mensal
         }
 
-    def get_category_summary(self, tipo: str = 'E', empresa_id: Optional[int] = None) -> List[Dict]:
+    def get_category_summary(self, tipo: bool = True, empresa_id: Optional[int] = None) -> List[Dict]:
         """Get summary by category for revenues or expenses"""
         
         from app.models.categoria import Categoria
@@ -98,7 +98,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == 'S'  # S: Sim (confirmado)
+                Lancamento.FlgConfirmacao == 1  # Campo bit: 1 = confirmado
             )
         )
         
@@ -141,7 +141,7 @@ class DashboardService:
             "contas_receber_inadimplentes": contas_receber_inadimplentes
         }
 
-    def get_top_favorecidos(self, tipo: str = 'S', limit: int = 10, empresa_id: Optional[int] = None) -> List[Dict]:
+    def get_top_favorecidos(self, tipo: bool = False, limit: int = 10, empresa_id: Optional[int] = None) -> List[Dict]:
         """Get top payees or clients by total value"""
         
         from app.models.favorecido import Favorecido
@@ -155,7 +155,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == 'S'  # S: Sim (confirmado)
+                Lancamento.FlgConfirmacao == 1  # Campo bit: 1 = confirmado
             )
         )
         
@@ -180,7 +180,7 @@ class DashboardService:
         
         return favorecidos_data
 
-    def _get_total_lancamentos(self, ind_mov: str, empresa_id: Optional[int] = None) -> Decimal:
+    def _get_total_lancamentos(self, ind_mov: bool, empresa_id: Optional[int] = None) -> Decimal:
         """Get total value of confirmed lancamentos"""
         
         query = self.db.query(
@@ -188,7 +188,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == 'S'  # S: Sim (confirmado)
+                Lancamento.FlgConfirmacao == 1  # Campo bit: 1 = confirmado
             )
         )
         
@@ -203,27 +203,29 @@ class DashboardService:
         """Get count of active accounts (payable or receivable)"""
         
         if account_type == 'payable':
+            # Contas em aberto são aquelas que não foram pagas (PaymentDate é NULL)
             query = self.db.query(AccountsPayable).filter(
-                AccountsPayable.Status.in_(['A', 'V'])  # Aberto or Vencido
+                AccountsPayable.PaymentDate.is_(None)
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsPayable.CodEmpresa == empresa_id)
+                query = query.filter(AccountsPayable.IdCompany == empresa_id)
                 
             return query.count()
         else:  # receivable
+            # Contas em aberto são aquelas que não foram recebidas (PaymentDate é NULL)
             query = self.db.query(AccountsReceivable).filter(
-                AccountsReceivable.Status.in_(['A', 'V'])  # Aberto or Vencido
+                AccountsReceivable.PaymentDate.is_(None)
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsReceivable.CodEmpresa == empresa_id)
+                query = query.filter(AccountsReceivable.IdCompany == empresa_id)
                 
             return query.count()
 
-    def _get_monthly_totals(self, ind_mov: str, start_date: datetime, end_date: datetime, empresa_id: Optional[int] = None) -> List[Dict]:
+    def _get_monthly_totals(self, ind_mov: bool, start_date: datetime, end_date: datetime, empresa_id: Optional[int] = None) -> List[Dict]:
         """Get monthly totals for lancamentos"""
         
         # Query to get monthly totals
@@ -234,7 +236,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == 'S',  # S: Sim (confirmado)
+                Lancamento.FlgConfirmacao == 1,  # Campo bit: 1 = confirmado
                 Lancamento.Data >= start_date,
                 Lancamento.Data <= end_date
             )
@@ -271,41 +273,51 @@ class DashboardService:
         from datetime import datetime
         
         if account_type == 'payable':
+            # Contas vencidas são aquelas não pagas e com data de vencimento anterior a hoje
             query = self.db.query(AccountsPayable).filter(
                 and_(
-                    AccountsPayable.Status == 'V',  # Vencido
-                    AccountsPayable.DataVencimento < datetime.now()
+                    AccountsPayable.PaymentDate.is_(None),  # Não pago
+                    AccountsPayable.DueDate < datetime.now()  # Vencido
                 )
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsPayable.CodEmpresa == empresa_id)
+                query = query.filter(AccountsPayable.IdCompany == empresa_id)
                 
             return query.count()
         else:  # receivable
+            # Contas vencidas são aquelas não recebidas e com data de vencimento anterior a hoje
             query = self.db.query(AccountsReceivable).filter(
                 and_(
-                    AccountsReceivable.Status == 'V',  # Vencido
-                    AccountsReceivable.DataVencimento < datetime.now()
+                    AccountsReceivable.PaymentDate.is_(None),  # Não recebido
+                    AccountsReceivable.DueDate < datetime.now()  # Vencido
                 )
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsReceivable.CodEmpresa == empresa_id)
+                query = query.filter(AccountsReceivable.IdCompany == empresa_id)
                 
             return query.count()
 
     def _get_delinquent_count(self, empresa_id: Optional[int] = None) -> int:
         """Get count of delinquent accounts receivable"""
         
+        # Como não há campo de protesto na estrutura atual, vamos considerar
+        # contas vencidas há mais de 30 dias como inadimplentes
+        from datetime import datetime, timedelta
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        
         query = self.db.query(AccountsReceivable).filter(
-            AccountsReceivable.FlgProtestado == True
+            and_(
+                AccountsReceivable.PaymentDate.is_(None),  # Não recebido
+                AccountsReceivable.DueDate < thirty_days_ago  # Vencido há mais de 30 dias
+            )
         )
         
         # Filter by empresa if provided
         if empresa_id:
-            query = query.filter(AccountsReceivable.CodEmpresa == empresa_id)
+            query = query.filter(AccountsReceivable.IdCompany == empresa_id)
             
         return query.count()

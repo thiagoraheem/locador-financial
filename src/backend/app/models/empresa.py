@@ -35,8 +35,6 @@ class Empresa(Base, LoginAuditMixin):
     # Relacionamentos
     contas_bancarias = relationship("Conta", back_populates="empresa")
     lancamentos = relationship("Lancamento", back_populates="empresa")
-    contas_pagar = relationship("AccountsPayable", back_populates="empresa")
-    contas_receber = relationship("AccountsReceivable", back_populates="empresa")
     
     def __repr__(self):
         return f"<Empresa(CodEmpresa={self.CodEmpresa}, NomEmpresa='{self.NomEmpresa}', CNPJ='{self.CNPJ}')>"

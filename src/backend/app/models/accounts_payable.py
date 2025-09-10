@@ -13,95 +13,52 @@ class AccountsPayable(Base, UserAuditMixin):
     
     __tablename__ = "tbl_AccountsPayable"
 
-    CodAccountsPayable = Column(Integer, primary_key=True, index=True)
-    CodEmpresa = Column(Integer, ForeignKey("tbl_Empresa.CodEmpresa"), nullable=False, comment="Empresa")
-    CodFornecedor = Column(Integer, ForeignKey("tbl_FINFavorecido.CodFavorecido"), nullable=False, comment="Fornecedor")
-    idConta = Column(Integer, ForeignKey("tbl_Conta.idConta"), comment="Conta bancária para pagamento")
-    CodCategoria = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"), comment="Categoria financeira")
+    IdAccountsPayable = Column(Integer, primary_key=True, index=True)
+    IdCompany = Column(Integer, nullable=False, comment="Empresa")
+    DocumentNumber = Column(String(50), comment="Número do documento")
+    Amount = Column(Numeric(19, 4), nullable=False, comment="Valor original")
+    IssuanceDate = Column(DateTime, nullable=False, comment="Data de emissão")
+    DueDate = Column(DateTime, nullable=False, comment="Data de vencimento")
+    IdCostCenter = Column(Integer, comment="Centro de custo")
+    IdChartOfAccounts = Column(Integer, comment="Plano de contas")
+    Description = Column(Text, comment="Descrição")
+    IdCustomer = Column(Integer, comment="Cliente")
+    PaymentDate = Column(DateTime, comment="Data do pagamento")
+    PaidAmount = Column(Numeric(19, 4), comment="Valor pago")
+    Installment = Column(Integer, comment="Número da parcela")
+    TotalInstallments = Column(Integer, comment="Total de parcelas")
+    FineAmount = Column(Numeric(19, 4), comment="Valor da multa")
+    InterestAmount = Column(Numeric(19, 4), comment="Valor dos juros")
+    DiscountAmount = Column(Numeric(19, 4), comment="Valor do desconto")
+    IdBankAccount = Column(Integer, comment="Conta bancária")
+    IdPaymentMethod = Column(Integer, comment="Forma de pagamento")
+    IdParentAccountsPayable = Column(Integer, comment="Conta pai")
+    IdInstallmentType = Column(Integer, nullable=False, comment="Tipo de parcela")
+    IdUserCreate = Column(Integer, nullable=False, comment="Usuário criação")
+    IdUserAlter = Column(Integer, comment="Usuário alteração")
+    DateCreate = Column(DateTime, nullable=False, comment="Data criação")
+    DateUpdate = Column(DateTime, comment="Data alteração")
     
-    # Datas
-    DataEmissao = Column(DateTime, nullable=False, default=datetime.now, comment="Data de emissão")
-    DataVencimento = Column(DateTime, nullable=False, comment="Data de vencimento")
-    DataPagamento = Column(DateTime, comment="Data do pagamento")
+    # Propriedades calculadas
+    @property
+    def valor_pendente(self):
+        """Calcula o valor ainda pendente de pagamento"""
+        return self.Amount - (self.PaidAmount or 0)
     
-    # Valores
-    Valor = Column(Numeric(18, 2), nullable=False, comment="Valor original")
-    ValorPago = Column(Numeric(18, 2), default=0, comment="Valor já pago")
-    Desconto = Column(Numeric(18, 2), default=0, comment="Desconto aplicado")
-    Juros = Column(Numeric(18, 2), default=0, comment="Juros aplicados")
-    Multa = Column(Numeric(18, 2), default=0, comment="Multa aplicada")
+    @property
+    def esta_vencido(self) -> bool:
+        """Verifica se a conta está vencida"""
+        return self.DueDate < datetime.now() and self.PaymentDate is None
     
-    # Controle
-    Status = Column(String(1), nullable=False, default='A', comment="A=Aberto, P=Pago, V=Vencido, C=Cancelado")
-    NumeroDocumento = Column(String(50), comment="Número do documento/nota fiscal")
-    NumParcela = Column(Integer, default=1, comment="Número da parcela")
-    TotalParcelas = Column(Integer, default=1, comment="Total de parcelas")
-    
-    # Informações adicionais
-    Observacao = Column(Text, comment="Observações")
-    CodigoBarras = Column(String(100), comment="Código de barras do boleto")
-    LinhaDigitavel = Column(String(100), comment="Linha digitável do boleto")
-    
-    # Relacionamentos
-    empresa = relationship("Empresa", back_populates="contas_pagar")
-    fornecedor = relationship("Favorecido", foreign_keys=[CodFornecedor], back_populates="contas_pagar")
-    conta = relationship("Conta", back_populates="contas_pagar")
-    categoria = relationship("Categoria", foreign_keys=[CodCategoria])
-    pagamentos = relationship("AccountsPayablePayment", back_populates="conta_pagar")
+    @property
+    def dias_atraso(self) -> int:
+        """Calcula quantos dias a conta está em atraso"""
+        if not self.esta_vencido:
+            return 0
+        return (datetime.now() - self.DueDate).days
     
     def __repr__(self):
-        return f"<AccountsPayable(CodAccountsPayable={self.CodAccountsPayable}, Valor={self.Valor}, Status='{self.Status}')>"
-    
-    @property
-    def valor_saldo(self) -> float:
-        """Retorna o saldo a pagar"""
-        return float(self.Valor - self.ValorPago)
-    
-    @property
-    def valor_total_com_encargos(self) -> float:
-        """Retorna valor total com juros e multa, menos desconto"""
-        return float(self.Valor + self.Juros + self.Multa - self.Desconto)
-    
-    @property
-    def is_vencido(self) -> bool:
-        """Verifica se está vencido"""
-        if self.Status == 'P':  # Já pago
-            return False
-        return self.DataVencimento < datetime.now()
-    
-    @property
-    def is_pago(self) -> bool:
-        """Verifica se está totalmente pago"""
-        return self.Status == 'P'
-    
-    @property
-    def is_aberto(self) -> bool:
-        """Verifica se está em aberto"""
-        return self.Status == 'A'
-    
-    @property
-    def is_cancelado(self) -> bool:
-        """Verifica se foi cancelado"""
-        return self.Status == 'C'
-    
-    @property
-    def percentual_pago(self) -> float:
-        """Retorna o percentual pago"""
-        if self.Valor == 0:
-            return 0
-        return (self.ValorPago / self.Valor) * 100
-    
-    def update_status(self):
-        """Atualiza o status baseado no valor pago e vencimento"""
-        if self.Status == 'C':  # Cancelado não muda
-            return
-        
-        if self.valor_saldo <= 0:
-            self.Status = 'P'  # Pago
-        elif self.is_vencido:
-            self.Status = 'V'  # Vencido
-        else:
-            self.Status = 'A'  # Aberto
+        return f"<AccountsPayable(IdAccountsPayable={self.IdAccountsPayable}, Amount={self.Amount}, PaymentDate={self.PaymentDate})>"
 
 
 class AccountsPayablePayment(Base, UserAuditMixin):
@@ -110,7 +67,7 @@ class AccountsPayablePayment(Base, UserAuditMixin):
     __tablename__ = "tbl_AccountsPayablePayments"
 
     CodPayment = Column(Integer, primary_key=True, index=True)
-    CodAccountsPayable = Column(Integer, ForeignKey("tbl_AccountsPayable.CodAccountsPayable"), nullable=False)
+    CodAccountsPayable = Column(Integer, ForeignKey("tbl_AccountsPayable.IdAccountsPayable"), nullable=False)
     idConta = Column(Integer, ForeignKey("tbl_Conta.idConta"), comment="Conta bancária do pagamento")
     CodFormaPagto = Column(Integer, ForeignKey("tbl_FINFormaPagamento.CodFormaPagto"), comment="Forma de pagamento")
     
@@ -123,10 +80,7 @@ class AccountsPayablePayment(Base, UserAuditMixin):
     NumeroDocumento = Column(String(50), comment="Número do documento de pagamento")
     Observacao = Column(Text, comment="Observações do pagamento")
     
-    # Relacionamentos
-    conta_pagar = relationship("AccountsPayable", back_populates="pagamentos")
-    conta = relationship("Conta")
-    forma_pagamento = relationship("FormaPagamento")
+    # Relacionamentos removidos devido a incompatibilidade com estrutura atual
     
     def __repr__(self):
         return f"<AccountsPayablePayment(CodPayment={self.CodPayment}, ValorPago={self.ValorPago})>"

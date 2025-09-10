@@ -21,10 +21,10 @@ class Lancamento(Base, LoginAuditMixin):
     CodFavorecido = Column(Integer, ForeignKey("tbl_FINFavorecido.CodFavorecido"))
     CodCategoria = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"))
     Valor = Column(Numeric(18, 2), nullable=False)
-    IndMov = Column(String(1), nullable=False)  # E: Entrada, S: Saída
+    IndMov = Column(Boolean, nullable=False)  # True: Entrada, False: Saída
     NumDocto = Column(String(50))
     CodFormaPagto = Column(Integer, ForeignKey("tbl_FINFormaPagamento.CodFormaPagto"))
-    FlgConfirmacao = Column(String(1), default='N')  # S: Sim, N: Não
+    FlgConfirmacao = Column(Boolean, default=False)  # Campo bit: True = confirmado, False = não confirmado
     FlgFrequencia = Column(String(1), nullable=False)  # U: Único, R: Recorrente
     Observacao = Column(String(500))
     
