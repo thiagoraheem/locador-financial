@@ -12,7 +12,16 @@ import {
   Container,
   Alert,
   CircularProgress,
+  Card,
+  CardContent,
+  Divider,
+  useTheme,
 } from '@mui/material';
+import {
+  AccountBalance as AccountBalanceIcon,
+  TrendingUp as TrendingUpIcon,
+  Security as SecurityIcon,
+} from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -33,6 +42,7 @@ export const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const theme = useTheme();
   const { isAuthenticated, loading, error } = useSelector((state: RootState) => state.auth);
 
   const {
@@ -75,95 +85,181 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Paper
-          elevation={3}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, ${theme.palette.primary.main}15 0%, ${theme.palette.secondary.main}15 100%)`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 2,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
           sx={{
-            padding: 4,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            width: '100%',
-            maxWidth: 400,
+            justifyContent: 'center',
+            gap: 4,
+            flexDirection: { xs: 'column', md: 'row' },
           }}
         >
-          {/* Logo/Title */}
-          <Typography component="h1" variant="h4" sx={{ mb: 1, fontWeight: 'bold' }}>
-            Sistema Financeiro
-          </Typography>
-          <Typography variant="h6" color="textSecondary" sx={{ mb: 3 }}>
-            Locador
-          </Typography>
-
-          {/* Welcome Message */}
-          <Typography variant="body1" sx={{ mb: 3, textAlign: 'center' }}>
-            {t('auth.welcome')}
-          </Typography>
-
-          {/* Error Alert */}
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {/* Login Form */}
+          {/* Left Side - Branding */}
           <Box
-            component="form"
-            onSubmit={handleSubmit(onSubmit)}
-            sx={{ width: '100%' }}
+            sx={{
+              flex: 1,
+              textAlign: { xs: 'center', md: 'left' },
+              mb: { xs: 4, md: 0 },
+            }}
           >
-            <TextField
-              {...register('login')}
-              margin="normal"
-              fullWidth
-              label={t('auth.username')}
-              autoComplete="username"
-              autoFocus
-              error={!!errors.login}
-              helperText={errors.login?.message}
-              disabled={loading}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 3 }}>
+              <AccountBalanceIcon sx={{ fontSize: 48, color: 'primary.main', mr: 2 }} />
+              <Box>
+                <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                  Locador Financial
+                </Typography>
+                <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 300 }}>
+                  Sistema de Gestão Financeira
+                </Typography>
+              </Box>
+            </Box>
+            
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 500 }}>
+              Bem-vindo de volta
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', lineHeight: 1.6 }}>
+              Faça login para acessar sua conta
+            </Typography>
+            
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+              Acesse sua plataforma de gestão financeira com segurança.
+            </Typography>
 
-            <TextField
-              {...register('senha')}
-              margin="normal"
-              fullWidth
-              label={t('auth.password')}
-              type="password"
-              autoComplete="current-password"
-              error={!!errors.senha}
-              helperText={errors.senha?.message}
-              disabled={loading}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2, py: 1.5 }}
-              disabled={loading}
-              startIcon={loading && <CircularProgress size={20} />}
-            >
-              {loading ? 'Entrando...' : t('auth.login_button')}
-            </Button>
+            {/* Features */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <TrendingUpIcon sx={{ color: 'success.main' }} />
+                <Typography variant="body2">Análises</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <SecurityIcon sx={{ color: 'info.main' }} />
+                <Typography variant="body2">Segurança</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <AccountBalanceIcon sx={{ color: 'primary.main' }} />
+                <Typography variant="body2">Gestão Completa</Typography>
+              </Box>
+            </Box>
           </Box>
 
-          {/* Footer Info */}
-          <Typography variant="body2" color="textSecondary" sx={{ mt: 2, textAlign: 'center' }}>
-            © 2024 Sistema Locador - Gestão Financeira
-          </Typography>
-        </Paper>
-      </Box>
-    </Container>
+          {/* Right Side - Login Form */}
+          <Box sx={{ flex: 1, maxWidth: 400, width: '100%' }}>
+            <Card
+              elevation={8}
+              sx={{
+                borderRadius: 3,
+                overflow: 'hidden',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <CardContent sx={{ p: 4 }}>
+                <Box sx={{ textAlign: 'center', mb: 4 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    Login
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Entre com suas credenciais
+                  </Typography>
+                </Box>
+
+                <Divider sx={{ mb: 3 }} />
+
+                {/* Error Alert */}
+                {error && (
+                  <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                    {error}
+                  </Alert>
+                )}
+
+                {/* Login Form */}
+                <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+                  <TextField
+                    {...register('login')}
+                    fullWidth
+                    label="Usuário"
+                    variant="outlined"
+                    margin="normal"
+                    autoComplete="username"
+                    autoFocus
+                    error={!!errors.login}
+                    helperText={errors.login?.message}
+                    disabled={loading}
+                    sx={{
+                      mb: 2,
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+
+                  <TextField
+                    {...register('senha')}
+                    fullWidth
+                    label="Senha"
+                    type="password"
+                    variant="outlined"
+                    margin="normal"
+                    autoComplete="current-password"
+                    error={!!errors.senha}
+                    helperText={errors.senha?.message}
+                    disabled={loading}
+                    sx={{
+                      mb: 3,
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    disabled={loading}
+                    startIcon={loading && <CircularProgress size={20} />}
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 2,
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                      textTransform: 'none',
+                      background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                      '&:hover': {
+                        background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+                      },
+                    }}
+                  >
+                    {loading ? 'Entrando...' : 'Entrar'}
+                  </Button>
+                </Box>
+
+                <Divider sx={{ my: 3 }} />
+
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ textAlign: 'center', fontSize: '0.875rem' }}
+                >
+                  © 2024 Sistema Locador - Gestão Financeira
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 };
