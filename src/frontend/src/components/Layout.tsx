@@ -27,11 +27,7 @@ export const Layout: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           minWidth: 0,
-          marginLeft: isMobile || !sidebarOpen ? 0 : `${sidebarWidth}px`,
-          transition: theme.transitions.create('margin-left', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
+          width: '100%',
         }}
       >
         {/* Top Bar */}
