@@ -1,14 +1,31 @@
 import axios, { AxiosResponse } from 'axios';
 
+// API Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const DISABLE_LOGS = process.env.REACT_APP_DISABLE_LOGS === 'true';
+
+// Logging utility for development
+const log = (...args: any[]) => {
+  if (!IS_PRODUCTION && !DISABLE_LOGS) {
+    console.log('[API]', ...args);
+  }
+};
 
 // Configuração do cliente Axios
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
-  timeout: 30000,
+  timeout: IS_PRODUCTION ? 60000 : 30000, // Timeout maior em produção
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Log da configuração inicial
+log('API Client configured:', {
+  baseURL: `${API_BASE_URL}/api/v1`,
+  timeout: IS_PRODUCTION ? 60000 : 30000,
+  environment: IS_PRODUCTION ? 'production' : 'development'
 });
 
 // Interceptor para adicionar token de autenticação
@@ -18,9 +35,11 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    log('Request:', config.method?.toUpperCase(), config.url);
     return config;
   },
   (error) => {
+    log('Request Error:', error);
     return Promise.reject(error);
   }
 );
