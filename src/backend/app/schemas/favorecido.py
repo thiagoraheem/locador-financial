@@ -8,7 +8,7 @@ from typing import Optional, Literal
 
 class FavorecidoBase(BaseModel):
     """Schema base para favorecidos"""
-    NomFavorecido: str = Field(..., max_length=100, description="Nome do favorecido")
+    DesFavorecido: str = Field(..., max_length=100, description="Nome do favorecido")
     TipoFavorecido: Literal['F', 'J'] = Field(..., description="Tipo: F=Físico, J=Jurídico")
     CPF_CNPJ: Optional[str] = Field(None, max_length=20, description="CPF ou CNPJ")
     Telefone: Optional[str] = Field(None, max_length=20, description="Telefone")

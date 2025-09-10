@@ -28,8 +28,8 @@ class CategoriaService:
         self._validate_categoria_data(categoria_create)
         
         # Verificar se categoria pai existe (se informada)
-        if categoria_create.CodCategoriaPai:
-            categoria_pai = self.get_categoria_by_id(categoria_create.CodCategoriaPai)
+        if categoria_create.CodPai:
+            categoria_pai = self.get_categoria_by_id(categoria_create.CodPai)
             if not categoria_pai.is_active:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -83,7 +83,7 @@ class CategoriaService:
         
         # Filtrar por tipo
         if tipo:
-            query = query.filter(Categoria.TipoCategoria == tipo)
+            query = query.filter(Categoria.flgTipo == tipo)
         
         # Filtrar apenas ativas
         if ativas_apenas:
@@ -91,10 +91,10 @@ class CategoriaService:
         
         # Se não incluir subcategorias, filtrar apenas categorias principais
         if not include_subcategorias:
-            query = query.filter(Categoria.CodCategoriaPai.is_(None))
+            query = query.filter(Categoria.CodPai.is_(None))
         
         # Ordenar por nome
-        query = query.order_by(Categoria.NomCategoria)
+        query = query.order_by(Categoria.DesCategoria)
         
         # Aplicar paginação
         return query.offset(skip).limit(limit).all()
@@ -108,16 +108,16 @@ class CategoriaService:
         
         # Buscar categorias principais (sem pai)
         query = self.db.query(Categoria).filter(
-            Categoria.CodCategoriaPai.is_(None)
+            Categoria.CodPai.is_(None)
         )
         
         if tipo:
-            query = query.filter(Categoria.TipoCategoria == tipo)
+            query = query.filter(Categoria.flgTipo == tipo)
         
         if ativas_apenas:
             query = query.filter(Categoria.FlgAtivo == 'S')
         
-        categorias_principais = query.order_by(Categoria.NomCategoria).all()
+        categorias_principais = query.order_by(Categoria.DesCategoria).all()
         
         # Para cada categoria principal, carregar suas subcategorias
         for categoria in categorias_principais:
@@ -171,7 +171,7 @@ class CategoriaService:
         # Verificar se possui subcategorias ativas
         subcategorias_ativas = self.db.query(Categoria).filter(
             and_(
-                Categoria.CodCategoriaPai == categoria_id,
+                Categoria.CodPai == categoria_id,
                 Categoria.FlgAtivo == 'S'
             )
         ).count()
@@ -204,8 +204,8 @@ class CategoriaService:
         categoria = self.get_categoria_by_id(categoria_id)
         
         # Verificar se categoria pai está ativa (se houver)
-        if categoria.CodCategoriaPai:
-            categoria_pai = self.get_categoria_by_id(categoria.CodCategoriaPai)
+        if categoria.CodPai:
+            categoria_pai = self.get_categoria_by_id(categoria.CodPai)
             if not categoria_pai.is_active:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -263,7 +263,7 @@ class CategoriaService:
                 )
         
         try:
-            categoria.CodCategoriaPai = nova_categoria_pai_id
+            categoria.CodPai = nova_categoria_pai_id
             categoria.NomUsuario = current_user.Login
             
             self.db.commit()
@@ -281,13 +281,13 @@ class CategoriaService:
         """Buscar subcategorias de uma categoria"""
         
         query = self.db.query(Categoria).filter(
-            Categoria.CodCategoriaPai == categoria_pai_id
+            Categoria.CodPai == categoria_pai_id
         )
         
         if ativas_apenas:
             query = query.filter(Categoria.FlgAtivo == 'S')
         
-        subcategorias = query.order_by(Categoria.NomCategoria).all()
+        subcategorias = query.order_by(Categoria.DesCategoria).all()
         
         # Carregar subcategorias recursivamente
         for subcategoria in subcategorias:
@@ -299,14 +299,14 @@ class CategoriaService:
         """Validações de negócio para categoria"""
         
         # Validar nome
-        if not categoria_data.NomCategoria or len(categoria_data.NomCategoria.strip()) == 0:
+        if not categoria_data.DesCategoria or len(categoria_data.DesCategoria.strip()) == 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Nome da categoria é obrigatório"
             )
         
         # Validar tipo
-        if categoria_data.TipoCategoria not in ['R', 'D', 'T']:
+        if categoria_data.flgTipo not in ['R', 'D', 'T']:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Tipo de categoria deve ser 'R' (Receita), 'D' (Despesa) ou 'T' (Transferência)"
@@ -315,20 +315,20 @@ class CategoriaService:
         # Verificar se nome já existe (mesmo tipo e mesmo pai)
         existing_query = self.db.query(Categoria).filter(
             and_(
-                Categoria.NomCategoria.ilike(categoria_data.NomCategoria.strip()),
-                Categoria.TipoCategoria == categoria_data.TipoCategoria,
+                Categoria.DesCategoria.ilike(categoria_data.DesCategoria.strip()),
+                Categoria.flgTipo == categoria_data.flgTipo,
                 Categoria.FlgAtivo == 'S'
             )
         )
         
         # Se tem categoria pai, filtrar pelo mesmo pai
-        if categoria_data.CodCategoriaPai:
+        if categoria_data.CodPai:
             existing_query = existing_query.filter(
-                Categoria.CodCategoriaPai == categoria_data.CodCategoriaPai
+                Categoria.CodPai == categoria_data.CodPai
             )
         else:
             existing_query = existing_query.filter(
-                Categoria.CodCategoriaPai.is_(None)
+                Categoria.CodPai.is_(None)
             )
         
         if existing_query.first():
@@ -341,24 +341,24 @@ class CategoriaService:
         """Validações específicas para atualização"""
         
         # Validar nome se está sendo alterado
-        if 'NomCategoria' in update_data:
-            if not update_data['NomCategoria'] or len(update_data['NomCategoria'].strip()) == 0:
+        if 'DesCategoria' in update_data:
+            if not update_data['DesCategoria'] or len(update_data['DesCategoria'].strip()) == 0:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Nome da categoria é obrigatório"
                 )
         
         # Validar tipo se está sendo alterado
-        if 'TipoCategoria' in update_data:
-            if update_data['TipoCategoria'] not in ['R', 'D', 'T']:
+        if 'flgTipo' in update_data:
+            if update_data['flgTipo'] not in ['R', 'D', 'T']:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Tipo de categoria deve ser 'R', 'D' ou 'T'"
                 )
         
         # Se está alterando categoria pai, validar
-        if 'CodCategoriaPai' in update_data:
-            nova_categoria_pai_id = update_data['CodCategoriaPai']
+        if 'CodPai' in update_data:
+            nova_categoria_pai_id = update_data['CodPai']
             
             if nova_categoria_pai_id:
                 # Categoria pai deve existir
@@ -396,7 +396,7 @@ class CategoriaService:
             ).first()
             
             if categoria_pai:
-                current_pai_id = categoria_pai.CodCategoriaPai
+                current_pai_id = categoria_pai.CodPai
             else:
                 break
         

@@ -17,8 +17,7 @@ class FormaPagamento(Base, LoginAuditMixin):
     Descricao = Column(String(200))
     FlgAtivo = Column(String(1), default='S')  # S: Sim, N: Não
     
-    # Relacionamento com lançamentos
-    lancamentos = relationship("Lancamento", back_populates="forma_pagamento")
+    # Relacionamento com lançamentos removido - sem foreign key definida
     
     def __repr__(self):
         return f"<FormaPagamento(CodFormaPagto={self.CodFormaPagto}, NomFormaPagto='{self.NomFormaPagto}')>"

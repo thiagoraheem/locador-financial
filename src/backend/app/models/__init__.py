@@ -2,7 +2,7 @@
 Database models package
 """
 from .funcionario import TblFuncionarios
-from .mixins import UserAuditMixin, LoginAuditMixin
+from .mixins import LoginAuditMixin
 from .lancamento import Lancamento
 from .categoria import Categoria
 from .favorecido import Favorecido
@@ -16,7 +16,6 @@ from .accounts_receivable import AccountsReceivable, AccountsReceivablePayment
 
 __all__ = [
     "TblFuncionarios",
-    "UserAuditMixin", 
     "LoginAuditMixin",
     "Lancamento",
     "Categoria",

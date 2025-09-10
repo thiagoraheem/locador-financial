@@ -1,30 +1,30 @@
-"""
-Modelo de Categorias Financeiras
-"""
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.core.database import Base
-from app.models.mixins import LoginAuditMixin
 
 
-class Categoria(Base, LoginAuditMixin):
-    """Modelo para categorias financeiras"""
-    
+class Categoria(Base):
     __tablename__ = "tbl_FINCategorias"
-
-    CodCategoria = Column(Integer, primary_key=True, index=True)
-    NomCategoria = Column(String(100), nullable=False)
-    Descricao = Column(String(500))
-    TipoCategoria = Column(String(1), nullable=False)  # R: Receita, D: Despesa, T: Transferência
-    CodCategoriaPai = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"), nullable=True)
-    FlgAtivo = Column(String(1), default='S')  # S: Sim, N: Não
     
-    # Relacionamento hierárquico
-    categoria_pai = relationship("Categoria", remote_side=[CodCategoria], back_populates="subcategorias")
-    subcategorias = relationship("Categoria", back_populates="categoria_pai")
+    CodCategoria = Column(Integer, primary_key=True, autoincrement=True)
+    DesCategoria = Column(String(50))
+    flgTipo = Column(String(1))  # R=Receita, D=Despesa
+    CodGrupoCategoria = Column(Integer)
+    CodPai = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"))
+    idCostCenter = Column(Integer)
+    idChartsOfAccount = Column(Integer)
+    IdUserCreate = Column(Integer, nullable=False)
+    IdUserAlter = Column(Integer)
+    DateCreate = Column(DateTime, nullable=False)
+    DateUpdate = Column(DateTime)
     
-    # Relacionamento com lançamentos
+    # Relacionamentos
     lancamentos = relationship("Lancamento", back_populates="categoria")
+    subcategorias = relationship(
+        "Categoria",
+        backref="categoria_pai",
+        remote_side=[CodCategoria]
+    )
     
     def __repr__(self):
-        return f"<Categoria(CodCategoria={self.CodCategoria}, NomCategoria='{self.NomCategoria}')>"
+        return f"<Categoria(CodCategoria={self.CodCategoria}, DesCategoria='{self.DesCategoria}')>"

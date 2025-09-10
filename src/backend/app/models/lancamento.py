@@ -1,39 +1,49 @@
 """
 Modelo de Lançamentos Financeiros
 """
-from sqlalchemy import Column, Integer, String, DateTime, Numeric, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Numeric, Date, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from app.core.database import Base
-from app.models.mixins import LoginAuditMixin
+from typing import Literal
 
 
-class Lancamento(Base, LoginAuditMixin):
+class Lancamento(Base):
     """Modelo para lançamentos financeiros"""
     
     __tablename__ = "tbl_FINLancamentos"
-
-    CodLancamento = Column(Integer, primary_key=True, index=True)
-    Data = Column(DateTime, nullable=False, default=datetime.now)
-    DataEmissao = Column(DateTime, nullable=False, default=datetime.now)
-    CodEmpresa = Column(Integer, ForeignKey("tbl_Empresa.CodEmpresa"), comment="Empresa do lançamento")
-    idConta = Column(Integer, ForeignKey("tbl_Conta.idConta"), comment="Conta bancária")
-    CodFavorecido = Column(Integer, ForeignKey("tbl_FINFavorecido.CodFavorecido"))
-    CodCategoria = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"))
-    Valor = Column(Numeric(18, 2), nullable=False)
-    IndMov = Column(Boolean, nullable=False)  # True: Entrada, False: Saída
-    NumDocto = Column(String(50))
-    CodFormaPagto = Column(Integer, ForeignKey("tbl_FINFormaPagamento.CodFormaPagto"))
-    FlgConfirmacao = Column(Boolean, default=False)  # Campo bit: True = confirmado, False = não confirmado
-    FlgFrequencia = Column(String(1), nullable=False)  # U: Único, R: Recorrente
-    Observacao = Column(String(500))
+    
+    CodLancamento = Column(Integer, primary_key=True, autoincrement=True)
+    CodEmpresa = Column(Integer, nullable=False)
+    CodFavorecido = Column(Integer, ForeignKey("tbl_FINFavorecido.CodFavorecido"), nullable=False)
+    CodCategoria = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"), nullable=False)
+    NumDocto = Column(String(15))
+    DataEmissao = Column(DateTime)
+    Data = Column(Date, nullable=False)
+    IndMov = Column(Boolean, nullable=False)  # True = Entrada, False = Saída
+    Valor = Column(Numeric(19, 4), nullable=False)  # money type
+    ValorPago = Column(Numeric(19, 4))
+    FlgConfirmacao = Column(Boolean)  # Campo bit: True = confirmado
+    DatConfirmacao = Column(Date)
+    Comentario = Column(Text)
+    FlgFrequencia = Column(Integer)
+    QtdParcelas = Column(Integer)
+    ParcelaAtual = Column(Integer)
+    CodLancamentoAnterior = Column(Integer)
+    CodFatura = Column(Integer)
+    CodMedicao = Column(Integer)
+    FlgTipoDivisao = Column(String(1))
+    CodFormaPagto = Column(Integer)
+    CodigoBarrasBoleto = Column(String(100))
+    FlgBoletoEmitido = Column(Boolean)
+    NumRemessa = Column(Integer)
+    DatCadastro = Column(DateTime, nullable=False)
+    NomUsuario = Column(String(20), nullable=False)
+    DatAlteracao = Column(DateTime)
+    NomUsuarioAlteracao = Column(String(20))
     
     # Relacionamentos
-    empresa = relationship("Empresa", back_populates="lancamentos")
-    conta = relationship("Conta", back_populates="lancamentos")
     favorecido = relationship("Favorecido", back_populates="lancamentos")
     categoria = relationship("Categoria", back_populates="lancamentos")
-    forma_pagamento = relationship("FormaPagamento", back_populates="lancamentos")
     
     def __repr__(self):
-        return f"<Lancamento(CodLancamento={self.CodLancamento}, Valor={self.Valor}, IndMov='{self.IndMov}')>"
+        return f"<Lancamento(CodLancamento={self.CodLancamento}, Valor={self.Valor}, IndMov={self.IndMov})>"

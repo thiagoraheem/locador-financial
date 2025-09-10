@@ -70,7 +70,7 @@ class ContaPagarService:
 
         # Add fornecedor_nome
         if hasattr(conta_pagar, 'fornecedor') and conta_pagar.fornecedor:
-            conta_pagar.fornecedor_nome = conta_pagar.fornecedor.NomFavorecido
+            conta_pagar.fornecedor_nome = conta_pagar.fornecedor.DesFavorecido
         else:
             conta_pagar.fornecedor_nome = None
 
@@ -117,7 +117,7 @@ class ContaPagarService:
         # Add fornecedor_nome to each conta
         for conta in contas:
             if hasattr(conta, 'fornecedor') and conta.fornecedor:
-                conta.fornecedor_nome = conta.fornecedor.NomFavorecido
+                conta.fornecedor_nome = conta.fornecedor.DesFavorecido
             else:
                 conta.fornecedor_nome = None
         

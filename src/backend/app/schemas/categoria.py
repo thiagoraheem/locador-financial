@@ -8,7 +8,7 @@ from typing import Optional, Literal, List
 
 class CategoriaBase(BaseModel):
     """Schema base para categorias"""
-    NomCategoria: str = Field(..., max_length=100, description="Nome da categoria")
+    DesCategoria: str = Field(..., max_length=50, description="Descrição da categoria")
     Descricao: Optional[str] = Field(None, max_length=500, description="Descrição da categoria")
     TipoCategoria: Literal['R', 'D', 'T'] = Field(..., description="Tipo: R=Receita, D=Despesa, T=Transferência")
     CodCategoriaPai: Optional[int] = Field(None, description="Código da categoria pai (para subcategorias)")

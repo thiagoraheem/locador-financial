@@ -72,7 +72,7 @@ class FavorecidoService:
             query = query.filter(Favorecido.FlgAtivo == 'S')
         
         # Order by name
-        query = query.order_by(Favorecido.NomFavorecido)
+        query = query.order_by(Favorecido.DesFavorecido)
         
         # Apply pagination
         return query.offset(skip).limit(limit).all()
@@ -94,14 +94,14 @@ class FavorecidoService:
         # Search by term
         if search_term:
             search_filter = or_(
-                Favorecido.NomFavorecido.ilike(f"%{search_term}%"),
+                Favorecido.DesFavorecido.ilike(f"%{search_term}%"),
                 Favorecido.CPF_CNPJ.ilike(f"%{search_term}%"),
                 Favorecido.Email.ilike(f"%{search_term}%")
             )
             query = query.filter(search_filter)
         
         # Order by name
-        query = query.order_by(Favorecido.NomFavorecido)
+        query = query.order_by(Favorecido.DesFavorecido)
         
         # Apply limit
         return query.limit(limit).all()

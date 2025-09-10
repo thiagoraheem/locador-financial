@@ -91,14 +91,14 @@ class DashboardService:
         
         # Query to get category totals
         query = self.db.query(
-            Categoria.NomCategoria,
+            Categoria.DesCategoria,
             func.sum(Lancamento.Valor).label('total')
         ).join(
             Lancamento, Lancamento.CodCategoria == Categoria.CodCategoria
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == 1  # Campo bit: 1 = confirmado
+                Lancamento.FlgConfirmacao == True  # Campo bit: True = confirmado
             )
         )
         
@@ -108,7 +108,7 @@ class DashboardService:
         
         # Group by category and order by total
         results = query.group_by(
-            Categoria.NomCategoria
+            Categoria.DesCategoria
         ).order_by(
             func.sum(Lancamento.Valor).desc()
         ).all()
@@ -117,7 +117,7 @@ class DashboardService:
         category_data = []
         for result in results:
             category_data.append({
-                "categoria": result.NomCategoria,
+                "categoria": result.DesCategoria,
                 "valor": float(result.total or 0)
             })
         
@@ -148,14 +148,14 @@ class DashboardService:
         
         # Query to get top favorecidos
         query = self.db.query(
-            Favorecido.NomFavorecido,
+            Favorecido.DesFavorecido,
             func.sum(Lancamento.Valor).label('total')
         ).join(
             Lancamento, Lancamento.CodFavorecido == Favorecido.CodFavorecido
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == 1  # Campo bit: 1 = confirmado
+                Lancamento.FlgConfirmacao == True  # Campo bit: True = confirmado
             )
         )
         
@@ -165,7 +165,7 @@ class DashboardService:
         
         # Group by favorecido and order by total
         results = query.group_by(
-            Favorecido.NomFavorecido
+            Favorecido.DesFavorecido
         ).order_by(
             func.sum(Lancamento.Valor).desc()
         ).limit(limit).all()
@@ -174,7 +174,7 @@ class DashboardService:
         favorecidos_data = []
         for result in results:
             favorecidos_data.append({
-                "nome": result.NomFavorecido,
+                "nome": result.DesFavorecido,
                 "valor": float(result.total or 0)
             })
         
@@ -188,7 +188,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == 1  # Campo bit: 1 = confirmado
+                Lancamento.FlgConfirmacao == True  # Campo bit: True = confirmado
             )
         )
         
@@ -236,7 +236,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == 1,  # Campo bit: 1 = confirmado
+                Lancamento.FlgConfirmacao == True,  # Campo bit: True = confirmado
                 Lancamento.Data >= start_date,
                 Lancamento.Data <= end_date
             )

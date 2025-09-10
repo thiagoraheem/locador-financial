@@ -5,10 +5,9 @@ from sqlalchemy import Column, Integer, String, DateTime, Numeric, ForeignKey, B
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
-from app.models.mixins import UserAuditMixin
 
 
-class AccountsReceivable(Base, UserAuditMixin):
+class AccountsReceivable(Base):
     """Modelo para contas a receber"""
     
     __tablename__ = "tbl_AccountsReceivable"
@@ -44,7 +43,7 @@ class AccountsReceivable(Base, UserAuditMixin):
     @property
     def valor_pendente(self):
         """Calcula o valor ainda pendente de recebimento"""
-        return self.Amount - (self.ReceivedAmount or 0)
+        return self.Amount - (self.PaidAmount or 0)
     
     @property
     def esta_vencido(self) -> bool:
@@ -62,7 +61,7 @@ class AccountsReceivable(Base, UserAuditMixin):
         return f"<AccountsReceivable(IdAccountsReceivable={self.IdAccountsReceivable}, Amount={self.Amount}, PaymentDate={self.PaymentDate})>"
 
 
-class AccountsReceivablePayment(Base, UserAuditMixin):
+class AccountsReceivablePayment(Base):
     """Modelo para registrar recebimentos das contas a receber"""
     
     __tablename__ = "tbl_AccountsReceivablePayments"
@@ -81,7 +80,13 @@ class AccountsReceivablePayment(Base, UserAuditMixin):
     NumeroDocumento = Column(String(50), comment="Número do documento de recebimento")
     Observacao = Column(Text, comment="Observações do recebimento")
     
-    # Relacionamentos removidos devido a incompatibilidade com estrutura atual
+    # Campos de auditoria
+    IdUserCreate = Column(Integer, nullable=False, comment="Usuário criação")
+    IdUserAlter = Column(Integer, comment="Usuário alteração")
+    DateCreate = Column(DateTime, nullable=False, default=datetime.now, comment="Data criação")
+    DateUpdate = Column(DateTime, comment="Data alteração")
+    
+    # Relacionamentos removidos temporariamente para evitar erros de configuração
     
     def __repr__(self):
         return f"<AccountsReceivablePayment(CodPayment={self.CodPayment}, ValorRecebido={self.ValorRecebido})>"

@@ -304,10 +304,10 @@ class LancamentoService:
             )
         
         # Validar indicador de movimento
-        if lancamento_data.IndMov not in ['E', 'S']:
+        if not isinstance(lancamento_data.IndMov, bool):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Indicador de movimento deve ser 'E' (Entrada) ou 'S' (Saída)"
+                detail="Indicador de movimento deve ser True (Entrada) ou False (Saída)"
             )
         
         # Validar frequência
@@ -339,8 +339,8 @@ class LancamentoService:
             )
         
         # Validar indicador de movimento
-        if 'IndMov' in update_data and update_data['IndMov'] not in ['E', 'S']:
+        if 'IndMov' in update_data and not isinstance(update_data['IndMov'], bool):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Indicador de movimento deve ser 'E' (Entrada) ou 'S' (Saída)"
+                detail="Indicador de movimento deve ser True (Entrada) ou False (Saída)"
             )

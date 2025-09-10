@@ -47,7 +47,9 @@ async def resumo_categorias(
     Retorna resumo financeiro por categorias
     """
     service = DashboardService(db)
-    return service.get_category_summary(tipo, empresa_id)
+    # Convert string to boolean: E=True (Receitas), S=False (Despesas)
+    tipo_bool = tipo.upper() == 'E'
+    return service.get_category_summary(tipo_bool, empresa_id)
 
 @router.get("/vencimentos", summary="Resumo de vencimentos")
 async def resumo_vencimentos(
@@ -73,4 +75,6 @@ async def top_favorecidos(
     Retorna os principais favorecidos/clientes por valor
     """
     service = DashboardService(db)
-    return service.get_top_favorecidos(tipo, limit, empresa_id)
+    # Convert string to boolean: E=True (Receitas), S=False (Despesas)
+    tipo_bool = tipo.upper() == 'E'
+    return service.get_top_favorecidos(tipo_bool, limit, empresa_id)

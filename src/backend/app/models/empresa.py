@@ -34,7 +34,7 @@ class Empresa(Base, LoginAuditMixin):
     
     # Relacionamentos
     contas_bancarias = relationship("Conta", back_populates="empresa")
-    lancamentos = relationship("Lancamento", back_populates="empresa")
+    # lancamentos = relationship("Lancamento", back_populates="empresa") - removido, sem foreign key
     
     def __repr__(self):
         return f"<Empresa(CodEmpresa={self.CodEmpresa}, NomEmpresa='{self.NomEmpresa}', CNPJ='{self.CNPJ}')>"

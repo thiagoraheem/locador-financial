@@ -5,10 +5,9 @@ from sqlalchemy import Column, Integer, String, DateTime, Numeric, ForeignKey, B
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
-from app.models.mixins import UserAuditMixin
 
 
-class AccountsPayable(Base, UserAuditMixin):
+class AccountsPayable(Base):
     """Modelo para contas a pagar"""
     
     __tablename__ = "tbl_AccountsPayable"
@@ -61,7 +60,7 @@ class AccountsPayable(Base, UserAuditMixin):
         return f"<AccountsPayable(IdAccountsPayable={self.IdAccountsPayable}, Amount={self.Amount}, PaymentDate={self.PaymentDate})>"
 
 
-class AccountsPayablePayment(Base, UserAuditMixin):
+class AccountsPayablePayment(Base):
     """Modelo para registrar pagamentos das contas a pagar"""
     
     __tablename__ = "tbl_AccountsPayablePayments"
@@ -80,7 +79,13 @@ class AccountsPayablePayment(Base, UserAuditMixin):
     NumeroDocumento = Column(String(50), comment="Número do documento de pagamento")
     Observacao = Column(Text, comment="Observações do pagamento")
     
-    # Relacionamentos removidos devido a incompatibilidade com estrutura atual
+    # Campos de auditoria
+    IdUserCreate = Column(Integer, nullable=False, comment="Usuário criação")
+    IdUserAlter = Column(Integer, comment="Usuário alteração")
+    DateCreate = Column(DateTime, nullable=False, default=datetime.now, comment="Data criação")
+    DateUpdate = Column(DateTime, comment="Data alteração")
+    
+    # Relacionamentos removidos temporariamente para evitar erros de configuração
     
     def __repr__(self):
         return f"<AccountsPayablePayment(CodPayment={self.CodPayment}, ValorPago={self.ValorPago})>"
