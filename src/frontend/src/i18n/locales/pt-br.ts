@@ -37,6 +37,11 @@ export const ptBrTranslations = {
   'dashboard.contas_receber': 'Contas a Receber',
   'dashboard.fluxo_caixa': 'Fluxo de Caixa',
   'dashboard.ultimos_lancamentos': 'Últimos Lançamentos',
+  'dashboard.saldo': 'Saldo',
+  'dashboard.entradas': 'Entradas',
+  'dashboard.saidas': 'Saídas',
+  'dashboard.top_receitas': 'Principais Receitas',
+  'dashboard.top_despesas': 'Principais Despesas',
 
   // Lançamentos
   'lancamentos.title': 'Lançamentos Financeiros',

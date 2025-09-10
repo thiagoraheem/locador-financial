@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { ptBR } from '@mui/material/locale';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { ptBR as dateFnsLocale } from 'date-fns/locale';
 
 import App from './App';
 import { store } from './store';
@@ -33,8 +35,10 @@ root.render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <App />
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateFnsLocale}>
+              <CssBaseline />
+              <App />
+            </LocalizationProvider>
           </ThemeProvider>
         </BrowserRouter>
       </QueryClientProvider>

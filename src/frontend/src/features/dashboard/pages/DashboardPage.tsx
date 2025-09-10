@@ -36,8 +36,7 @@ import {
   BarChart,
   Bar,
   PieChart,
-  Pie,
-  Cell
+  Pie
 } from 'recharts';
 
 interface StatCardProps {
@@ -52,7 +51,6 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend }) => {
-  const theme = useTheme();
 
   return (
     <Card elevation={2}>
@@ -98,7 +96,6 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend })
 };
 
 export const DashboardPage: React.FC = () => {
-  const { t } = useTranslation();
   const theme = useTheme();
   const dispatch = useAppDispatch();
   
@@ -107,11 +104,9 @@ export const DashboardPage: React.FC = () => {
     cashFlow,
     revenueCategories,
     expenseCategories,
-    overdueSummary,
     topReceitas,
     topDespesas,
-    loading,
-    error
+    loading
   } = useAppSelector((state) => state.dashboard);
 
   // Load dashboard data on component mount
@@ -149,43 +144,57 @@ export const DashboardPage: React.FC = () => {
   const revenueCategoryData = revenueCategories.map((item, index) => ({
     name: item.categoria,
     value: item.valor,
-    color: theme.palette.success.light
+    fill: `hsl(${120 + index * 30}, 70%, 50%)`
   }));
 
   const expenseCategoryData = expenseCategories.map((item, index) => ({
     name: item.categoria,
     value: item.valor,
-    color: theme.palette.error.light
+    fill: `hsl(${0 + index * 30}, 70%, 50%)`
   }));
+
+  // Comparison data for revenue vs expenses
+  const comparisonData = [
+    {
+      name: 'Receitas',
+      valor: financialSummary?.total_receitas || 0,
+      fill: theme.palette.success.main
+    },
+    {
+      name: 'Despesas',
+      valor: financialSummary?.total_despesas || 0,
+      fill: theme.palette.error.main
+    }
+  ];
 
   // Stats data
   const stats = financialSummary ? [
     {
-      title: t('dashboard.total_receitas'),
+      title: 'Total de Receitas',
       value: formatCurrency(financialSummary.total_receitas),
       icon: <TrendingUpIcon />,
       color: theme.palette.success.main,
     },
     {
-      title: t('dashboard.total_despesas'),
+      title: 'Total de Despesas',
       value: formatCurrency(financialSummary.total_despesas),
       icon: <TrendingDownIcon />,
       color: theme.palette.error.main,
     },
     {
-      title: t('dashboard.saldo_atual'),
+      title: 'Saldo Atual',
       value: formatCurrency(financialSummary.saldo),
       icon: <AccountBalanceIcon />,
-      color: theme.palette.info.main,
+      color: financialSummary.saldo >= 0 ? theme.palette.success.main : theme.palette.error.main,
     },
     {
-      title: t('dashboard.contas_pagar'),
+      title: 'Contas a Pagar',
       value: formatNumber(financialSummary.contas_a_pagar),
       icon: <PaymentIcon />,
       color: theme.palette.warning.main,
     },
     {
-      title: t('dashboard.contas_receber'),
+      title: 'Contas a Receber',
       value: formatNumber(financialSummary.contas_a_receber),
       icon: <RequestQuoteIcon />,
       color: theme.palette.primary.main,
@@ -193,14 +202,14 @@ export const DashboardPage: React.FC = () => {
   ] : [];
 
   return (
-    <Box>
+    <Box sx={{ p: 2 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {t('dashboard.title')}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+          Dashboard Financeiro
         </Typography>
         <Typography variant="body1" color="textSecondary">
-          {t('dashboard.overview')}
+          Visão Geral do Sistema Financeiro
         </Typography>
       </Box>
 
@@ -213,42 +222,156 @@ export const DashboardPage: React.FC = () => {
         ))}
       </Grid>
 
-      {/* Charts and Additional Info */}
-      <Grid container spacing={3}>
+      {/* Charts Row 1 */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Fluxo de Caixa */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, height: 400 }}>
-            <Typography variant="h6" gutterBottom>
-              {t('dashboard.fluxo_caixa')}
+        <Grid item xs={12} lg={8}>
+          <Paper elevation={3} sx={{ p: 3, height: 450, borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+              📈 Fluxo de Caixa (12 meses)
             </Typography>
             {cashFlowData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={cashFlowData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.grey[300]} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12 }}
+                    stroke={theme.palette.text.secondary}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke={theme.palette.text.secondary}
+                    tickFormatter={(value) => formatCurrency(value).replace('R$', 'R$').slice(0, -3) + 'k'}
+                  />
+                  <Tooltip 
+                    formatter={(value) => formatCurrency(Number(value))}
+                    contentStyle={{
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: 8
+                    }}
+                  />
                   <Legend />
                   <Line 
                     type="monotone" 
                     dataKey="saldo" 
                     stroke={theme.palette.info.main} 
-                    name={t('dashboard.saldo')} 
-                    strokeWidth={2}
+                    name="Saldo" 
+                    strokeWidth={3}
+                    dot={{ fill: theme.palette.info.main, strokeWidth: 2, r: 4 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="entrada" 
                     stroke={theme.palette.success.main} 
-                    name={t('dashboard.entradas')} 
+                    name="Entradas" 
+                    strokeWidth={2}
+                    dot={{ fill: theme.palette.success.main, strokeWidth: 2, r: 3 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="saida" 
                     stroke={theme.palette.error.main} 
-                    name={t('dashboard.saidas')} 
+                    name="Saídas" 
+                    strokeWidth={2}
+                    dot={{ fill: theme.palette.error.main, strokeWidth: 2, r: 3 }}
                   />
                 </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box
+                sx={{
+                  height: 350,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: theme.palette.grey[50],
+                  borderRadius: 2,
+                  border: `2px dashed ${theme.palette.grey[300]}`
+                }}
+              >
+                <Typography variant="h6" color="textSecondary">
+                  {loading ? '⏳ Carregando dados...' : '📊 Nenhum dado encontrado'}
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Receitas vs Despesas */}
+        <Grid item xs={12} lg={4}>
+          <Paper elevation={3} sx={{ p: 3, height: 450, borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+              💰 Receitas vs Despesas
+            </Typography>
+            {comparisonData.length > 0 && comparisonData[0].valor > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.grey[300]} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12 }}
+                    stroke={theme.palette.text.secondary}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke={theme.palette.text.secondary}
+                    tickFormatter={(value) => formatCurrency(value).replace('R$', 'R$').slice(0, -3) + 'k'}
+                  />
+                  <Tooltip 
+                    formatter={(value) => formatCurrency(Number(value))}
+                    contentStyle={{
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: 8
+                    }}
+                  />
+                  <Bar dataKey="valor" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box
+                sx={{
+                  height: 350,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: theme.palette.grey[50],
+                  borderRadius: 2,
+                  border: `2px dashed ${theme.palette.grey[300]}`
+                }}
+              >
+                <Typography variant="h6" color="textSecondary">
+                  {loading ? '⏳ Carregando dados...' : '📊 Nenhum dado encontrado'}
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Charts Row 2 */}
+      <Grid container spacing={3}>
+        {/* Categorias de Receitas */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, height: 400, borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+              📊 Receitas por Categoria
+            </Typography>
+            {revenueCategoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={revenueCategoryData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    dataKey="value"
+                    label={({ name }) => name}
+                  />
+                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                </PieChart>
               </ResponsiveContainer>
             ) : (
               <Box
@@ -258,49 +381,38 @@ export const DashboardPage: React.FC = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: theme.palette.grey[50],
-                  borderRadius: 1,
+                  borderRadius: 2,
+                  border: `2px dashed ${theme.palette.grey[300]}`
                 }}
               >
                 <Typography variant="body1" color="textSecondary">
-                  {loading ? t('messages.loading') : t('messages.no_data')}
+                  {loading ? '⏳ Carregando...' : '📊 Nenhum dado encontrado'}
                 </Typography>
               </Box>
             )}
           </Paper>
         </Grid>
 
-        {/* Últimos Lançamentos */}
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, height: 400 }}>
-            <Typography variant="h6" gutterBottom>
-              {t('dashboard.ultimos_lancamentos')}
+        {/* Categorias de Despesas */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, height: 400, borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+              📊 Despesas por Categoria
             </Typography>
-            {topReceitas.length > 0 || topDespesas.length > 0 ? (
-              <Box sx={{ height: 300, overflowY: 'auto' }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, color: theme.palette.success.main }}>
-                  {t('dashboard.top_receitas')}
-                </Typography>
-                {topReceitas.map((item, index) => (
-                  <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">{item.nome}</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {formatCurrency(item.valor)}
-                    </Typography>
-                  </Box>
-                ))}
-                
-                <Typography variant="subtitle2" sx={{ mb: 1, mt: 2, color: theme.palette.error.main }}>
-                  {t('dashboard.top_despesas')}
-                </Typography>
-                {topDespesas.map((item, index) => (
-                  <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">{item.nome}</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {formatCurrency(item.valor)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
+            {expenseCategoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={expenseCategoryData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    dataKey="value"
+                    label={({ name }) => name}
+                  />
+                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                </PieChart>
+              </ResponsiveContainer>
             ) : (
               <Box
                 sx={{
@@ -309,14 +421,90 @@ export const DashboardPage: React.FC = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: theme.palette.grey[50],
-                  borderRadius: 1,
+                  borderRadius: 2,
+                  border: `2px dashed ${theme.palette.grey[300]}`
                 }}
               >
-                <Typography variant="body1" color="textSecondary" sx={{ textAlign: 'center' }}>
-                  {loading ? t('messages.loading') : t('messages.no_data')}
+                <Typography variant="body1" color="textSecondary">
+                  {loading ? '⏳ Carregando...' : '📊 Nenhum dado encontrado'}
                 </Typography>
               </Box>
             )}
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Top Favorecidos Row */}
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+              🏆 Top Favorecidos
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.success.light + '20', borderRadius: 2 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.success.main, fontWeight: 'bold' }}>
+                    💚 Maiores Receitas
+                  </Typography>
+                  {topReceitas.length > 0 ? (
+                    topReceitas.map((item, index) => (
+                      <Box key={index} sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        mb: 1.5,
+                        p: 1,
+                        backgroundColor: 'white',
+                        borderRadius: 1,
+                        boxShadow: 1
+                      }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                          {index + 1}. {item.nome}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
+                          {formatCurrency(item.valor)}
+                        </Typography>
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', py: 2 }}>
+                      Nenhuma receita encontrada
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.error.light + '20', borderRadius: 2 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.error.main, fontWeight: 'bold' }}>
+                    💸 Maiores Despesas
+                  </Typography>
+                  {topDespesas.length > 0 ? (
+                    topDespesas.map((item, index) => (
+                      <Box key={index} sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        mb: 1.5,
+                        p: 1,
+                        backgroundColor: 'white',
+                        borderRadius: 1,
+                        boxShadow: 1
+                      }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                          {index + 1}. {item.nome}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main }}>
+                          {formatCurrency(item.valor)}
+                        </Typography>
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', py: 2 }}>
+                      Nenhuma despesa encontrada
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
           </Paper>
         </Grid>
       </Grid>
