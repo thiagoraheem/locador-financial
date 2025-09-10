@@ -24,7 +24,7 @@ class Lancamento(Base, LoginAuditMixin):
     IndMov = Column(String(1), nullable=False)  # E: Entrada, S: Saída
     NumDocto = Column(String(50))
     CodFormaPagto = Column(Integer, ForeignKey("tbl_FINFormaPagamento.CodFormaPagto"))
-    FlgConfirmacao = Column(Boolean, default=False)
+    FlgConfirmacao = Column(String(1), default='N')  # S: Sim, N: Não
     FlgFrequencia = Column(String(1), nullable=False)  # U: Único, R: Recorrente
     Observacao = Column(String(500))
     

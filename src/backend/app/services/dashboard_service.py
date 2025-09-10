@@ -98,7 +98,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == True
+                Lancamento.FlgConfirmacao == 'S'  # S: Sim (confirmado)
             )
         )
         
@@ -155,7 +155,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == True
+                Lancamento.FlgConfirmacao == 'S'  # S: Sim (confirmado)
             )
         )
         
@@ -188,7 +188,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == True
+                Lancamento.FlgConfirmacao == 'S'  # S: Sim (confirmado)
             )
         )
         
@@ -234,7 +234,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == True,
+                Lancamento.FlgConfirmacao == 'S',  # S: Sim (confirmado)
                 Lancamento.Data >= start_date,
                 Lancamento.Data <= end_date
             )
