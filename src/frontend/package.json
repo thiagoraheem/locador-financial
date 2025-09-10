@@ -45,7 +45,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:prod": "set REACT_APP_API_URL=http://localhost:8000 && react-scripts start",
     "build": "react-scripts build",
+    "build:prod": "set NODE_ENV=production && react-scripts build",
+    "build:staging": "set NODE_ENV=staging && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src --ext .ts,.tsx",

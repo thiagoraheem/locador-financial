@@ -1,13 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
+import { config } from '../config/environment';
 
-// API Configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001';
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const DISABLE_LOGS = process.env.REACT_APP_DISABLE_LOGS === 'true';
+// API Configuration from centralized config
+const { apiUrl: API_BASE_URL, environment, enableLogs, apiTimeout } = config;
+const IS_PRODUCTION = environment === 'production';
 
 // Logging utility for development
 const log = (...args: any[]) => {
-  if (!IS_PRODUCTION && !DISABLE_LOGS) {
+  if (enableLogs) {
     console.log('[API]', ...args);
   }
 };
@@ -15,7 +15,7 @@ const log = (...args: any[]) => {
 // Configuração do cliente Axios
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
-  timeout: IS_PRODUCTION ? 60000 : 30000, // Timeout maior em produção
+  timeout: apiTimeout,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,8 +24,8 @@ export const apiClient = axios.create({
 // Log da configuração inicial
 log('API Client configured:', {
   baseURL: `${API_BASE_URL}/api/v1`,
-  timeout: IS_PRODUCTION ? 60000 : 30000,
-  environment: IS_PRODUCTION ? 'production' : 'development'
+  timeout: apiTimeout,
+  environment: environment
 });
 
 // Interceptor para adicionar token de autenticação
@@ -47,14 +47,25 @@ apiClient.interceptors.request.use(
 // Interceptor para tratamento de respostas
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    log('Response:', response.status, response.config.url);
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = error.config?.url;
+    
+    log('Response Error:', status, url, error.message);
+    
+    if (status === 401) {
       // Token expirado ou inválido
+      log('Authentication failed, redirecting to login');
       localStorage.removeItem('token');
       window.location.href = '/login';
+    } else if (status >= 500 && IS_PRODUCTION) {
+      // Em produção, log erros de servidor sem expor detalhes
+      console.error('Server error occurred. Please try again later.');
     }
+    
     return Promise.reject(error);
   }
 );
