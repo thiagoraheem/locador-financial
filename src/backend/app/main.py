@@ -1,10 +1,16 @@
 """
 FastAPI application main module for Financial Web Application
 """
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import auth, lancamentos, contas_pagar, contas_receber, categorias, dashboard, empresas, bancos, contas, clientes
 from app.core.config import settings
+from app.services.ip_service import print_external_ip
+
+# Configuração de logging
+logging.basicConfig(level=getattr(logging, settings.LOG_LEVEL))
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -12,6 +18,19 @@ app = FastAPI(
     version=settings.PROJECT_VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Evento executado durante a inicialização da aplicação
+    """
+    logger.info("Inicializando Sistema Financeiro Locador...")
+    
+    # Consulta e exibe o IP externo
+    await print_external_ip()
+    
+    logger.info("Sistema inicializado com sucesso!")
 
 # Configuração de CORS
 app.add_middleware(
