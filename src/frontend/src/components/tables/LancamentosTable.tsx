@@ -1,32 +1,43 @@
 import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
-  DataGrid,
-  GridColDef,
-  GridPaginationModel,
-  GridFilterModel,
-  GridSortModel,
-  GridRowParams,
-  GridEventListener,
-} from '@mui/x-data-grid';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
   Select,
-  MenuItem,
-  Chip,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Check as CheckIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Plus,
+  Search,
+  X,
+  Edit,
+  Trash2,
+  Check,
+  XCircle,
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
@@ -58,19 +69,18 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
   } = useAppSelector((state) => state.lancamentos);
 
   const [localFilters, setLocalFilters] = useState(filters);
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: pagination.skip / pagination.limit,
-    pageSize: pagination.limit,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
+    const skip = (currentPage - 1) * pageSize;
     dispatch(fetchLancamentos({
-      ...filters,
-      skip: pagination.skip,
-      limit: pagination.limit,
+      ...localFilters,
+      skip,
+      limit: pageSize,
     }));
-  }, [dispatch, filters, pagination]);
+  }, [dispatch, currentPage, pageSize, localFilters]);
 
   // Handle filter changes
   const handleFilterChange = (field: string, value: any) => {
@@ -95,13 +105,17 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
     dispatch(setPagination({ skip: 0, limit: pagination.limit }));
   };
 
-  // Handle pagination changes
-  const handlePaginationModelChange = (model: GridPaginationModel) => {
-    setPaginationModel(model);
-    dispatch(setPagination({
-      skip: model.page * model.pageSize,
-      limit: model.pageSize,
-    }));
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const skip = (page - 1) * pageSize;
+    dispatch(setPagination({ skip, limit: pageSize }));
+  };
+
+  const handlePageSizeChange = (newPageSize: string) => {
+    const size = parseInt(newPageSize);
+    setPageSize(size);
+    setCurrentPage(1);
+    dispatch(setPagination({ skip: 0, limit: size }));
   };
 
   // Handle delete
@@ -116,196 +130,249 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
     dispatch(confirmLancamento({ id, confirmar }));
   };
 
-  // Columns definition
-  const columns: GridColDef[] = [
-    {
-      field: 'Data',
-      headerName: t('lancamentos.data'),
-      width: 120,
-      valueFormatter: (value: string) => value ? format(new Date(value), 'dd/MM/yyyy', { locale: ptBR }) : '',
-    },
-    {
-      field: 'favorecido_nome',
-      headerName: t('lancamentos.favorecido'),
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'categoria_nome',
-      headerName: t('lancamentos.categoria'),
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'IndMov',
-      headerName: t('lancamentos.tipo'),
-      width: 100,
-      renderCell: (params) => (
-        <Chip
-          label={params.value === 'E' ? t('lancamentos.entrada') : t('lancamentos.saida')}
-          color={params.value === 'E' ? 'success' : 'error'}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: 'Valor',
-      headerName: t('lancamentos.valor'),
-      width: 120,
-      valueFormatter: (value: number) => {
-        const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
-        return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
-      },
-    },
-    {
-      field: 'FlgConfirmacao',
-      headerName: t('lancamentos.status'),
-      width: 120,
-      renderCell: (params) => (
-        <Chip
-          label={params.value ? t('lancamentos.confirmado') : t('lancamentos.pendente')}
-          color={params.value ? 'success' : 'warning'}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: 'actions',
-      headerName: t('actions.actions'),
-      width: 150,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title={t('actions.edit')}>
-            <IconButton
-              size="small"
-              onClick={() => onEdit(params.row as LancamentoResponse)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={params.row.FlgConfirmacao ? t('lancamentos.cancel_confirmation') : t('lancamentos.confirm')}>
-            <IconButton
-              size="small"
-              onClick={() => handleConfirm(params.row.CodLancamento, !params.row.FlgConfirmacao)}
-            >
-              {params.row.FlgConfirmacao ? (
-                <CloseIcon fontSize="small" />
-              ) : (
-                <CheckIcon fontSize="small" />
-              )}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('actions.delete')}>
-            <IconButton
-              size="small"
-              onClick={() => handleDelete(params.row.CodLancamento)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ];
+  // Format date
+  const formatDate = (dateString: string) => {
+    return dateString ? format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR }) : '';
+  };
+
+  // Format currency
+  const formatCurrency = (value: number) => {
+    const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+    return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
+  };
+
+  // Render tipo movimento badge
+  const renderTipoMovimento = (indMov: string) => {
+    const isEntrada = indMov === 'E';
+    return (
+      <Badge variant={isEntrada ? 'default' : 'destructive'}>
+        {isEntrada ? t('lancamentos.entrada') : t('lancamentos.saida')}
+      </Badge>
+    );
+  };
+
+  // Render status badge
+  const renderStatus = (flgConfirmacao: boolean) => {
+    return (
+      <Badge variant={flgConfirmacao ? 'default' : 'secondary'}>
+        {flgConfirmacao ? t('lancamentos.confirmado') : t('lancamentos.pendente')}
+      </Badge>
+    );
+  };
+
+  // Render actions dropdown
+  const renderActions = (lancamento: LancamentoResponse) => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onEdit(lancamento)}>
+            <Edit className="mr-2 h-4 w-4" />
+            {t('actions.edit')}
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleConfirm(lancamento.CodLancamento, !lancamento.FlgConfirmacao)}
+          >
+            {lancamento.FlgConfirmacao ? (
+              <XCircle className="mr-2 h-4 w-4" />
+            ) : (
+              <Check className="mr-2 h-4 w-4" />
+            )}
+            {lancamento.FlgConfirmacao ? t('lancamentos.cancel_confirmation') : t('lancamentos.confirm')}
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleDelete(lancamento.CodLancamento)}
+            className="text-red-600"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            {t('actions.delete')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize + 1;
+  const endIndex = Math.min(currentPage * pageSize, totalCount);
 
   return (
-    <Box sx={{ height: 600, width: '100%' }}>
-      {/* Filter controls */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-        <TextField
-          label={t('lancamentos.favorecido')}
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4">
+        <Input
+          placeholder={t('lancamentos.favorecido')}
           value={localFilters.cod_favorecido || ''}
           onChange={(e) => handleFilterChange('cod_favorecido', e.target.value ? parseInt(e.target.value) : undefined)}
           type="number"
-          size="small"
+          className="w-48"
         />
         
-        <TextField
-          label={t('lancamentos.categoria')}
+        <Input
+          placeholder={t('lancamentos.categoria')}
           value={localFilters.cod_categoria || ''}
           onChange={(e) => handleFilterChange('cod_categoria', e.target.value ? parseInt(e.target.value) : undefined)}
           type="number"
-          size="small"
+          className="w-48"
         />
         
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>{t('lancamentos.tipo')}</InputLabel>
-          <Select
-            value={localFilters.ind_mov || ''}
-            label={t('lancamentos.tipo')}
-            onChange={(e) => handleFilterChange('ind_mov', e.target.value || undefined)}
-          >
-            <MenuItem value="E">{t('lancamentos.entrada')}</MenuItem>
-            <MenuItem value="S">{t('lancamentos.saida')}</MenuItem>
-          </Select>
-        </FormControl>
+        <Select value={localFilters.ind_mov || ''} onValueChange={(value) => handleFilterChange('ind_mov', value || undefined)}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder={t('lancamentos.tipo')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="E">{t('lancamentos.entrada')}</SelectItem>
+            <SelectItem value="S">{t('lancamentos.saida')}</SelectItem>
+          </SelectContent>
+        </Select>
         
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>{t('lancamentos.status')}</InputLabel>
-          <Select
-            value={localFilters.confirmado !== undefined ? (localFilters.confirmado ? '1' : '0') : ''}
-            label={t('lancamentos.status')}
-            onChange={(e) => handleFilterChange('confirmado', e.target.value === '1' ? true : (e.target.value === '0' ? false : undefined))}
-          >
-            <MenuItem value="1">{t('lancamentos.confirmado')}</MenuItem>
-            <MenuItem value="0">{t('lancamentos.pendente')}</MenuItem>
-          </Select>
-        </FormControl>
+        <Select 
+          value={localFilters.confirmado !== undefined ? (localFilters.confirmado ? '1' : '0') : ''} 
+          onValueChange={(value) => handleFilterChange('confirmado', value === '1' ? true : (value === '0' ? false : undefined))}
+        >
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder={t('lancamentos.status')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">{t('lancamentos.confirmado')}</SelectItem>
+            <SelectItem value="0">{t('lancamentos.pendente')}</SelectItem>
+          </SelectContent>
+        </Select>
         
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Button
-            variant="contained"
-            onClick={handleApplyFilters}
-            size="small"
-          >
-            {t('actions.filter')}
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleClearFilters}
-            size="small"
-          >
-            {t('actions.clear')}
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onCreate}
-            size="small"
-          >
-            {t('lancamentos.novo')}
-          </Button>
-        </Box>
-      </Box>
+        <Button onClick={handleApplyFilters} className="flex items-center gap-2">
+          <Search className="h-4 w-4" />
+          {t('actions.filter')}
+        </Button>
+        <Button variant="outline" onClick={handleClearFilters} className="flex items-center gap-2">
+          <X className="h-4 w-4" />
+          {t('actions.clear')}
+        </Button>
+        <Button onClick={onCreate} className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          {t('lancamentos.novo')}
+        </Button>
+      </div>
 
-      {/* Data Grid */}
-      <DataGrid
-        rows={lancamentos}
-        columns={columns}
-        loading={loading}
-        rowCount={totalCount}
-        paginationModel={paginationModel}
-        onPaginationModelChange={handlePaginationModelChange}
-        pageSizeOptions={[10, 20, 50]}
-        paginationMode="server"
-        filterMode="server"
-        sortingMode="server"
-        disableRowSelectionOnClick
-        getRowId={(row) => row.CodLancamento}
-        sx={{
-          '& .MuiDataGrid-cell:focus': {
-            outline: 'none',
-          },
-        }}
-      />
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('lancamentos.data')}</TableHead>
+              <TableHead>{t('lancamentos.favorecido')}</TableHead>
+              <TableHead>{t('lancamentos.categoria')}</TableHead>
+              <TableHead>{t('lancamentos.tipo')}</TableHead>
+              <TableHead>{t('lancamentos.valor')}</TableHead>
+              <TableHead>{t('lancamentos.status')}</TableHead>
+              <TableHead className="w-[100px]">{t('actions.actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              Array.from({ length: pageSize }).map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell colSpan={7} className="h-12">
+                    <div className="flex items-center space-x-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                      <span>Carregando...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : lancamentos.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  Nenhum lançamento encontrado.
+                </TableCell>
+              </TableRow>
+            ) : (
+              lancamentos.map((lancamento) => (
+                <TableRow key={lancamento.CodLancamento}>
+                  <TableCell>{formatDate(lancamento.Data)}</TableCell>
+                  <TableCell className="font-medium">{lancamento.favorecido_nome}</TableCell>
+                  <TableCell>{lancamento.categoria_nome}</TableCell>
+                  <TableCell>{renderTipoMovimento(lancamento.IndMov)}</TableCell>
+                  <TableCell>{formatCurrency(lancamento.Valor)}</TableCell>
+                  <TableCell>{renderStatus(lancamento.FlgConfirmacao)}</TableCell>
+                  <TableCell>{renderActions(lancamento)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {startIndex} a {endIndex} de {totalCount} resultados
+          </p>
+        </div>
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium">Linhas por página</p>
+            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent side="top">
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronsLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+              Página {currentPage} de {totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronsRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
       
       {error && (
-        <Box sx={{ mt: 2, color: 'error.main' }}>
+        <div className="mt-2 text-red-600">
           {error}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };

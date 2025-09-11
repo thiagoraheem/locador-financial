@@ -1,59 +1,52 @@
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Box,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
   Menu,
-  MenuItem,
-  Avatar,
-  useTheme,
-} from '@mui/material';
-import {
-  Menu as MenuIcon,
-  AccountCircle as AccountCircleIcon,
-  Logout as LogoutIcon,
-} from '@mui/icons-material';
+  LogOut,
+  Settings,
+  Sun,
+  Moon,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store';
-import { toggleSidebar } from '../store/slices/uiSlice';
+import { setSidebarOpen } from '../store/slices/uiSlice';
 import { logout } from '../store/slices/authSlice';
-import { showNotification } from '../store/slices/uiSlice';
+import { useTheme } from '@/components/theme-provider';
 
 export const TopBar: React.FC = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate();
   
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const { sidebarOpen } = useSelector((state: RootState) => state.ui);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { theme, setTheme } = useTheme();
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleSettings = () => {
+    navigate('/configuracoes');
   };
 
-  const handleMenuToggle = () => {
-    dispatch(toggleSidebar());
+  const handleToggleSidebar = () => {
+    dispatch(setSidebarOpen(!sidebarOpen));
   };
 
-  const handleLogout = async () => {
-    try {
-      dispatch(logout());
-      dispatch(showNotification({
-        message: t('auth.logout_success'),
-        severity: 'success',
-      }));
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-    }
-    handleClose();
+  const handleToggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const getUserInitials = (name: string): string => {
@@ -64,87 +57,64 @@ export const TopBar: React.FC = () => {
   };
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={1}
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        color: theme.palette.text.primary,
-        borderBottom: `1px solid ${theme.palette.divider}`,
-      }}
-    >
-      <Toolbar>
-        {/* Menu Toggle */}
-        <IconButton
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          onClick={handleMenuToggle}
-          sx={{ mr: 2 }}
+    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center px-4">
+        {/* Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleToggleSidebar}
+          className="mr-4"
         >
-          <MenuIcon />
-        </IconButton>
+          <Menu className="h-5 w-5" />
+        </Button>
 
         {/* Title */}
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          {/* O título será atualizado dinamicamente baseado na rota */}
-        </Typography>
+        <div className="flex-1">
+          {/* Breadcrumb ou título da página atual pode ser adicionado aqui */}
+        </div>
+
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleToggleTheme}
+          className="mr-2"
+        >
+          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </Button>
 
         {/* User Menu */}
         {user && (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}>
-              {user.nome}
-            </Typography>
-            
-            <IconButton
-              size="large"
-              aria-label="conta do usuário"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: theme.palette.primary.main,
-                  fontSize: '0.875rem',
-                }}
-              >
-                {getUserInitials(user.nome)}
-              </Avatar>
-            </IconButton>
-
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={open}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={handleClose} disabled>
-                <AccountCircleIcon sx={{ mr: 1 }} />
-                {t('nav.profile')}
-              </MenuItem>
-              
-              <MenuItem onClick={handleLogout}>
-                <LogoutIcon sx={{ mr: 1 }} />
-                {t('nav.logout')}
-              </MenuItem>
-            </Menu>
-          </Box>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                   <AvatarFallback className="bg-primary text-primary-foreground">
+                     {user.nome?.charAt(0).toUpperCase()}
+                   </AvatarFallback>
+                 </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+               <div className="flex items-center justify-start gap-2 p-2">
+                 <div className="flex flex-col space-y-1 leading-none">
+                   <p className="font-medium">{user.nome}</p>
+                 </div>
+               </div>
+               <DropdownMenuSeparator />
+               <DropdownMenuItem onClick={handleSettings}>
+                 <Settings className="mr-2 h-4 w-4" />
+                 <span>Configurações</span>
+               </DropdownMenuItem>
+               <DropdownMenuItem onClick={handleLogout}>
+                 <LogOut className="mr-2 h-4 w-4" />
+                 <span>Sair</span>
+               </DropdownMenuItem>
+             </DropdownMenuContent>
+          </DropdownMenu>
         )}
-      </Toolbar>
-    </AppBar>
+      </div>
+    </header>
   );
 };

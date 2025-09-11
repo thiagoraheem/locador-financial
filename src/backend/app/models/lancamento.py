@@ -32,7 +32,8 @@ class Lancamento(Base):
     CodFatura = Column(Integer)
     CodMedicao = Column(Integer)
     FlgTipoDivisao = Column(String(1))
-    CodFormaPagto = Column(Integer)
+    CodFormaPagto = Column(Integer, ForeignKey("tbl_FINFormaPagamento.CodFormaPagto"))
+    idConta = Column(Integer, ForeignKey("tbl_Conta.idConta"))
     CodigoBarrasBoleto = Column(String(100))
     FlgBoletoEmitido = Column(Boolean)
     NumRemessa = Column(Integer)
@@ -44,6 +45,8 @@ class Lancamento(Base):
     # Relacionamentos
     favorecido = relationship("Favorecido", back_populates="lancamentos")
     categoria = relationship("Categoria", back_populates="lancamentos")
+    forma_pagamento = relationship("FormaPagamento", back_populates="lancamentos")
+    conta = relationship("Conta", back_populates="lancamentos")
     
     def __repr__(self):
         return f"<Lancamento(CodLancamento={self.CodLancamento}, Valor={self.Valor}, IndMov={self.IndMov})>"

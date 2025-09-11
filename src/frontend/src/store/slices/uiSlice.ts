@@ -8,14 +8,12 @@ interface UIState {
     message: string;
     severity: 'success' | 'error' | 'warning' | 'info';
   } | null;
-  theme: 'light' | 'dark';
 }
 
 const initialState: UIState = {
   sidebarOpen: true,
   loading: false,
   notification: null,
-  theme: 'light',
 };
 
 export const uiSlice = createSlice({
@@ -52,9 +50,7 @@ export const uiSlice = createSlice({
     clearNotification: (state) => {
       state.notification = null;
     },
-    setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
-      state.theme = action.payload;
-    },
+
   },
 });
 
@@ -65,5 +61,4 @@ export const {
   showNotification,
   hideNotification,
   clearNotification,
-  setTheme,
 } = uiSlice.actions;

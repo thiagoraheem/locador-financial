@@ -1,29 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import {
-  DataGrid,
-  GridColDef,
-  GridPaginationModel,
-} from '@mui/x-data-grid';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  IconButton,
-  Tooltip,
-  Grid,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Payment as PaymentIcon,
-} from '@mui/icons-material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Plus, Edit, Trash2, DollarSign, Filter, X, MoreHorizontal, Calendar as CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
@@ -33,8 +20,6 @@ import {
   setPagination,
 } from '../../store/slices/contasPagarSlice';
 import { AccountsPayableResponse } from '../../services/contasPagarApi';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface ContasPagarTableProps {
   onEdit: (conta: AccountsPayableResponse) => void;
@@ -55,10 +40,8 @@ export const ContasPagarTable: React.FC<ContasPagarTableProps> = ({ onEdit, onCr
   } = useAppSelector((state) => state.contasPagar);
 
   const [localFilters, setLocalFilters] = useState(filters);
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: pagination.skip / pagination.limit,
-    pageSize: pagination.limit,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
@@ -100,269 +83,326 @@ export const ContasPagarTable: React.FC<ContasPagarTableProps> = ({ onEdit, onCr
   };
 
   // Handle pagination changes
-  const handlePaginationModelChange = (model: GridPaginationModel) => {
-    setPaginationModel(model);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
     dispatch(setPagination({
-      skip: model.page * model.pageSize,
-      limit: model.pageSize,
+      skip: (page - 1) * pageSize,
+      limit: pageSize,
     }));
   };
 
-  // Columns definition
-  const columns: GridColDef[] = [
-    {
-      field: 'DataVencimento',
-      headerName: t('contas_pagar.data_vencimento'),
-      width: 120,
-      valueFormatter: (value: string) => value ? format(new Date(value), 'dd/MM/yyyy', { locale: ptBR }) : '',
-    },
-    {
-      field: 'fornecedor_nome',
-      headerName: t('contas_pagar.fornecedor'),
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'NumeroDocumento',
-      headerName: t('lancamentos.numero_documento'),
-      flex: 1,
-      minWidth: 120,
-    },
-    {
-      field: 'Valor',
-      headerName: t('contas_pagar.valor'),
-      width: 120,
-      valueFormatter: (value: number) => {
-        const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
-        return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
-      },
-    },
-    {
-      field: 'ValorPago',
-      headerName: t('contas_pagar.valor_pago'),
-      width: 120,
-      valueFormatter: (value: number) => {
-        const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
-        return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
-      },
-    },
-    {
-      field: 'Status',
-      headerName: t('contas_pagar.status'),
-      width: 120,
-      renderCell: (params) => {
-        let label = '';
-        let color: 'success' | 'warning' | 'error' | 'default' = 'default';
-        
-        switch (params.value) {
-          case 'A':
-            label = t('contas_pagar.aberto');
-            color = 'warning';
-            break;
-          case 'P':
-            label = t('contas_pagar.pago');
-            color = 'success';
-            break;
-          case 'V':
-            label = t('contas_pagar.vencido');
-            color = 'error';
-            break;
-          case 'C':
-            label = t('actions.cancel');
-            color = 'default';
-            break;
-        }
-        
-        return (
-          <Chip
-            label={label}
-            color={color}
-            size="small"
-          />
-        );
-      },
-    },
-    {
-      field: 'actions',
-      headerName: t('actions.actions'),
-      width: 150,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title={t('actions.edit')}>
-            <IconButton
-              size="small"
-              onClick={() => onEdit(params.row as AccountsPayableResponse)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          {params.row.Status !== 'P' && (
-            <Tooltip title={t('contas_pagar.pagar')}>
-              <IconButton
-                size="small"
-                onClick={() => onPagar(params.row as AccountsPayableResponse)}
-              >
-                <PaymentIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          <Tooltip title={t('actions.delete')}>
-            <IconButton
-              size="small"
-              onClick={() => handleDelete(params.row.CodAccountsPayable)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ];
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+    dispatch(setPagination({
+      skip: 0,
+      limit: newPageSize,
+    }));
+  };
+
+  // Render functions for table cells
+  const renderStatus = (status: string) => {
+    let label = '';
+    let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default';
+    
+    switch (status) {
+      case 'A':
+        label = t('contas_pagar.aberto');
+        variant = 'outline';
+        break;
+      case 'P':
+        label = t('contas_pagar.pago');
+        variant = 'default';
+        break;
+      case 'V':
+        label = t('contas_pagar.vencido');
+        variant = 'destructive';
+        break;
+      case 'C':
+        label = t('actions.cancel');
+        variant = 'secondary';
+        break;
+    }
+    
+    return (
+      <Badge variant={variant}>
+        {label}
+      </Badge>
+    );
+  };
+
+  const renderActions = (conta: AccountsPayableResponse) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => onEdit(conta)}>
+          <Edit className="mr-2 h-4 w-4" />
+          {t('actions.edit')}
+        </DropdownMenuItem>
+        {conta.Status !== 'P' && (
+          <DropdownMenuItem onClick={() => onPagar(conta)}>
+            <DollarSign className="mr-2 h-4 w-4" />
+            {t('contas_pagar.pagar')}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem 
+          onClick={() => handleDelete(conta.CodAccountsPayable)}
+          className="text-red-600"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t('actions.delete')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  // Pagination calculations
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
 
   return (
-    <Box sx={{ height: 600, width: '100%' }}>
+    <div className="space-y-4">
       {/* Filter controls */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            label={t('contas_pagar.fornecedor')}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <Input
+            placeholder={t('contas_pagar.fornecedor')}
             value={localFilters.cod_fornecedor || ''}
             onChange={(e) => handleFilterChange('cod_fornecedor', e.target.value ? parseInt(e.target.value) : undefined)}
             type="number"
-            size="small"
-            fullWidth
           />
-        </Grid>
+        </div>
         
-        <Grid item xs={12} sm={6} md={3}>
-          <FormControl size="small" fullWidth>
-            <InputLabel>{t('contas_pagar.status')}</InputLabel>
-            <Select
-              value={localFilters.status || ''}
-              label={t('contas_pagar.status')}
-              onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
-            >
-              <MenuItem value="A">{t('contas_pagar.aberto')}</MenuItem>
-              <MenuItem value="P">{t('contas_pagar.pago')}</MenuItem>
-              <MenuItem value="V">{t('contas_pagar.vencido')}</MenuItem>
-              <MenuItem value="C">{t('actions.cancel')}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
+        <div>
+          <Select
+            value={localFilters.status || ''}
+            onValueChange={(value) => handleFilterChange('status', value || undefined)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('contas_pagar.status')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="A">{t('contas_pagar.aberto')}</SelectItem>
+              <SelectItem value="P">{t('contas_pagar.pago')}</SelectItem>
+              <SelectItem value="V">{t('contas_pagar.vencido')}</SelectItem>
+              <SelectItem value="C">{t('actions.cancel')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         
-        <Grid item xs={12} sm={6} md={3}>
-          <DatePicker
-            label={t('contas_pagar.data_vencimento_inicio')}
-            value={localFilters.data_vencimento_inicio ? new Date(localFilters.data_vencimento_inicio) : null}
-            onChange={(date) => handleFilterChange('data_vencimento_inicio', date ? format(date, 'yyyy-MM-dd') : undefined)}
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-          />
-        </Grid>
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !localFilters.data_vencimento_inicio && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {localFilters.data_vencimento_inicio ? format(new Date(localFilters.data_vencimento_inicio), 'dd/MM/yyyy') : t('contas_pagar.data_vencimento_inicio')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={localFilters.data_vencimento_inicio ? new Date(localFilters.data_vencimento_inicio) : undefined}
+                onSelect={(date) => handleFilterChange('data_vencimento_inicio', date ? format(date, 'yyyy-MM-dd') : undefined)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
         
-        <Grid item xs={12} sm={6} md={3}>
-          <DatePicker
-            label={t('contas_pagar.data_vencimento_fim')}
-            value={localFilters.data_vencimento_fim ? new Date(localFilters.data_vencimento_fim) : null}
-            onChange={(date) => handleFilterChange('data_vencimento_fim', date ? format(date, 'yyyy-MM-dd') : undefined)}
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-          />
-        </Grid>
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !localFilters.data_vencimento_fim && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {localFilters.data_vencimento_fim ? format(new Date(localFilters.data_vencimento_fim), 'dd/MM/yyyy') : t('contas_pagar.data_vencimento_fim')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={localFilters.data_vencimento_fim ? new Date(localFilters.data_vencimento_fim) : undefined}
+                onSelect={(date) => handleFilterChange('data_vencimento_fim', date ? format(date, 'yyyy-MM-dd') : undefined)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
         
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            label={t('contas_pagar.valor_minimo')}
+        <div>
+          <Input
+            placeholder={t('contas_pagar.valor_minimo')}
             value={localFilters.valor_min || ''}
             onChange={(e) => handleFilterChange('valor_min', e.target.value ? parseFloat(e.target.value) : undefined)}
             type="number"
-            size="small"
-            fullWidth
-            InputProps={{
-              inputProps: { min: 0, step: 0.01 }
-            }}
+            step="0.01"
+            min="0"
           />
-        </Grid>
+        </div>
         
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            label={t('contas_pagar.valor_maximo')}
+        <div>
+          <Input
+            placeholder={t('contas_pagar.valor_maximo')}
             value={localFilters.valor_max || ''}
             onChange={(e) => handleFilterChange('valor_max', e.target.value ? parseFloat(e.target.value) : undefined)}
             type="number"
-            size="small"
-            fullWidth
-            InputProps={{
-              inputProps: { min: 0, step: 0.01 }
-            }}
+            step="0.01"
+            min="0"
           />
-        </Grid>
+        </div>
         
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            label={t('contas.empresa')}
+        <div>
+          <Input
+            placeholder={t('contas.empresa')}
             value={localFilters.cod_empresa || ''}
             onChange={(e) => handleFilterChange('cod_empresa', e.target.value ? parseInt(e.target.value) : undefined)}
             type="number"
-            size="small"
-            fullWidth
           />
-        </Grid>
+        </div>
         
-        <Grid item xs={12} sm={6} md={3}>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', height: '100%' }}>
-            <Button
-              variant="contained"
-              onClick={handleApplyFilters}
-              size="small"
-            >
-              {t('actions.filter')}
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleClearFilters}
-              size="small"
-            >
-              {t('actions.clear')}
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={onCreate}
-              size="small"
-            >
-              {t('contas_pagar.nova')}
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+        <div className="flex gap-2">
+          <Button onClick={handleApplyFilters} size="sm">
+            <Filter className="mr-2 h-4 w-4" />
+            {t('actions.filter')}
+          </Button>
+          <Button variant="outline" onClick={handleClearFilters} size="sm">
+            <X className="mr-2 h-4 w-4" />
+            {t('actions.clear')}
+          </Button>
+          <Button onClick={onCreate} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            {t('contas_pagar.nova')}
+          </Button>
+        </div>
+      </div>
 
-      {/* Data Grid */}
-      <DataGrid
-        rows={contasPagar}
-        columns={columns}
-        loading={loading}
-        rowCount={totalCount}
-        paginationModel={paginationModel}
-        onPaginationModelChange={handlePaginationModelChange}
-        pageSizeOptions={[10, 20, 50]}
-        paginationMode="server"
-        filterMode="server"
-        sortingMode="server"
-        disableRowSelectionOnClick
-        getRowId={(row) => row.CodAccountsPayable}
-        sx={{
-          '& .MuiDataGrid-cell:focus': {
-            outline: 'none',
-          },
-        }}
-      />
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('contas_pagar.data_vencimento')}</TableHead>
+              <TableHead>{t('contas_pagar.fornecedor')}</TableHead>
+              <TableHead>{t('contas_pagar.numero_documento')}</TableHead>
+              <TableHead>{t('contas_pagar.valor')}</TableHead>
+              <TableHead>{t('contas_pagar.valor_pago')}</TableHead>
+              <TableHead>{t('contas_pagar.status')}</TableHead>
+              <TableHead className="w-[100px]">{t('actions.actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  {t('common.loading')}
+                </TableCell>
+              </TableRow>
+            ) : contasPagar.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  {t('common.no_data')}
+                </TableCell>
+              </TableRow>
+            ) : (
+              contasPagar.map((conta) => (
+                <TableRow key={conta.CodAccountsPayable}>
+                  <TableCell>
+                    {conta.DataVencimento ? format(new Date(conta.DataVencimento), 'dd/MM/yyyy') : ''}
+                  </TableCell>
+                  <TableCell>{conta.CodFornecedor || ''}</TableCell>
+                  <TableCell>{conta.NumeroDocumento}</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    }).format(conta.Valor || 0)}
+                  </TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    }).format(conta.ValorPago || 0)}
+                  </TableCell>
+                  <TableCell>{renderStatus(conta.Status)}</TableCell>
+                  <TableCell>{renderActions(conta)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          {t('common.showing')} {startIndex + 1} {t('common.to')} {endIndex} {t('common.of')} {totalCount} {t('common.results')}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(parseInt(value))}>
+            <SelectTrigger className="w-[70px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              {totalPages > 5 && <PaginationEllipsis />}
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
       
       {error && (
-        <Box sx={{ mt: 2, color: 'error.main' }}>
+        <div className="text-red-600 text-sm mt-2">
           {error}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };

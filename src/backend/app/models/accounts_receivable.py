@@ -21,7 +21,7 @@ class AccountsReceivable(Base):
     IdCostCenter = Column(Integer, comment="Centro de custo")
     IdChartOfAccounts = Column(Integer, comment="Plano de contas")
     Description = Column(Text, comment="Descrição")
-    IdCustomer = Column(Integer, comment="Cliente")
+    IdCustomer = Column(Integer, ForeignKey("tbl_Clientes.CodCliente"), comment="Cliente")
     PaymentDate = Column(DateTime, comment="Data do recebimento")
     PaidAmount = Column(Numeric(19, 4), comment="Valor recebido")
     Installment = Column(Integer, comment="Número da parcela")
@@ -38,6 +38,9 @@ class AccountsReceivable(Base):
     IdUserAlter = Column(Integer, comment="Usuário alteração")
     DateCreate = Column(DateTime, nullable=False, comment="Data criação")
     DateUpdate = Column(DateTime, comment="Data alteração")
+    
+    # Relacionamentos
+    cliente = relationship("Cliente", back_populates="contas_receber")
     
     # Propriedades calculadas
     @property

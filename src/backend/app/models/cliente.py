@@ -1,13 +1,13 @@
 """
 Modelo de Clientes
 """
-from sqlalchemy import Column, Integer, String, Boolean, Text
+from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from app.core.database import Base
-from app.models.mixins import LoginAuditMixin
 
 
-class Cliente(Base, LoginAuditMixin):
+class Cliente(Base):
     """Modelo para clientes do sistema"""
     
     __tablename__ = "tbl_Clientes"
@@ -16,38 +16,31 @@ class Cliente(Base, LoginAuditMixin):
     DesCliente = Column(String(100), nullable=False, comment="Nome/descrição do cliente")
     RazaoSocial = Column(String(200), comment="Razão social (para PJ)")
     FlgTipoPessoa = Column(String(1), nullable=False, comment="F=Física, J=Jurídica")
+    CNPJCPF = Column(String(20), unique=True, index=True, comment="CNPJ ou CPF")
+    InscricaoEstadual = Column(String(20), comment="Inscrição estadual (para PJ)")
+    Email = Column(String(100), comment="Email principal")
+    Telefone = Column(String(20), comment="Telefone principal")
+    Endereco = Column(Text, comment="Endereço completo")
+    FlgAtivo = Column(Boolean, default=True, comment="Cliente ativo")
+    Observacoes = Column(Text, comment="Observações gerais")
     
-    # Documentos Pessoa Física
-    CPF = Column(String(14), comment="CPF (apenas PF)")
-    RG = Column(String(20), comment="RG (apenas PF)")
+    # Colunas de auditoria (conforme estrutura real da tabela)
+    DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
+    NomUsuario = Column(String(15), nullable=False)
+    DatAlteracao = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
+    NomUsuarioAlteracao = Column(String(15), nullable=True)
     
-    # Documentos Pessoa Jurídica
-    CNPJ = Column(String(18), comment="CNPJ (apenas PJ)")
-    IE = Column(String(20), comment="Inscrição Estadual (apenas PJ)")
-    IM = Column(String(20), comment="Inscrição Municipal (apenas PJ)")
+    # Relacionamentos
+    contas_receber = relationship("AccountsReceivable", back_populates="cliente")
     
-    # Dados de endereço
-    Endereco = Column(String(200), comment="Endereço completo")
-    Bairro = Column(String(100), comment="Bairro")
-    CEP = Column(String(10), comment="CEP")
-    Municipio = Column(String(100), comment="Município")
-    Estado = Column(String(2), comment="Estado (UF)")
+    # Propriedades de compatibilidade para schemas
+    @property
+    def DtCreate(self):
+        return self.DatCadastro
     
-    # Dados de contato (múltiplos)
-    Telefone1 = Column(String(20), comment="Telefone principal")
-    Telefone2 = Column(String(20), comment="Telefone secundário")
-    Email1 = Column(String(100), comment="E-mail principal")
-    Email2 = Column(String(100), comment="E-mail secundário")
-    
-    # Status e configurações
-    FlgLiberado = Column(Boolean, default=True, comment="Status de liberação do cliente")
-    FlgVIP = Column(Boolean, default=False, comment="Cliente VIP")
-    FlgAtivo = Column(String(1), default='S', comment="S=Ativo, N=Inativo")
-    
-    # Observações
-    Observacoes = Column(Text, comment="Observações gerais sobre o cliente")
-    
-    # Relacionamentos removidos devido a incompatibilidade com estrutura atual
+    @property
+    def DtAlter(self):
+        return self.DatAlteracao
     
     def __repr__(self):
         return f"<Cliente(CodCliente={self.CodCliente}, DesCliente='{self.DesCliente}', Tipo={self.FlgTipoPessoa})>"

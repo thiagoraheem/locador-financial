@@ -1,26 +1,37 @@
 import React, { useEffect } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-  FormHelperText,
-} from '@mui/material';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
+
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
+import { Alert, AlertDescription } from '../ui/alert';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form';
 
 // Types for the form - adjust to match yup schema exactly
 interface CategoriaFormData {
@@ -60,12 +71,7 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
   const { t } = useTranslation();
   const isEditing = !!initialData;
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<CategoriaFormData>({
+  const form = useForm<CategoriaFormData>({
     resolver: yupResolver(categoriaSchema),
     defaultValues: {
       NomCategoria: '',
@@ -75,6 +81,13 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
       FlgAtivo: 'S',
     },
   });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = form;
 
   // Reset form when initialData changes or when closing
   useEffect(() => {
@@ -106,135 +119,138 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {isEditing ? t('categorias.editar') : t('categorias.nova')}
-      </DialogTitle>
-      
-      <DialogContent>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? t('categorias.editar') : t('categorias.nova')}
+          </DialogTitle>
+        </DialogHeader>
+        
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+          <Alert className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
             {/* Nome da Categoria */}
-            <Grid item xs={12}>
-              <Controller
-                name="NomCategoria"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('categorias.nome')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
+            <FormField
+              control={control}
+              name="NomCategoria"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('categorias.nome')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Descrição */}
-            <Grid item xs={12}>
-              <Controller
-                name="Descricao"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('categorias.descricao')}
-                    multiline
-                    rows={3}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
+            <FormField
+              control={control}
+              name="Descricao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('categorias.descricao')}</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} value={field.value || ''} className="min-h-[80px]" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Tipo de Categoria */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={control}
                 name="TipoCategoria"
-                control={control}
                 render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.TipoCategoria}>
-                    <InputLabel>{t('categorias.tipo')}</InputLabel>
-                    <Select {...field} label={t('categorias.tipo')}>
-                      <MenuItem value="R">{t('categorias.receita')}</MenuItem>
-                      <MenuItem value="D">{t('categorias.despesa')}</MenuItem>
-                      <MenuItem value="T">{t('categorias.transferencia')}</MenuItem>
+                  <FormItem>
+                    <FormLabel>{t('categorias.tipo')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('categorias.tipo')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="R">{t('categorias.receita')}</SelectItem>
+                        <SelectItem value="D">{t('categorias.despesa')}</SelectItem>
+                        <SelectItem value="T">{t('categorias.transferencia')}</SelectItem>
+                      </SelectContent>
                     </Select>
-                    {errors.TipoCategoria && (
-                      <FormHelperText>{t(errors.TipoCategoria.message || '')}</FormHelperText>
-                    )}
-                  </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Categoria Pai */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="CodCategoriaPai"
+              {/* Categoria Pai */}
+              <FormField
                 control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('categorias.categoria_pai')}
-                    type="number"
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                    InputProps={{
-                      inputProps: { min: 0 }
-                    }}
-                  />
+                name="CodCategoriaPai"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('categorias.categoria_pai')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min={0}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
+            </div>
 
             {/* Status */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="FlgAtivo"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.FlgAtivo}>
-                    <InputLabel>{t('categorias.ativo')}</InputLabel>
-                    <Select {...field} label={t('categorias.ativo')}>
-                      <MenuItem value="S">{t('categorias.ativo')}</MenuItem>
-                      <MenuItem value="N">{t('categorias.inativo')}</MenuItem>
-                    </Select>
-                    {errors.FlgAtivo && (
-                      <FormHelperText>{t(errors.FlgAtivo.message || '')}</FormHelperText>
-                    )}
-                  </FormControl>
-                )}
-              />
-            </Grid>
-          </Grid>
-        </Box>
+            <FormField
+              control={control}
+              name="FlgAtivo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('categorias.ativo')}</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('categorias.ativo')} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="S">{t('categorias.ativo')}</SelectItem>
+                      <SelectItem value="N">{t('categorias.inativo')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
+        
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+            {t('actions.cancel')}
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            onClick={handleSubmit(handleFormSubmit)}
+          >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {loading ? t('messages.saving') : t('actions.save')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      
-      <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
-          {t('actions.cancel')}
-        </Button>
-        <Button 
-          onClick={handleSubmit(handleFormSubmit)} 
-          variant="contained" 
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
-        >
-          {loading ? t('messages.saving') : t('actions.save')}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

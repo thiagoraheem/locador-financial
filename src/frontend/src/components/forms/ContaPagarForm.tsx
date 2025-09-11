@@ -1,30 +1,40 @@
 import React, { useEffect } from 'react';
 import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Grid,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-  FormHelperText,
-} from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { useForm, Controller } from 'react-hook-form';
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Textarea } from '@/components/ui/textarea';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
-import { ptBR } from 'date-fns/locale';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Types for the form - adjust to match yup schema exactly
 interface ContaPagarFormData {
@@ -82,12 +92,7 @@ export const ContaPagarForm: React.FC<ContaPagarFormProps> = ({
   const { t } = useTranslation();
   const isEditing = !!initialData;
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ContaPagarFormData>({
+  const form = useForm<ContaPagarFormData>({
     resolver: yupResolver(contaPagarSchema),
     defaultValues: {
       CodEmpresa: 0,
@@ -106,6 +111,13 @@ export const ContaPagarForm: React.FC<ContaPagarFormProps> = ({
       LinhaDigitavel: '',
     },
   });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = form;
 
   // Reset form when initialData changes or when closing
   useEffect(() => {
@@ -168,326 +180,357 @@ export const ContaPagarForm: React.FC<ContaPagarFormProps> = ({
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {isEditing ? t('contas_pagar.editar') : t('contas_pagar.nova')}
-        </DialogTitle>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? t('contas_pagar.editar') : t('contas_pagar.nova')}
+          </DialogTitle>
+        </DialogHeader>
         
-        <DialogContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          
-          <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
+        {error && (
+          <Alert className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        <Form {...form}>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Empresa */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodEmpresa"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas.empresa')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="CodEmpresa"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.empresa')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Fornecedor */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodFornecedor"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_pagar.fornecedor')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="CodFornecedor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas_pagar.fornecedor')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Conta Bancária */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="idConta"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas.conta')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+               <FormField
+                 control={control}
+                 name="idConta"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas.conta')}</FormLabel>
+                     <FormControl>
+                       <Input
+                         type="number"
+                         min={0}
+                         {...field}
+                         value={field.value || ''}
+                         onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                       />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Categoria */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodCategoria"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.categoria')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+               {/* Categoria */}
+               <FormField
+                 control={control}
+                 name="CodCategoria"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('lancamentos.categoria')}</FormLabel>
+                     <FormControl>
+                       <Input
+                         type="number"
+                         min={0}
+                         {...field}
+                         value={field.value || ''}
+                         onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                       />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
               {/* Data de Emissão */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="DataEmissao"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      label={t('lancamentos.data_emissao')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error ? t(error.message || '') : null,
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+               <FormField
+                 control={control}
+                 name="DataEmissao"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('lancamentos.data_emissao')}</FormLabel>
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <FormControl>
+                           <Button
+                             variant="outline"
+                             className={cn(
+                               "w-full pl-3 text-left font-normal",
+                               !field.value && "text-muted-foreground"
+                             )}
+                           >
+                             {field.value ? (
+                               format(field.value, "PPP", { locale: ptBR })
+                             ) : (
+                               <span>{t('lancamentos.selecionar_data')}</span>
+                             )}
+                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                           </Button>
+                         </FormControl>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0" align="start">
+                         <Calendar
+                           mode="single"
+                           selected={field.value || undefined}
+                           onSelect={field.onChange}
+                           disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                           initialFocus
+                         />
+                       </PopoverContent>
+                     </Popover>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Data de Vencimento */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="DataVencimento"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      label={t('contas_pagar.data_vencimento')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error ? t(error.message || '') : null,
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+               {/* Data de Vencimento */}
+               <FormField
+                 control={control}
+                 name="DataVencimento"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas_pagar.data_vencimento')}</FormLabel>
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <FormControl>
+                           <Button
+                             variant="outline"
+                             className={cn(
+                               "w-full pl-3 text-left font-normal",
+                               !field.value && "text-muted-foreground"
+                             )}
+                           >
+                             {field.value ? (
+                               format(field.value, "PPP", { locale: ptBR })
+                             ) : (
+                               <span>{t('contas_pagar.selecionar_data_vencimento')}</span>
+                             )}
+                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                           </Button>
+                         </FormControl>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0" align="start">
+                         <Calendar
+                           mode="single"
+                           selected={field.value || undefined}
+                           onSelect={field.onChange}
+                           disabled={(date) => date < new Date("1900-01-01")}
+                           initialFocus
+                         />
+                       </PopoverContent>
+                     </Popover>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
               {/* Valor */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="Valor"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_pagar.valor')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0, step: 0.01 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+               <FormField
+                 control={control}
+                 name="Valor"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas_pagar.valor')}</FormLabel>
+                     <FormControl>
+                       <Input
+                         type="number"
+                         min={0}
+                         step={0.01}
+                         {...field}
+                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                       />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Número do Documento */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="NumeroDocumento"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.numero_documento')}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
+               {/* Número do Documento */}
+               <FormField
+                 control={control}
+                 name="NumeroDocumento"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('lancamentos.numero_documento')}</FormLabel>
+                     <FormControl>
+                       <Input {...field} />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Número da Parcela */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="NumParcela"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_pagar.parcial')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 1 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+               {/* Número da Parcela */}
+               <FormField
+                 control={control}
+                 name="NumParcela"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas_pagar.num_parcela')}</FormLabel>
+                     <FormControl>
+                       <Input
+                         type="number"
+                         min={1}
+                         {...field}
+                         value={field.value || ''}
+                         onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                       />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Total de Parcelas */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="TotalParcelas"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_pagar.parcial')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 1 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+               {/* Total de Parcelas */}
+               <FormField
+                 control={control}
+                 name="TotalParcelas"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas_pagar.total_parcelas')}</FormLabel>
+                     <FormControl>
+                       <Input
+                         type="number"
+                         min={1}
+                         {...field}
+                         value={field.value || ''}
+                         onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                       />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
               {/* Status */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="Status"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.Status}>
-                      <InputLabel>{t('contas_pagar.status')}</InputLabel>
-                      <Select {...field} label={t('contas_pagar.status')}>
-                        <MenuItem value="A">{t('contas_pagar.aberto')}</MenuItem>
-                        <MenuItem value="P">{t('contas_pagar.pago')}</MenuItem>
-                        <MenuItem value="V">{t('contas_pagar.vencido')}</MenuItem>
-                        <MenuItem value="C">{t('lancamentos.cancelado')}</MenuItem>
-                      </Select>
-                      {errors.Status && (
-                        <FormHelperText>{t(errors.Status.message || '')}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </Grid>
+               <FormField
+                 control={control}
+                 name="Status"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas_pagar.status')}</FormLabel>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                       <FormControl>
+                         <SelectTrigger>
+                           <SelectValue placeholder={t('contas_pagar.selecionar_status')} />
+                         </SelectTrigger>
+                       </FormControl>
+                       <SelectContent>
+                         <SelectItem value="A">{t('contas_pagar.aberto')}</SelectItem>
+                         <SelectItem value="P">{t('contas_pagar.pago')}</SelectItem>
+                         <SelectItem value="V">{t('contas_pagar.vencido')}</SelectItem>
+                         <SelectItem value="C">{t('lancamentos.cancelado')}</SelectItem>
+                       </SelectContent>
+                     </Select>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Código de Barras */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodigoBarras"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_pagar.codigo_barras')}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
+               {/* Código de Barras */}
+               <FormField
+                 control={control}
+                 name="CodigoBarras"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas_pagar.codigo_barras')}</FormLabel>
+                     <FormControl>
+                       <Input {...field} />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Linha Digitável */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="LinhaDigitavel"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_pagar.linha_digitavel')}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
+               {/* Linha Digitável */}
+               <FormField
+                 control={control}
+                 name="LinhaDigitavel"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>{t('contas_pagar.linha_digitavel')}</FormLabel>
+                     <FormControl>
+                       <Input {...field} />
+                     </FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
 
-              {/* Observações */}
-              <Grid item xs={12}>
-                <Controller
-                  name="Observacao"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.observacoes')}
-                      multiline
-                      rows={3}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
+               {/* Observações */}
+               <div className="col-span-full">
+                 <FormField
+                   control={control}
+                   name="Observacao"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>{t('lancamentos.observacoes')}</FormLabel>
+                       <FormControl>
+                         <Textarea
+                           rows={3}
+                           {...field}
+                         />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+               </div>
+            </div>
+          </form>
+        </Form>
         
-        <DialogActions>
-          <Button onClick={handleClose} disabled={loading}>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={loading}>
             {t('actions.cancel')}
           </Button>
           <Button 
-            onClick={handleSubmit(handleFormSubmit)} 
-            variant="contained" 
+            type="submit"
+            onClick={handleSubmit(handleFormSubmit)}
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} /> : null}
           >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {loading ? t('messages.saving') : t('actions.save')}
           </Button>
-        </DialogActions>
-      </Dialog>
-    </LocalizationProvider>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -1,28 +1,34 @@
 import React, { useEffect } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-  FormHelperText,
-  Checkbox,
-  FormControlLabel,
-} from '@mui/material';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
+
+import {
+  Button,
+  Input,
+  Label,
+  Textarea,
+  Checkbox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  Alert,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui';
 
 // Types for the form - adjust to match yup schema exactly
 interface ClienteFormData {
@@ -94,12 +100,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   const { t } = useTranslation();
   const isEditing = !!initialData;
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ClienteFormData>({
+  const form = useForm<ClienteFormData>({
     resolver: yupResolver(clienteSchema),
     defaultValues: {
       DesCliente: '',
@@ -125,6 +126,13 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       Observacoes: '',
     },
   });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = form;
 
   // Reset form when initialData changes or when closing
   useEffect(() => {
@@ -188,406 +196,383 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {isEditing ? t('clientes.editar') : t('clientes.novo')}
-      </DialogTitle>
-      
-      <DialogContent>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? t('clientes.editarCliente') : t('clientes.novoCliente')}
+          </DialogTitle>
+        </DialogHeader>
+        
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert className="mb-4">
             {error}
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            {/* Nome */}
-            <Grid item xs={12}>
-              <Controller
-                name="DesCliente"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.nome')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome */}
+              <div className="md:col-span-2">
+                <FormField
+                  control={control}
+                  name="DesCliente"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('clientes.nome')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            {/* Tipo de Pessoa */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Tipo de Pessoa */}
+              <FormField
+                control={control}
                 name="FlgTipoPessoa"
-                control={control}
                 render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.FlgTipoPessoa}>
-                    <InputLabel>{t('clientes.tipo_pessoa')}</InputLabel>
-                    <Select {...field} label={t('clientes.tipo_pessoa')}>
-                      <MenuItem value="F">{t('clientes.tipo_pessoa_f')}</MenuItem>
-                      <MenuItem value="J">{t('clientes.tipo_pessoa_j')}</MenuItem>
+                  <FormItem>
+                    <FormLabel>{t('clientes.tipo_pessoa')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="F">{t('clientes.tipo_pessoa_f')}</SelectItem>
+                        <SelectItem value="J">{t('clientes.tipo_pessoa_j')}</SelectItem>
+                      </SelectContent>
                     </Select>
-                    {errors.FlgTipoPessoa && (
-                      <FormHelperText>{t(errors.FlgTipoPessoa.message || '')}</FormHelperText>
-                    )}
-                  </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Razão Social */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Razão Social */}
+              <FormField
+                control={control}
                 name="RazaoSocial"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.razao_social')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.razao_social')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* CPF */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* CPF */}
+              <FormField
+                control={control}
                 name="CPF"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.cpf')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.cpf')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* RG */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* RG */}
+              <FormField
+                control={control}
                 name="RG"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.rg')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.rg')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* CNPJ */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* CNPJ */}
+              <FormField
+                control={control}
                 name="CNPJ"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.cnpj')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.cnpj')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Inscrição Estadual */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* IE */}
+              <FormField
+                control={control}
                 name="IE"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.ie')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.ie')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Inscrição Municipal */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* IM */}
+              <FormField
+                control={control}
                 name="IM"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.im')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.im')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Telefone 1 */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Telefone 1 */}
+              <FormField
+                control={control}
                 name="Telefone1"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.telefone1')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.telefone1')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Telefone 2 */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Telefone 2 */}
+              <FormField
+                control={control}
                 name="Telefone2"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.telefone2')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.telefone2')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Email 1 */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Email 1 */}
+              <FormField
+                control={control}
                 name="Email1"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.email1')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.email1')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Email 2 */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Email 2 */}
+              <FormField
+                control={control}
                 name="Email2"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.email2')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.email2')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Endereço */}
-            <Grid item xs={12}>
-              <Controller
-                name="Endereco"
+              {/* Endereço */}
+              <div className="md:col-span-2">
+                <FormField
+                  control={control}
+                  name="Endereco"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('clientes.endereco')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Bairro */}
+              <FormField
                 control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.endereco')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Bairro */}
-            <Grid item xs={12} sm={6}>
-              <Controller
                 name="Bairro"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.bairro')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.bairro')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* CEP */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* CEP */}
+              <FormField
+                control={control}
                 name="CEP"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.cep')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.cep')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Município */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Município */}
+              <FormField
+                control={control}
                 name="Municipio"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.municipio')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.municipio')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Estado */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Estado */}
+              <FormField
+                control={control}
                 name="Estado"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.estado')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('clientes.estado')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Observações */}
-            <Grid item xs={12}>
-              <Controller
-                name="Observacoes"
+              {/* Observações */}
+              <div className="md:col-span-2">
+                <FormField
+                  control={control}
+                  name="Observacoes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('clientes.observacoes')}</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} className="min-h-[80px]" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Flags */}
+              <FormField
                 control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.observacoes')}
-                    multiline
-                    rows={3}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Flags */}
-            <Grid item xs={12} sm={4}>
-              <Controller
                 name="FlgLiberado"
-                control={control}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
                       <Checkbox
-                        {...field}
                         checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
+                        onCheckedChange={field.onChange}
                       />
-                    }
-                    label={t('clientes.liberado')}
-                  />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t('clientes.liberado')}</FormLabel>
+                    </div>
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            <Grid item xs={12} sm={4}>
-              <Controller
+              <FormField
+                control={control}
                 name="FlgVIP"
-                control={control}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
                       <Checkbox
-                        {...field}
                         checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
+                        onCheckedChange={field.onChange}
                       />
-                    }
-                    label={t('clientes.vip')}
-                  />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t('clientes.vip')}</FormLabel>
+                    </div>
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Status */}
-            <Grid item xs={12} sm={4}>
-              <Controller
-                name="FlgAtivo"
+              {/* Status */}
+              <FormField
                 control={control}
+                name="FlgAtivo"
                 render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.FlgAtivo}>
-                    <InputLabel>{t('clientes.ativo')}</InputLabel>
-                    <Select {...field} label={t('clientes.ativo')}>
-                      <MenuItem value="S">{t('categorias.ativo')}</MenuItem>
-                      <MenuItem value="N">{t('categorias.inativo')}</MenuItem>
+                  <FormItem>
+                    <FormLabel>{t('clientes.ativo')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="S">{t('categorias.ativo')}</SelectItem>
+                        <SelectItem value="N">{t('categorias.inativo')}</SelectItem>
+                      </SelectContent>
                     </Select>
-                    {errors.FlgAtivo && (
-                      <FormHelperText>{t(errors.FlgAtivo.message || '')}</FormHelperText>
-                    )}
-                  </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
-          </Grid>
-        </Box>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
-      
-      <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
-          {t('actions.cancel')}
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          {t('common.cancelar')}
         </Button>
-        <Button 
-          onClick={handleSubmit(handleFormSubmit)} 
-          variant="contained" 
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          onClick={handleSubmit(handleFormSubmit)}
         >
-          {loading ? t('messages.saving') : t('actions.save')}
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {t('common.salvar')}
         </Button>
-      </DialogActions>
+      </DialogFooter>
     </Dialog>
   );
 };

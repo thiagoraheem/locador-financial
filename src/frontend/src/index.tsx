@@ -13,6 +13,7 @@ import App from './App';
 import { store } from './store';
 import { theme } from './theme';
 import './i18n';
+import './globals.css';
 
 // Configuração do React Query
 const queryClient = new QueryClient({

@@ -1,32 +1,43 @@
 import React, { useEffect } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-  FormHelperText,
-  Checkbox,
-  FormControlLabel,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
-import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { ChevronDown, Loader2 } from 'lucide-react';
+
+// ShadCN UI Components
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 // Types for the form - adjust to match yup schema exactly
 interface ContaBancariaFormData {
@@ -88,12 +99,7 @@ export const ContaBancariaForm: React.FC<ContaBancariaFormProps> = ({
   const { t } = useTranslation();
   const isEditing = !!initialData;
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ContaBancariaFormData>({
+  const form = useForm<ContaBancariaFormData>({
     resolver: yupResolver(contaBancariaSchema),
     defaultValues: {
       CodEmpresa: 0,
@@ -114,6 +120,13 @@ export const ContaBancariaForm: React.FC<ContaBancariaFormProps> = ({
       TokenAPI: '',
     },
   });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = form;
 
   // Reset form when initialData changes or when closing
   useEffect(() => {
@@ -174,356 +187,364 @@ export const ContaBancariaForm: React.FC<ContaBancariaFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {isEditing ? t('contas.editar') : t('contas.nova')}
-      </DialogTitle>
-      
-      <DialogContent>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? t('contas.editar') : t('contas.nova')}
+          </DialogTitle>
+        </DialogHeader>
+        
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+          <Alert className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            {/* Empresa */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+        <Form {...form}>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Empresa */}
+              <FormField
+                control={control}
                 name="CodEmpresa"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.empresa')}
-                    type="number"
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    InputProps={{
-                      inputProps: { min: 0 }
-                    }}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.empresa')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="0"
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Banco */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="Banco"
+              {/* Banco */}
+              <FormField
                 control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.banco')}
-                    type="number"
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    InputProps={{
-                      inputProps: { min: 0 }
-                    }}
-                  />
+                name="Banco"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.banco')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="0"
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
+
+            </div>
 
             {/* Nome da Conta */}
-            <Grid item xs={12}>
-              <Controller
-                name="NomConta"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.nome_conta')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
+            <FormField
+              control={control}
+              name="NomConta"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('contas.nome_conta')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            {/* Agência */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Agência */}
+              <FormField
+                control={control}
                 name="Agencia"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.agencia')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.agencia')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Dígito da Agência */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Dígito da Agência */}
+              <FormField
+                control={control}
                 name="AgenciaDigito"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.agencia') + ' ' + t('contas.digito')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.agencia')} {t('contas.digito')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Conta */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Conta */}
+              <FormField
+                control={control}
                 name="Conta"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.conta')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.conta')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Dígito da Conta */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Dígito da Conta */}
+              <FormField
+                control={control}
                 name="ContaDigito"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.conta') + ' ' + t('contas.digito')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.conta')} {t('contas.digito')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Tipo de Conta */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Tipo de Conta */}
+              <FormField
+                control={control}
                 name="TipoConta"
-                control={control}
                 render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.TipoConta}>
-                    <InputLabel>{t('contas.tipo_conta')}</InputLabel>
-                    <Select {...field} label={t('contas.tipo_conta')}>
-                      <MenuItem value="CC">{t('contas.tipo_conta_cc')}</MenuItem>
-                      <MenuItem value="CP">{t('contas.tipo_conta_cp')}</MenuItem>
-                      <MenuItem value="CS">{t('contas.tipo_conta_cs')}</MenuItem>
+                  <FormItem>
+                    <FormLabel>{t('contas.tipo_conta')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="CC">{t('contas.tipo_conta_cc')}</SelectItem>
+                        <SelectItem value="CP">{t('contas.tipo_conta_cp')}</SelectItem>
+                        <SelectItem value="CS">{t('contas.tipo_conta_cs')}</SelectItem>
+                      </SelectContent>
                     </Select>
-                    {errors.TipoConta && (
-                      <FormHelperText>{t(errors.TipoConta.message || '')}</FormHelperText>
-                    )}
-                  </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Saldo */}
-            <Grid item xs={12} sm={6}>
-              <Controller
+              {/* Saldo */}
+              <FormField
+                control={control}
                 name="Saldo"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('contas.saldo')}
-                    type="number"
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    InputProps={{
-                      inputProps: { min: 0, step: 0.01 }
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Conta Padrão */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="FlgContaPadrao"
-                control={control}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
+                  <FormItem>
+                    <FormLabel>{t('contas.saldo')}</FormLabel>
+                    <FormControl>
+                      <Input
                         {...field}
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                       />
-                    }
-                    label={t('contas.conta_padrao')}
-                  />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
-            </Grid>
 
-            {/* Status */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="FlgAtivo"
+              {/* Conta Padrão */}
+              <FormField
                 control={control}
+                name="FlgContaPadrao"
                 render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.FlgAtivo}>
-                    <InputLabel>{t('contas.ativo')}</InputLabel>
-                    <Select {...field} label={t('contas.ativo')}>
-                      <MenuItem value="S">{t('categorias.ativo')}</MenuItem>
-                      <MenuItem value="N">{t('categorias.inativo')}</MenuItem>
-                    </Select>
-                    {errors.FlgAtivo && (
-                      <FormHelperText>{t(errors.FlgAtivo.message || '')}</FormHelperText>
-                    )}
-                  </FormControl>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t('contas.conta_padrao')}</FormLabel>
+                    </div>
+                  </FormItem>
                 )}
               />
-            </Grid>
+
+              {/* Status */}
+              <FormField
+                control={control}
+                name="FlgAtivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.ativo')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="S">{t('categorias.ativo')}</SelectItem>
+                        <SelectItem value="N">{t('categorias.inativo')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+            </div>
 
             {/* PIX Configuration - Expandable section */}
-            <Grid item xs={12}>
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography>{t('contas.pix')}</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Controller
-                        name="TipoPix"
-                        control={control}
-                        render={({ field, fieldState: { error } }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            label={t('contas.tipo_pix')}
-                            error={!!error}
-                            helperText={error ? t(error.message || '') : null}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Controller
-                        name="ValorPix"
-                        control={control}
-                        render={({ field, fieldState: { error } }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            label={t('contas.valor_pix')}
-                            error={!!error}
-                            helperText={error ? t(error.message || '') : null}
-                          />
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                </AccordionDetails>
-              </Accordion>
-            </Grid>
+            <div className="col-span-2">
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 text-left bg-muted rounded-lg hover:bg-muted/80">
+                  <span className="font-medium">{t('contas.pix_config')}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Tipo PIX */}
+                    <FormField
+                      control={control}
+                      name="TipoPix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('contas.tipo_pix')}</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={t('contas.selecione')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="none">{t('contas.selecione')}</SelectItem>
+                              <SelectItem value="CPF">{t('contas.cpf')}</SelectItem>
+                              <SelectItem value="CNPJ">{t('contas.cnpj')}</SelectItem>
+                              <SelectItem value="EMAIL">{t('contas.email')}</SelectItem>
+                              <SelectItem value="TELEFONE">{t('contas.telefone')}</SelectItem>
+                              <SelectItem value="CHAVE_ALEATORIA">{t('contas.chave_aleatoria')}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Valor PIX */}
+                    <FormField
+                      control={control}
+                      name="ValorPix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('contas.valor_pix')}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
             {/* API Configuration - Expandable section */}
-            <Grid item xs={12}>
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography>{t('contas.config_api')}</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Controller
-                        name="EnableAPI"
-                        control={control}
-                        render={({ field }) => (
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                {...field}
-                                checked={field.value}
-                                onChange={(e) => field.onChange(e.target.checked)}
-                              />
-                            }
-                            label={t('contas.enable_api')}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Controller
-                        name="ConfiguracaoAPI"
-                        control={control}
-                        render={({ field, fieldState: { error } }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            label={t('contas.config_api')}
-                            multiline
-                            rows={3}
-                            error={!!error}
-                            helperText={error ? t(error.message || '') : null}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Controller
-                        name="TokenAPI"
-                        control={control}
-                        render={({ field, fieldState: { error } }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            label="API Token"
-                            multiline
-                            rows={2}
-                            error={!!error}
-                            helperText={error ? t(error.message || '') : null}
-                          />
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                </AccordionDetails>
-              </Accordion>
-            </Grid>
-          </Grid>
-        </Box>
+            <div className="col-span-2">
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 text-left bg-muted rounded-lg hover:bg-muted/80">
+                  <span className="font-medium">{t('contas.config_api')}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 p-4">
+                  <div className="space-y-4">
+                    {/* Enable API */}
+                    <FormField
+                      control={control}
+                      name="EnableAPI"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>{t('contas.enable_api')}</FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Configuração API */}
+                    <FormField
+                      control={control}
+                      name="ConfiguracaoAPI"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('contas.config_api')}</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} rows={3} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Token API */}
+                    <FormField
+                      control={control}
+                      name="TokenAPI"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>API Token</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} rows={2} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleContent>
+               </Collapsible>
+             </div>
+
+           </form>
+         </Form>
+           
+         <DialogFooter>
+           <Button variant="outline" onClick={handleClose} disabled={loading}>
+             {t('actions.cancel')}
+           </Button>
+           <Button 
+             type="submit"
+             onClick={handleSubmit(handleFormSubmit)}
+             disabled={loading}
+           >
+             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+             {loading ? t('messages.saving') : t('actions.save')}
+           </Button>
+         </DialogFooter>
       </DialogContent>
-      
-      <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
-          {t('actions.cancel')}
-        </Button>
-        <Button 
-          onClick={handleSubmit(handleFormSubmit)} 
-          variant="contained" 
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
-        >
-          {loading ? t('messages.saving') : t('actions.save')}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

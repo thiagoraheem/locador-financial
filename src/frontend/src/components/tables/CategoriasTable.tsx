@@ -1,26 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {
-  DataGrid,
-  GridColDef,
-  GridPaginationModel,
-} from '@mui/x-data-grid';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
+import { Plus, Edit, Trash2, Filter, X } from 'lucide-react';
+
+// ShadCN UI Components
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
@@ -49,10 +37,8 @@ export const CategoriasTable: React.FC<CategoriasTableProps> = ({ onEdit, onCrea
   } = useAppSelector((state) => state.categorias);
 
   const [localFilters, setLocalFilters] = useState(filters);
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: pagination.skip / pagination.limit,
-    pageSize: pagination.limit,
-  });
+  const [currentPage, setCurrentPage] = useState(Math.floor(pagination.skip / pagination.limit) + 1);
+  const [pageSize, setPageSize] = useState(pagination.limit);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
@@ -94,195 +80,243 @@ export const CategoriasTable: React.FC<CategoriasTableProps> = ({ onEdit, onCrea
   };
 
   // Handle pagination changes
-  const handlePaginationModelChange = (model: GridPaginationModel) => {
-    setPaginationModel(model);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
     dispatch(setPagination({
-      skip: model.page * model.pageSize,
-      limit: model.pageSize,
+      skip: (page - 1) * pageSize,
+      limit: pageSize,
     }));
   };
 
-  // Columns definition
-  const columns: GridColDef[] = [
-    {
-      field: 'NomCategoria',
-      headerName: t('categorias.nome'),
-      flex: 1,
-      minWidth: 200,
-    },
-    {
-      field: 'Descricao',
-      headerName: t('categorias.descricao'),
-      flex: 1,
-      minWidth: 200,
-    },
-    {
-      field: 'TipoCategoria',
-      headerName: t('categorias.tipo'),
-      width: 120,
-      renderCell: (params) => {
-        let label = '';
-        let color: 'success' | 'error' | 'info' = 'info';
-        
-        switch (params.value) {
-          case 'R':
-            label = t('categorias.receita');
-            color = 'success';
-            break;
-          case 'D':
-            label = t('categorias.despesa');
-            color = 'error';
-            break;
-          case 'T':
-            label = t('categorias.transferencia');
-            color = 'info';
-            break;
-        }
-        
-        return (
-          <Chip
-            label={label}
-            color={color}
-            size="small"
-          />
-        );
-      },
-    },
-    {
-      field: 'categoria_pai_nome',
-      headerName: t('categorias.categoria_pai'),
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'FlgAtivo',
-      headerName: t('categorias.ativo'),
-      width: 100,
-      renderCell: (params) => (
-        <Chip
-          label={params.value === 'S' ? t('categorias.ativo') : t('categorias.inativo')}
-          color={params.value === 'S' ? 'success' : 'default'}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: 'actions',
-      headerName: t('actions.actions'),
-      width: 120,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title={t('actions.edit')}>
-            <IconButton
-              size="small"
-              onClick={() => onEdit(params.row as CategoriaResponse)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('actions.delete')}>
-            <IconButton
-              size="small"
-              onClick={() => handleDelete(params.row.CodCategoria)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ];
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+    dispatch(setPagination({
+      skip: 0,
+      limit: newPageSize,
+    }));
+  };
+
+  // Helper functions for rendering cells
+  const renderTipoCategoria = (tipo: string) => {
+    let label = '';
+    let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default';
+    
+    switch (tipo) {
+      case 'R':
+        label = t('categorias.receita');
+        variant = 'default';
+        break;
+      case 'D':
+        label = t('categorias.despesa');
+        variant = 'destructive';
+        break;
+      case 'T':
+        label = t('categorias.transferencia');
+        variant = 'secondary';
+        break;
+    }
+    
+    return (
+      <Badge variant={variant}>
+        {label}
+      </Badge>
+    );
+  };
+
+  const renderStatus = (flgAtivo: string) => (
+    <Badge variant={flgAtivo === 'S' ? 'default' : 'outline'}>
+      {flgAtivo === 'S' ? t('categorias.ativo') : t('categorias.inativo')}
+    </Badge>
+  );
+
+  const renderActions = (categoria: CategoriaResponse) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm">
+          •••
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => onEdit(categoria)}>
+          <Edit className="mr-2 h-4 w-4" />
+          {t('actions.edit')}
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => handleDelete(categoria.CodCategoria)}
+          className="text-red-600"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t('actions.delete')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  // Calculate pagination
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const startItem = (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalCount);
 
   return (
-    <Box sx={{ height: 600, width: '100%' }}>
+    <div className="space-y-4">
       {/* Filter controls */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-        <TextField
-          label={t('categorias.nome')}
-          value={localFilters.tipo || ''}
-          onChange={(e) => handleFilterChange('tipo', e.target.value || undefined)}
-          size="small"
-        />
+      <div className="flex flex-wrap gap-4 items-end">
+        <div className="flex-1 min-w-[200px]">
+          <Input
+            placeholder={t('categorias.nome')}
+            value={localFilters.tipo || ''}
+            onChange={(e) => handleFilterChange('tipo', e.target.value || undefined)}
+          />
+        </div>
         
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>{t('categorias.tipo')}</InputLabel>
+        <div className="min-w-[150px]">
           <Select
             value={localFilters.tipo || ''}
-            label={t('categorias.tipo')}
-            onChange={(e) => handleFilterChange('tipo', e.target.value || undefined)}
+            onValueChange={(value) => handleFilterChange('tipo', value || undefined)}
           >
-            <MenuItem value="R">{t('categorias.receita')}</MenuItem>
-            <MenuItem value="D">{t('categorias.despesa')}</MenuItem>
-            <MenuItem value="T">{t('categorias.transferencia')}</MenuItem>
+            <SelectTrigger>
+              <SelectValue placeholder={t('categorias.tipo')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="R">{t('categorias.receita')}</SelectItem>
+              <SelectItem value="D">{t('categorias.despesa')}</SelectItem>
+              <SelectItem value="T">{t('categorias.transferencia')}</SelectItem>
+            </SelectContent>
           </Select>
-        </FormControl>
+        </div>
         
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>{t('categorias.ativo')}</InputLabel>
+        <div className="min-w-[120px]">
           <Select
             value={localFilters.ativas_apenas !== undefined ? (localFilters.ativas_apenas ? '1' : '0') : '1'}
-            label={t('categorias.ativo')}
-            onChange={(e) => handleFilterChange('ativas_apenas', e.target.value === '1' ? true : (e.target.value === '0' ? false : undefined))}
+            onValueChange={(value) => handleFilterChange('ativas_apenas', value === '1' ? true : (value === '0' ? false : undefined))}
           >
-            <MenuItem value="1">{t('categorias.ativo')}</MenuItem>
-            <MenuItem value="0">{t('categorias.inativo')}</MenuItem>
+            <SelectTrigger>
+              <SelectValue placeholder={t('categorias.ativo')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">{t('categorias.ativo')}</SelectItem>
+              <SelectItem value="0">{t('categorias.inativo')}</SelectItem>
+            </SelectContent>
           </Select>
-        </FormControl>
+        </div>
         
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Button
-            variant="contained"
-            onClick={handleApplyFilters}
-            size="small"
-          >
+        <div className="flex gap-2">
+          <Button onClick={handleApplyFilters} size="sm">
+            <Filter className="mr-2 h-4 w-4" />
             {t('actions.filter')}
           </Button>
-          <Button
-            variant="outlined"
-            onClick={handleClearFilters}
-            size="small"
-          >
+          <Button variant="outline" onClick={handleClearFilters} size="sm">
+            <X className="mr-2 h-4 w-4" />
             {t('actions.clear')}
           </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onCreate}
-            size="small"
-          >
+          <Button onClick={onCreate} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
             {t('categorias.nova')}
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {/* Data Grid */}
-      <DataGrid
-        rows={categorias}
-        columns={columns}
-        loading={loading}
-        rowCount={totalCount}
-        paginationModel={paginationModel}
-        onPaginationModelChange={handlePaginationModelChange}
-        pageSizeOptions={[10, 20, 50]}
-        paginationMode="server"
-        filterMode="server"
-        sortingMode="server"
-        disableRowSelectionOnClick
-        getRowId={(row) => row.CodCategoria}
-        sx={{
-          '& .MuiDataGrid-cell:focus': {
-            outline: 'none',
-          },
-        }}
-      />
+      {/* Table */}
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('categorias.nome')}</TableHead>
+              <TableHead>{t('categorias.descricao')}</TableHead>
+              <TableHead>{t('categorias.tipo')}</TableHead>
+              <TableHead>{t('categorias.categoria_pai')}</TableHead>
+              <TableHead>{t('categorias.ativo')}</TableHead>
+              <TableHead className="w-[100px]">{t('actions.actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  {t('messages.loading')}
+                </TableCell>
+              </TableRow>
+            ) : categorias.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  {t('messages.no_data')}
+                </TableCell>
+              </TableRow>
+            ) : (
+              categorias.map((categoria) => (
+                <TableRow key={categoria.CodCategoria}>
+                  <TableCell className="font-medium">{categoria.NomCategoria}</TableCell>
+                  <TableCell>{categoria.Descricao || '-'}</TableCell>
+                  <TableCell>{renderTipoCategoria(categoria.TipoCategoria)}</TableCell>
+                  <TableCell>{categoria.categoria_pai_nome || '-'}</TableCell>
+                  <TableCell>{renderStatus(categoria.FlgAtivo)}</TableCell>
+                  <TableCell>{renderActions(categoria)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Mostrando {startItem} a {endItem} de {totalCount} resultados
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Itens por página:</span>
+            <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
+              <SelectTrigger className="w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              {totalPages > 5 && <PaginationEllipsis />}
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
       
       {error && (
-        <Box sx={{ mt: 2, color: 'error.main' }}>
+        <div className="text-red-600 text-sm mt-2">
           {error}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };

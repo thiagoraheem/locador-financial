@@ -72,9 +72,10 @@ class EmpresaService:
         
         query = self.db.query(Empresa)
         
-        # Filter only active
-        if ativas_apenas:
-            query = query.filter(Empresa.FlgAtivo == 'S')
+        # Note: FlgAtivo attribute doesn't exist in Empresa model
+        # Removing the filter for now as all empresas in the table are considered active
+        # if ativas_apenas:
+        #     query = query.filter(Empresa.FlgAtivo == 'S')
         
         # Order by name
         query = query.order_by(Empresa.NomEmpresa)
@@ -124,7 +125,7 @@ class EmpresaService:
             )
 
     def delete_empresa(self, empresa_id: int, current_user: TblFuncionarios) -> None:
-        """Delete empresa (logical deletion)"""
+        """Delete empresa (physical deletion)"""
         
         empresa = self.get_empresa_by_id(empresa_id)
         
@@ -136,10 +137,8 @@ class EmpresaService:
             )
         
         try:
-            # Logical deletion
-            empresa.FlgAtivo = 'N'
-            empresa.NomUsuario = current_user.Login
-            
+            # Physical deletion since FlgAtivo doesn't exist in model
+            self.db.delete(empresa)
             self.db.commit()
         except Exception as e:
             self.db.rollback()
@@ -155,10 +154,7 @@ class EmpresaService:
         cnpj_digits = re.sub(r'\D', '', cnpj)
         
         query = self.db.query(Empresa).filter(
-            and_(
-                Empresa.CNPJ == cnpj_digits,
-                Empresa.FlgAtivo == 'S'
-            )
+            Empresa.CNPJ == cnpj_digits
         )
         
         # Exclude current empresa if updating

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Layout } from './components/Layout';
 import { AuthGuard } from './components/AuthGuard';
+import { ThemeProvider } from './components/theme-provider';
+import { TestComponents } from './components/test-components';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { LancamentosPage } from './features/lancamentos/pages/LancamentosPage';
@@ -23,7 +25,8 @@ function App() {
   }
 
   return (
-    <Routes>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <Routes>
       {/* Rota pública de login */}
       <Route path="/login" element={<LoginPage />} />
       
@@ -45,9 +48,13 @@ function App() {
         <Route path="contas-receber" element={<ContasReceberPage />} />
       </Route>
 
+      {/* Rota de teste dos componentes ShadCN */}
+      <Route path="/test-components" element={<TestComponents />} />
+
       {/* Redirecionamento padrão */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+      </Routes>
+    </ThemeProvider>
   );
 }
 

@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {
-  DataGrid,
-  GridColDef,
-  GridPaginationModel,
-} from '@mui/x-data-grid';
-import {
-  Box,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, Edit, Trash2, Filter, X, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
@@ -45,10 +35,8 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({ onEdit, onCreate }
   } = useAppSelector((state) => state.clientes);
 
   const [localFilters, setLocalFilters] = useState(filters);
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: pagination.skip / pagination.limit,
-    pageSize: pagination.limit,
-  });
+  const [currentPage, setCurrentPage] = useState(Math.floor(pagination.skip / pagination.limit) + 1);
+  const [pageSize, setPageSize] = useState(pagination.limit);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
@@ -82,12 +70,22 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({ onEdit, onCreate }
     dispatch(setPagination({ skip: 0, limit: pagination.limit }));
   };
 
-  // Handle pagination changes
-  const handlePaginationModelChange = (model: GridPaginationModel) => {
-    setPaginationModel(model);
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
     dispatch(setPagination({
-      skip: model.page * model.pageSize,
-      limit: model.pageSize,
+      skip: (page - 1) * pageSize,
+      limit: pageSize,
+    }));
+  };
+
+  // Handle page size changes
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+    dispatch(setPagination({
+      skip: 0,
+      limit: newPageSize,
     }));
   };
 
@@ -98,154 +96,176 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({ onEdit, onCreate }
     }
   };
 
-  // Columns definition
-  const columns: GridColDef[] = [
-    {
-      field: 'DesCliente',
-      headerName: t('clientes.nome'),
-      flex: 1,
-      minWidth: 200,
-    },
-    {
-      field: 'FlgTipoPessoa',
-      headerName: t('clientes.tipo_pessoa'),
-      width: 120,
-      renderCell: (params) => (
-        <Chip
-          label={params.value === 'F' ? t('clientes.tipo_pessoa_f') : t('clientes.tipo_pessoa_j')}
-          color={params.value === 'F' ? 'primary' : 'secondary'}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: 'CPF',
-      headerName: t('clientes.cpf'),
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'CNPJ',
-      headerName: t('clientes.cnpj'),
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'Telefone1',
-      headerName: t('clientes.telefone1'),
-      flex: 1,
-      minWidth: 120,
-    },
-    {
-      field: 'Email1',
-      headerName: t('clientes.email1'),
-      flex: 1,
-      minWidth: 200,
-    },
-    {
-      field: 'FlgAtivo',
-      headerName: t('categorias.ativo'),
-      width: 100,
-      renderCell: (params) => (
-        <Chip
-          label={params.value === 'S' ? t('categorias.ativo') : t('categorias.inativo')}
-          color={params.value === 'S' ? 'success' : 'default'}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: 'actions',
-      headerName: t('actions.actions'),
-      width: 120,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title={t('actions.edit')}>
-            <IconButton
-              size="small"
-              onClick={() => onEdit(params.row as ClienteResponse)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('actions.delete')}>
-            <IconButton
-              size="small"
-              onClick={() => handleDelete(params.row.CodCliente)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ];
+  // Render functions for table cells
+  const renderTipoPessoa = (tipo: string) => (
+    <Badge variant={tipo === 'F' ? 'default' : 'secondary'}>
+      {tipo === 'F' ? t('clientes.tipo_pessoa_f') : t('clientes.tipo_pessoa_j')}
+    </Badge>
+  );
+
+  const renderStatus = (ativo: string) => (
+    <Badge variant={ativo === 'S' ? 'default' : 'outline'}>
+      {ativo === 'S' ? t('categorias.ativo') : t('categorias.inativo')}
+    </Badge>
+  );
+
+  const renderActions = (cliente: ClienteResponse) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => onEdit(cliente)}>
+          <Edit className="mr-2 h-4 w-4" />
+          {t('actions.edit')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleDelete(cliente.CodCliente)}>
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t('actions.delete')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  // Pagination calculations
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const startItem = (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalCount);
 
   return (
-    <Box sx={{ height: 600, width: '100%' }}>
+    <div className="space-y-4">
       {/* Filter controls */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-        <TextField
-          label={t('clientes.nome')}
-          value={localFilters.search || ''}
-          onChange={(e) => handleFilterChange('search', e.target.value || undefined)}
-          size="small"
-        />
+      <div className="flex flex-wrap gap-4 items-end">
+        <div className="flex-1 min-w-[200px]">
+          <Input
+            placeholder={t('clientes.nome')}
+            value={localFilters.search || ''}
+            onChange={(e) => handleFilterChange('search', e.target.value || undefined)}
+          />
+        </div>
         
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Button
-            variant="contained"
-            onClick={handleApplyFilters}
-            size="small"
-          >
+        <div className="flex gap-2">
+          <Button onClick={handleApplyFilters} size="sm">
+            <Filter className="mr-2 h-4 w-4" />
             {t('actions.filter')}
           </Button>
-          <Button
-            variant="outlined"
-            onClick={handleClearFilters}
-            size="small"
-          >
+          <Button variant="outline" onClick={handleClearFilters} size="sm">
+            <X className="mr-2 h-4 w-4" />
             {t('actions.clear')}
           </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onCreate}
-            size="small"
-          >
+          <Button onClick={onCreate} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
             {t('clientes.novo')}
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {/* Data Grid */}
-      <DataGrid
-        rows={clientes}
-        columns={columns}
-        loading={loading}
-        rowCount={totalCount}
-        paginationModel={paginationModel}
-        onPaginationModelChange={handlePaginationModelChange}
-        pageSizeOptions={[10, 20, 50]}
-        paginationMode="server"
-        filterMode="server"
-        sortingMode="server"
-        disableRowSelectionOnClick
-        getRowId={(row) => row.CodCliente}
-        sx={{
-          '& .MuiDataGrid-cell:focus': {
-            outline: 'none',
-          },
-        }}
-      />
+      {/* Table */}
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('clientes.nome')}</TableHead>
+              <TableHead>{t('clientes.tipo_pessoa')}</TableHead>
+              <TableHead>{t('clientes.cpf')}</TableHead>
+              <TableHead>{t('clientes.cnpj')}</TableHead>
+              <TableHead>{t('clientes.telefone1')}</TableHead>
+              <TableHead>{t('clientes.email1')}</TableHead>
+              <TableHead>{t('categorias.ativo')}</TableHead>
+              <TableHead className="w-[100px]">{t('actions.actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8">
+                  {t('messages.loading')}
+                </TableCell>
+              </TableRow>
+            ) : clientes.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8">
+                  {t('messages.no_data')}
+                </TableCell>
+              </TableRow>
+            ) : (
+              clientes.map((cliente) => (
+                <TableRow key={cliente.CodCliente}>
+                  <TableCell className="font-medium">{cliente.DesCliente}</TableCell>
+                  <TableCell>{renderTipoPessoa(cliente.FlgTipoPessoa)}</TableCell>
+                  <TableCell>{cliente.CPF || '-'}</TableCell>
+                  <TableCell>{cliente.CNPJ || '-'}</TableCell>
+                  <TableCell>{cliente.Telefone1 || '-'}</TableCell>
+                  <TableCell>{cliente.Email1 || '-'}</TableCell>
+                  <TableCell>{renderStatus(cliente.FlgAtivo)}</TableCell>
+                  <TableCell>{renderActions(cliente)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Mostrando {startItem} a {endItem} de {totalCount} resultados
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Itens por página:</span>
+            <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
+              <SelectTrigger className="w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              {totalPages > 5 && <PaginationEllipsis />}
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
       
       {error && (
-        <Box sx={{ mt: 2, color: 'error.main' }}>
+        <div className="text-red-600 text-sm mt-2">
           {error}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };

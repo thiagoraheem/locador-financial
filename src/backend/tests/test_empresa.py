@@ -15,8 +15,7 @@ def test_create_empresa(client, db_session: Session, auth_headers):
         "NomEmpresa": "Test Company",
         "RazaoSocial": "Test Company LTDA",
         "CNPJ": "12345678901234",
-        "FlgPadrao": False,
-        "FlgAtivo": "S"
+        "FlgPadrao": False
     }
     
     response = client.post("/api/v1/empresas/", json=empresa_data, headers=auth_headers)
@@ -117,6 +116,6 @@ def test_delete_empresa(client, db_session: Session, auth_headers):
     response = client.delete(f"/api/v1/empresas/{empresa.CodEmpresa}", headers=auth_headers)
     assert response.status_code == 200
     
-    # Verify it's marked as inactive
+    # Verify it's physically deleted
     deleted_empresa = db_session.query(Empresa).filter(Empresa.CodEmpresa == empresa.CodEmpresa).first()
-    assert deleted_empresa.FlgAtivo == 'N'
+    assert deleted_empresa is None

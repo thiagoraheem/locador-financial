@@ -1,53 +1,36 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { Notification } from './Notification';
+import AppBreadcrumb from './AppBreadcrumb';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import { cn } from '@/lib/utils';
 
 export const Layout: React.FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { sidebarOpen } = useSelector((state: RootState) => state.ui);
-
   const sidebarWidth = 280;
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <Sidebar width={sidebarWidth} />
       
       {/* Main Content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: 0,
-          width: '100%',
-        }}
-      >
+      <main className="flex-1 flex flex-col min-w-0 w-full">
         {/* Top Bar */}
         <TopBar />
         
         {/* Page Content */}
-        <Box
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            backgroundColor: theme.palette.background.default,
-            overflow: 'auto',
-          }}
-        >
+        <div className="flex-1 p-6 bg-background overflow-auto">
+          <AppBreadcrumb />
           <Outlet />
-        </Box>
-      </Box>
+        </div>
+      </main>
 
       {/* Notification Snackbar */}
       <Notification />
-    </Box>
+    </div>
   );
 };

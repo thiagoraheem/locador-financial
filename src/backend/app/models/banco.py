@@ -1,25 +1,39 @@
 """
 Modelo de Bancos
 """
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from app.core.database import Base
-from app.models.mixins import LoginAuditMixin
 
 
-class Banco(Base, LoginAuditMixin):
+class Banco(Base):
     """Modelo para bancos do sistema financeiro nacional"""
     
     __tablename__ = "tbl_Banco"
 
-    Codigo = Column(Integer, primary_key=True, index=True, comment="Código do banco (padrão FEBRABAN)")
-    Digito = Column(String(1), comment="Dígito verificador do banco")
-    Nome = Column(String(100), nullable=False, comment="Nome do banco")
-    NomeAbreviado = Column(String(20), comment="Nome abreviado do banco")
-    FlgAtivo = Column(String(1), default='S', comment="S=Ativo, N=Inativo")
+    CodBanco = Column(Integer, primary_key=True, index=True)
+    NomBanco = Column(String(100), nullable=False)
+    CodBacen = Column(String(10), unique=True, index=True)
+    Site = Column(String(200))
+    
+    # Colunas de auditoria (conforme estrutura real da tabela)
+    DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
+    NomUsuario = Column(String(15), nullable=False)
+    DatAlteracao = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
+    NomUsuarioAlteracao = Column(String(15), nullable=True)
     
     # Relacionamentos
     contas = relationship("Conta", back_populates="banco")
+    
+    # Propriedades de compatibilidade para schemas
+    @property
+    def DtCreate(self):
+        return self.DatCadastro
+    
+    @property
+    def DtAlter(self):
+        return self.DatAlteracao
     
     def __repr__(self):
         return f"<Banco(Codigo={self.Codigo}, Nome='{self.Nome}')>"

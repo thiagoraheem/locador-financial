@@ -1,28 +1,18 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  Box,
-  Divider,
-  useTheme,
-  useMediaQuery,
-} from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  AccountBalance as AccountBalanceIcon,
-  Category as CategoryIcon,
-  PaymentOutlined as PaymentOutlinedIcon,
-  RequestQuoteOutlined as RequestQuoteOutlinedIcon,
-  Assessment as AssessmentIcon,
-  Business as BusinessIcon,
-  AccountBalanceOutlined as AccountBalanceOutlinedIcon,
-  People as PeopleIcon,
-} from '@mui/icons-material';
+  LayoutDashboard,
+  CreditCard,
+  Tag,
+  DollarSign,
+  FileText,
+  BarChart3,
+  Building2,
+  Landmark,
+  Users,
+} from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
@@ -37,12 +27,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const dispatch = useDispatch();
   
   const { sidebarOpen } = useSelector((state: RootState) => state.ui);
   const { user } = useSelector((state: RootState) => state.auth);
+  
+  const isMobile = window.innerWidth < 768;
 
   const handleClose = () => {
     if (isMobile) {
@@ -53,52 +43,52 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
   const menuItems = [
     {
       text: t('nav.dashboard'),
-      icon: <DashboardIcon />,
+      icon: <LayoutDashboard className="h-5 w-5" />,
       path: '/dashboard',
     },
     {
       text: t('nav.lancamentos'),
-      icon: <AccountBalanceIcon />,
+      icon: <CreditCard className="h-5 w-5" />,
       path: '/lancamentos',
     },
     {
       text: t('nav.categorias'),
-      icon: <CategoryIcon />,
+      icon: <Tag className="h-5 w-5" />,
       path: '/categorias',
     },
     {
       text: t('nav.empresas'),
-      icon: <BusinessIcon />,
+      icon: <Building2 className="h-5 w-5" />,
       path: '/empresas',
     },
     {
       text: t('nav.bancos'),
-      icon: <AccountBalanceOutlinedIcon />,
+      icon: <Landmark className="h-5 w-5" />,
       path: '/bancos',
     },
     {
       text: t('nav.contas'),
-      icon: <AccountBalanceIcon />,
+      icon: <CreditCard className="h-5 w-5" />,
       path: '/contas',
     },
     {
       text: t('nav.clientes'),
-      icon: <PeopleIcon />,
+      icon: <Users className="h-5 w-5" />,
       path: '/clientes',
     },
     {
       text: t('nav.contas_pagar'),
-      icon: <PaymentOutlinedIcon />,
+      icon: <DollarSign className="h-5 w-5" />,
       path: '/contas-pagar',
     },
     {
       text: t('nav.contas_receber'),
-      icon: <RequestQuoteOutlinedIcon />,
+      icon: <FileText className="h-5 w-5" />,
       path: '/contas-receber',
     },
     {
       text: t('nav.relatorios'),
-      icon: <AssessmentIcon />,
+      icon: <BarChart3 className="h-5 w-5" />,
       path: '/relatorios',
     },
   ];
@@ -108,105 +98,82 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
     handleClose();
   };
 
-  const drawerContent = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+  const sidebarContent = (
+    <div className="h-full flex flex-col bg-card">
       {/* Header */}
-      <Box
-        sx={{
-          p: 2,
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.primary.contrastText,
-        }}
-      >
-        <Typography variant="h6" component="h1" noWrap>
+      <div className="p-4 bg-primary text-primary-foreground">
+        <h1 className="text-lg font-semibold truncate">
           Sistema Financeiro
-        </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.8 }}>
+        </h1>
+        <p className="text-sm opacity-80">
           Locador
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Divider />
+      <Separator />
 
       {/* User Info */}
       {user && (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="body2" color="textSecondary">
+        <div className="p-4">
+          <p className="text-sm text-muted-foreground">
             Bem-vindo
-          </Typography>
-          <Typography variant="subtitle2" noWrap>
+          </p>
+          <p className="text-sm font-medium truncate">
             {user.nome}
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
 
-      <Divider />
+      <Separator />
 
       {/* Navigation Menu */}
-      <List sx={{ flexGrow: 1, pt: 1 }}>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              onClick={() => handleNavigation(item.path)}
-              selected={location.pathname === item.path}
-              sx={{
-                mx: 1,
-                borderRadius: 1,
-                '&.Mui-selected': {
-                  backgroundColor: theme.palette.primary.main,
-                  color: theme.palette.primary.contrastText,
-                  '&:hover': {
-                    backgroundColor: theme.palette.primary.dark,
-                  },
-                  '& .MuiListItemIcon-root': {
-                    color: theme.palette.primary.contrastText,
-                  },
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  color: location.pathname === item.path 
-                    ? theme.palette.primary.contrastText 
-                    : 'inherit',
-                  minWidth: 40,
-                }}
+      <nav className="flex-1 p-2">
+        <ul className="space-y-1">
+          {menuItems.map((item) => (
+            <li key={item.text}>
+              <button
+                onClick={() => handleNavigation(item.path)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  location.pathname === item.path
+                    ? "bg-primary text-primary-foreground font-medium"
+                    : "text-foreground"
+                )}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText 
-                primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: '0.875rem',
-                  fontWeight: location.pathname === item.path ? 600 : 400,
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+                <span className="flex-shrink-0">
+                  {item.icon}
+                </span>
+                <span className="truncate">
+                  {item.text}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
   );
 
+  if (isMobile) {
+    return (
+      <Sheet open={sidebarOpen} onOpenChange={(open) => !open && handleClose()}>
+        <SheetContent side="left" className="p-0 w-80">
+          {sidebarContent}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
   return (
-    <Drawer
-      variant={isMobile ? 'temporary' : 'persistent'}
-      open={sidebarOpen}
-      onClose={handleClose}
-      sx={{
-        width: sidebarOpen ? width : 0,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: width,
-          boxSizing: 'border-box',
-          borderRight: `1px solid ${theme.palette.divider}`,
-        },
-      }}
-      ModalProps={{
-        keepMounted: true, // Better open performance on mobile
-      }}
+    <aside
+      className={cn(
+        "border-r bg-card transition-all duration-300 ease-in-out",
+        sidebarOpen ? "w-80" : "w-0 overflow-hidden"
+      )}
+      style={{ width: sidebarOpen ? width : 0 }}
     >
-      {drawerContent}
-    </Drawer>
+      {sidebarContent}
+    </aside>
   );
 };
