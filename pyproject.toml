@@ -23,4 +23,5 @@ dependencies = [
     "redis==5.0.1",
     "coverage==7.3.2",
     "pre-commit==3.6.0",
+    "requests>=2.32.5",
 ]
