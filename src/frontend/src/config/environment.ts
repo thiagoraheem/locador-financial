@@ -15,7 +15,7 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
   const disableLogs = process.env.REACT_APP_DISABLE_LOGS === 'true';
   
   // Default API URL based on environment
-  let defaultApiUrl = 'http://localhost:8001';
+  let defaultApiUrl = 'http://localhost:8001'; // Backend is running on port 8000
   if (isProduction) {
     // In production, try to detect common production URLs
     defaultApiUrl = 'http://localhost:8000'; // Default production backend port

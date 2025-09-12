@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>Auto Login Test</h1>
+    <script>
+        // Simular login automático
+        const loginData = {
+            login: 'admin',
+            senha: 'YpP7sPnjw2G/TO5357wt1w=='
+        };
+        
+        fetch('http://localhost:8000/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Login response:', data);
+            if (data.access_token) {
+                // Salvar token no localStorage
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user_info));
+                console.log('Token saved to localStorage');
+                
+                // Redirecionar para o dashboard
+                window.location.href = 'http://localhost:5600/dashboard';
+            }
+        })
+        .catch(error => {
+            console.error('Login error:', error);
+        });
+    </script>
+</body>
+</html>

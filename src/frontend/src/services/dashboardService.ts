@@ -48,17 +48,41 @@ export const dashboardService = {
           data_fim: dataFim
         }
       });
-      return response.data;
+      
+      // Mapear os dados da API para a interface esperada pelo frontend
+      const apiData = response.data;
+      console.log('API Data received:', apiData);
+      
+      // Converter strings para números se necessário
+      const parseNumber = (value: any): number => {
+        if (typeof value === 'string') {
+          // Remove vírgulas e converte para número
+          return parseFloat(value.replace(',', '.')) || 0;
+        }
+        return Number(value) || 0;
+      };
+      
+      const result = {
+        receitas: parseNumber(apiData.total_receitas),
+        despesas: parseNumber(apiData.total_despesas),
+        saldo: parseNumber(apiData.saldo),
+        receitasPendentes: parseNumber(apiData.receitas_pendentes || 0),
+        despesasPendentes: parseNumber(apiData.despesas_pendentes || 0)
+      };
+      console.log('Mapped result:', result);
+      return result;
     } catch (error) {
       console.error('Erro ao buscar resumo do dashboard:', error);
       // Fallback com dados mockados em caso de erro
-      return {
+      const fallbackData = {
         receitas: 15420.50,
         despesas: 8750.30,
         saldo: 6670.20,
         receitasPendentes: 2340.00,
         despesasPendentes: 1890.00
       };
+      console.log('Using fallback data:', fallbackData);
+      return fallbackData;
     }
   },
 

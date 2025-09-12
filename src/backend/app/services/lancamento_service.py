@@ -290,10 +290,10 @@ class LancamentoService:
         """Validações de negócio para lançamento"""
         
         # Validar valor
-        if lancamento_data.Valor <= 0:
+        if lancamento_data.Valor < 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Valor deve ser maior que zero"
+                detail="Valor não pode ser negativo"
             )
         
         # Validar data
@@ -325,10 +325,10 @@ class LancamentoService:
         """Validações específicas para atualização"""
         
         # Se está atualizando valor, validar
-        if 'Valor' in update_data and update_data['Valor'] <= 0:
+        if 'Valor' in update_data and update_data['Valor'] < 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Valor deve ser maior que zero"
+                detail="Valor não pode ser negativo"
             )
         
         # Se está atualizando data, validar

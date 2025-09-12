@@ -15,11 +15,11 @@ class LancamentoBase(BaseModel):
     CodConta: Optional[int] = Field(None, description="Código da conta bancária")
     CodFavorecido: int = Field(..., description="Código do favorecido")
     CodCategoria: int = Field(..., description="Código da categoria")
-    Valor: Decimal = Field(..., gt=0, description="Valor do lançamento")
+    Valor: Decimal = Field(..., ge=0, description="Valor do lançamento")
     IndMov: bool = Field(..., description="Indicador de movimento: True=Entrada, False=Saída")
     NumDocto: Optional[str] = Field(None, max_length=50, description="Número do documento")
     CodFormaPagto: int = Field(..., description="Código da forma de pagamento")
-    FlgFrequencia: Literal['U', 'R'] = Field(..., description="Frequência: U=Único, R=Recorrente")
+    FlgFrequencia: Optional[int] = Field(None, description="Frequência: código numérico da frequência")
     Observacao: Optional[str] = Field(None, max_length=500, description="Observações")
 
 
@@ -36,11 +36,11 @@ class LancamentoUpdate(BaseModel):
     CodConta: Optional[int] = Field(None, description="Código da conta bancária")
     CodFavorecido: Optional[int] = Field(None, description="Código do favorecido")
     CodCategoria: Optional[int] = Field(None, description="Código da categoria")
-    Valor: Optional[Decimal] = Field(None, gt=0, description="Valor do lançamento")
+    Valor: Optional[Decimal] = Field(None, ge=0, description="Valor do lançamento")
     IndMov: Optional[bool] = Field(None, description="Indicador de movimento: True=Entrada, False=Saída")
     NumDocto: Optional[str] = Field(None, max_length=50, description="Número do documento")
     CodFormaPagto: Optional[int] = Field(None, description="Código da forma de pagamento")
-    FlgFrequencia: Optional[Literal['U', 'R']] = Field(None, description="Frequência: U=Único, R=Recorrente")
+    FlgFrequencia: Optional[int] = Field(None, description="Frequência: código numérico da frequência")
     Observacao: Optional[str] = Field(None, max_length=500, description="Observações")
 
 
@@ -54,7 +54,7 @@ class LancamentoResponse(LancamentoBase):
     empresa_nome: Optional[str] = None
     conta_nome: Optional[str] = None
     NomUsuario: str
-    DtCreate: datetime
+    DtCreate: datetime = Field(alias="DatCadastro")
     DtAlter: Optional[datetime] = None
     
     class Config:
