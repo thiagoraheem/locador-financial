@@ -3,15 +3,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { configureStore } from '@reduxjs/toolkit';
 import { ContaPagarForm } from '../forms/ContaPagarForm';
-import { theme } from '../../theme';
 import { contasPagarSlice } from '../../store/slices/contasPagarSlice';
 import { uiSlice } from '../../store/slices/uiSlice';
-import { ptBR } from 'date-fns/locale';
 
 // Mock do i18next
 jest.mock('react-i18next', () => ({
@@ -68,11 +63,7 @@ const TestWrapper: React.FC<{
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-            {children}
-          </LocalizationProvider>
-        </ThemeProvider>
+        {children}
       </BrowserRouter>
     </Provider>
   );

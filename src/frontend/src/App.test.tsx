@@ -2,10 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
 import { configureStore } from '@reduxjs/toolkit';
 import App from './App';
-import { theme } from './theme';
 import { authSlice } from './store/slices/authSlice';
 import { uiSlice } from './store/slices/uiSlice';
 
@@ -38,9 +36,7 @@ const TestWrapper: React.FC<{
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          {children}
-        </ThemeProvider>
+        {children}
       </BrowserRouter>
     </Provider>
   );

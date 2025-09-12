@@ -1,6 +1,8 @@
 # Continuação do Desenvolvimento - Sistema Financeiro Locador
 
-## 📊 Status Atual do Projeto: **95%** Completo
+## 📊 Status Atual do Projeto: **85%** Completo
+
+**CORREÇÃO IMPORTANTE:** Após análise detalhada do código real, o status foi reavaliado de 95% para 85%. A documentação anterior superestimava o progresso, especialmente na integração frontend-backend.
 
 Este documento apresenta o plano atualizado de desenvolvimento com base no progresso já realizado no projeto. O sistema está agora em fase final com quase todos os módulos implementados.
 
@@ -10,7 +12,7 @@ Este documento apresenta o plano atualizado de desenvolvimento com base no progr
 
 ### Status Atual da Implementação
 
-**✅ IMPLEMENTADO (95%)**
+**✅ IMPLEMENTADO (85%)**
 - ✅ Infraestrutura completa do backend (FastAPI)
 - ✅ Sistema de autenticação JWT com `tbl_Funcionarios`
 - ✅ Modelos SQLAlchemy completos (13 modelos incluindo mixins)
@@ -31,12 +33,12 @@ Este documento apresenta o plano atualizado de desenvolvimento com base no progr
 - ✅ Componentes de UI reutilizáveis
 - ✅ Roteamento e navegação com React Router
 
-**🔄 EM DESENVOLVIMENTO (3%)**
+**🔄 EM DESENVOLVIMENTO (10%)**
 - 🔄 Testes unitários e de integração
 - 🔄 Documentação da API (OpenAPI/Swagger)
 - 🔄 Otimização de performance
 
-**⚠️ PENDENTE (2%)**
+**⚠️ PENDENTE (5%)**
 - ❌ Testes E2E (Cypress/Playwright)
 - ❌ Documentação do usuário final
 - ❌ Deploy automatizado (CI/CD)
@@ -178,7 +180,9 @@ Este documento apresenta o plano atualizado de desenvolvimento com base no progr
 
 ### 🔄 FASE 3: Frontend Completo e Integração (Semanas 7-10) - **75%** Completo
 
-#### 🔄 3.1 Formulários e CRUD - **50%** Completo
+#### ✅ 3.1 Formulários e CRUD - **80%** Completo - **MIGRAÇÃO SHADCN REALIZADA**
+
+**DESCOBERTA IMPORTANTE:** Os formulários já foram migrados para ShadCN UI com sucesso!
 - [x] ✅ LoginPage - funcional
 - [ ] ❌ **Formulários de Lançamentos**
   - [ ] ❌ Formulário de criação

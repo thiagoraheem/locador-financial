@@ -1,5 +1,5 @@
-import React from 'react';
-import { Snackbar, Alert, AlertColor } from '@mui/material';
+import React, { useEffect } from 'react';
+import { toast, Toaster } from 'sonner';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { hideNotification, clearNotification } from '../store/slices/uiSlice';
@@ -8,42 +8,37 @@ export const Notification: React.FC = () => {
   const dispatch = useDispatch();
   const { notification } = useSelector((state: RootState) => state.ui);
 
-  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
+  useEffect(() => {
+    if (notification && notification.open) {
+      const { message, severity } = notification;
+      
+      switch (severity) {
+        case 'success':
+          toast.success(message);
+          break;
+        case 'error':
+          toast.error(message);
+          break;
+        case 'warning':
+          toast.warning(message);
+          break;
+        case 'info':
+        default:
+          toast.info(message);
+          break;
+      }
+      
+      dispatch(hideNotification());
+      dispatch(clearNotification());
     }
-    dispatch(hideNotification());
-  };
-
-  const handleExited = () => {
-    dispatch(clearNotification());
-  };
-
-  if (!notification) {
-    return null;
-  }
+  }, [notification, dispatch]);
 
   return (
-    <Snackbar
-      open={notification.open}
-      autoHideDuration={6000}
-      onClose={handleClose}
-      TransitionProps={{
-        onExited: handleExited,
-      }}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-    >
-      <Alert
-        onClose={handleClose}
-        severity={notification.severity as AlertColor}
-        variant="filled"
-        sx={{ width: '100%' }}
-      >
-        {notification.message}
-      </Alert>
-    </Snackbar>
+    <Toaster 
+      position="top-right" 
+      richColors 
+      closeButton 
+      duration={6000}
+    />
   );
 };

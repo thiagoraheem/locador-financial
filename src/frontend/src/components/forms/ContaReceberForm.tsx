@@ -1,32 +1,28 @@
 import React, { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
   Select,
-  MenuItem,
-  Typography,
-  Grid,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-  FormHelperText,
-  Checkbox,
-  FormControlLabel,
-} from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
-import { ptBR } from 'date-fns/locale';
 
 // Types for the form - adjust to match yup schema exactly
 interface ContaReceberFormData {
@@ -193,410 +189,486 @@ export const ContaReceberForm: React.FC<ContaReceberFormProps> = ({
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {isEditing ? t('contas_receber.editar') : t('contas_receber.nova')}
-        </DialogTitle>
-        
-        <DialogContent>
+    <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing ? t('contas_receber.editar') : t('contas_receber.nova')}
+            </DialogTitle>
+          </DialogHeader>
+          
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
+            <Alert className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           
-          <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              {/* Empresa */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodEmpresa"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas.empresa')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              {/* Empresa and Cliente */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="CodEmpresa">{t('contas.empresa')}</Label>
+                  <Controller
+                    name="CodEmpresa"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="CodEmpresa"
+                          type="number"
+                          min="0"
+                          className={error ? 'border-red-500' : ''}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {t(error.message || '')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
 
-              {/* Cliente */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodCliente"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.cliente')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+                <div className="space-y-2">
+                  <Label htmlFor="CodCliente">{t('contas_receber.cliente')}</Label>
+                  <Controller
+                    name="CodCliente"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="CodCliente"
+                          type="number"
+                          min="0"
+                          className={error ? 'border-red-500' : ''}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {t(error.message || '')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
 
-              {/* Conta Bancária */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="idConta"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas.conta')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              {/* Conta Bancária and Categoria */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="idConta">{t('contas.conta')}</Label>
+                  <Controller
+                    name="idConta"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="idConta"
+                          type="number"
+                          min="0"
+                          value={field.value || ''}
+                          className={error ? 'border-red-500' : ''}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {t(error.message || '')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
 
-              {/* Categoria */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodCategoria"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.categoria')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+                <div className="space-y-2">
+                  <Label htmlFor="CodCategoria">{t('lancamentos.categoria')}</Label>
+                  <Controller
+                    name="CodCategoria"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="CodCategoria"
+                          type="number"
+                          min="0"
+                          value={field.value || ''}
+                          className={error ? 'border-red-500' : ''}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {t(error.message || '')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
 
               {/* Data de Emissão */}
-              <Grid item xs={12} sm={6}>
+              <div className="space-y-2">
+                <Label htmlFor="DataEmissao">{t('lancamentos.data_emissao')}</Label>
                 <Controller
                   name="DataEmissao"
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      label={t('lancamentos.data_emissao')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error ? t(error.message || '') : null,
-                        }
-                      }}
-                    />
+                    <div>
+                      <Input
+                        {...field}
+                        id="DataEmissao"
+                        type="date"
+                        className={error ? "border-red-500" : ""}
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                      />
+                      {error && (
+                        <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                      )}
+                    </div>
                   )}
                 />
-              </Grid>
+              </div>
 
               {/* Data de Vencimento */}
-              <Grid item xs={12} sm={6}>
+              <div className="space-y-2">
+                <Label htmlFor="DataVencimento">{t('contas_receber.data_vencimento')}</Label>
                 <Controller
                   name="DataVencimento"
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      label={t('contas_receber.data_vencimento')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error ? t(error.message || '') : null,
-                        }
-                      }}
-                    />
+                    <div>
+                      <Input
+                        {...field}
+                        id="DataVencimento"
+                        type="date"
+                        className={error ? "border-red-500" : ""}
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                      />
+                      {error && (
+                        <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                      )}
+                    </div>
                   )}
                 />
-              </Grid>
+              </div>
 
               {/* Data de Recebimento */}
-              <Grid item xs={12} sm={6}>
+              <div className="space-y-2">
+                <Label htmlFor="DataRecebimento">{t('contas_receber.data_recebimento')}</Label>
                 <Controller
                   name="DataRecebimento"
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      label={t('contas_receber.data_recebimento')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error ? t(error.message || '') : null,
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Valor */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="Valor"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.valor')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0, step: 0.01 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Número do Documento */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="NumeroDocumento"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.numero_documento')}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Nota Fiscal */}
-              <Grid item xs={12} sm={3}>
-                <Controller
-                  name="NotaFiscal"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.nota_fiscal')}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Série NF */}
-              <Grid item xs={12} sm={3}>
-                <Controller
-                  name="SerieNF"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.serie_nf')}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Número da Parcela */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="NumParcela"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.parcial')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 1 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Total de Parcelas */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="TotalParcelas"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.parcial')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 1 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Dias de Atraso */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="DiasAtraso"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.dias_atraso')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Protestado */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="FlgProtestado"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          {...field}
-                          checked={field.value}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                        />
-                      }
-                      label={t('contas_receber.protestado')}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Data de Protesto */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="DataProtesto"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      label={t('contas_receber.data_protesto')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error ? t(error.message || '') : null,
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Status */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="Status"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.Status}>
-                      <InputLabel>{t('contas_receber.status')}</InputLabel>
-                      <Select {...field} label={t('contas_receber.status')}>
-                        <MenuItem value="A">{t('contas_receber.aberto')}</MenuItem>
-                        <MenuItem value="R">{t('contas_receber.recebido')}</MenuItem>
-                        <MenuItem value="V">{t('contas_receber.vencido')}</MenuItem>
-                        <MenuItem value="C">{t('lancamentos.cancelado')}</MenuItem>
-                      </Select>
-                      {errors.Status && (
-                        <FormHelperText>{t(errors.Status.message || '')}</FormHelperText>
+                    <div>
+                      <Input
+                        {...field}
+                        id="DataRecebimento"
+                        type="date"
+                        className={error ? "border-red-500" : ""}
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                      />
+                      {error && (
+                        <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
                       )}
-                    </FormControl>
+                    </div>
                   )}
                 />
-              </Grid>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Valor */}
+                <div className="space-y-2">
+                  <Label htmlFor="Valor">{t('contas_receber.valor')}</Label>
+                  <Controller
+                    name="Valor"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="Valor"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={field.value || ''}
+                          className={error ? "border-red-500" : ""}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* Número do Documento */}
+                <div className="space-y-2">
+                  <Label htmlFor="NumeroDocumento">{t('lancamentos.numero_documento')}</Label>
+                  <Controller
+                    name="NumeroDocumento"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="NumeroDocumento"
+                          value={field.value || ''}
+                          className={error ? "border-red-500" : ""}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Nota Fiscal */}
+                <div className="space-y-2">
+                  <Label htmlFor="NotaFiscal">{t('contas_receber.nota_fiscal')}</Label>
+                  <Controller
+                    name="NotaFiscal"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="NotaFiscal"
+                          value={field.value || ''}
+                          className={error ? "border-red-500" : ""}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* Série NF */}
+                <div className="space-y-2">
+                  <Label htmlFor="SerieNF">{t('contas_receber.serie_nf')}</Label>
+                  <Controller
+                    name="SerieNF"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="SerieNF"
+                          value={field.value || ''}
+                          className={error ? "border-red-500" : ""}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Número da Parcela */}
+                <div className="space-y-2">
+                  <Label htmlFor="NumParcela">{t('contas_receber.parcial')}</Label>
+                  <Controller
+                    name="NumParcela"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="NumParcela"
+                          type="number"
+                          min="1"
+                          value={field.value || ''}
+                          className={error ? "border-red-500" : ""}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* Total de Parcelas */}
+                <div className="space-y-2">
+                  <Label htmlFor="TotalParcelas">{t('contas_receber.total_parcelas')}</Label>
+                  <Controller
+                    name="TotalParcelas"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="TotalParcelas"
+                          type="number"
+                          min="1"
+                          value={field.value || ''}
+                          className={error ? "border-red-500" : ""}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* Dias de Atraso */}
+                <div className="space-y-2">
+                  <Label htmlFor="DiasAtraso">{t('contas_receber.dias_atraso')}</Label>
+                  <Controller
+                    name="DiasAtraso"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="DiasAtraso"
+                          type="number"
+                          min="0"
+                          value={field.value || ''}
+                          className={error ? "border-red-500" : ""}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Protestado */}
+                <div className="space-y-2">
+                  <Controller
+                    name="FlgProtestado"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="FlgProtestado"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                        <Label htmlFor="FlgProtestado">{t('contas_receber.protestado')}</Label>
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* Data de Protesto */}
+                <div className="space-y-2">
+                  <Label htmlFor="DataProtesto">{t('contas_receber.data_protesto')}</Label>
+                  <Controller
+                    name="DataProtesto"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          id="DataProtesto"
+                          type="date"
+                          className={error ? "border-red-500" : ""}
+                          value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                          onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Status */}
+                <div className="space-y-2">
+                  <Label htmlFor="Status">{t('contas_receber.status')}</Label>
+                  <Controller
+                    name="Status"
+                    control={control}
+                    render={({ field, fieldState: { error } }) => (
+                      <div>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger className={error ? "border-red-500" : ""}>
+                            <SelectValue placeholder={t('contas_receber.status')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="A">{t('contas_receber.aberto')}</SelectItem>
+                            <SelectItem value="R">{t('contas_receber.recebido')}</SelectItem>
+                            <SelectItem value="V">{t('contas_receber.vencido')}</SelectItem>
+                            <SelectItem value="C">{t('lancamentos.cancelado')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {error && (
+                          <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
 
               {/* Observações */}
-              <Grid item xs={12}>
+              <div className="space-y-2">
+                <Label htmlFor="Observacao">{t('lancamentos.observacoes')}</Label>
                 <Controller
                   name="Observacao"
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.observacoes')}
-                      multiline
-                      rows={3}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
+                    <div>
+                      <textarea
+                        {...field}
+                        id="Observacao"
+                        rows={3}
+                        className={`w-full px-3 py-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${error ? 'border-red-500' : 'border-gray-300'}`}
+                        placeholder={t('lancamentos.observacoes')}
+                      />
+                      {error && (
+                        <p className="text-sm text-red-500 mt-1">{t(error.message || '')}</p>
+                      )}
+                    </div>
                   )}
                 />
-              </Grid>
-            </Grid>
-          </Box>
+              </div>
+            </div>
+          </form>
         </DialogContent>
         
-        <DialogActions>
-          <Button onClick={handleClose} disabled={loading}>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={loading}>
             {t('actions.cancel')}
           </Button>
           <Button 
             onClick={handleSubmit(handleFormSubmit)} 
-            variant="contained" 
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} /> : null}
           >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {loading ? t('messages.saving') : t('actions.save')}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </LocalizationProvider>
   );
 };

@@ -3,30 +3,18 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import {
-  Box,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Container,
-  Alert,
-  CircularProgress,
-  Card,
-  CardContent,
-  Divider,
-  useTheme,
-} from '@mui/material';
-import {
-  AccountBalance as AccountBalanceIcon,
-  TrendingUp as TrendingUpIcon,
-  Security as SecurityIcon,
-} from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { loginStart, loginSuccess, loginFailure, clearError } from '../../../store/slices/authSlice';
 import { authApi } from '../../../services/api';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Alert, AlertDescription } from '../../../components/ui/alert';
+import { Separator } from '../../../components/ui/separator';
+import { Loader2, Building2, TrendingUp, Shield } from 'lucide-react';
 
 interface LoginFormData {
   login: string;
@@ -42,7 +30,6 @@ export const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const theme = useTheme();
   const { isAuthenticated, loading, error } = useSelector((state: RootState) => state.auth);
 
   const {
@@ -85,181 +72,123 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: `linear-gradient(135deg, ${theme.palette.primary.main}15 0%, ${theme.palette.secondary.main}15 100%)`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 2,
-      }}
-    >
-      <Container maxWidth="lg">
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 4,
-            flexDirection: { xs: 'column', md: 'row' },
-          }}
-        >
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="container max-w-6xl mx-auto">
+        <div className="flex items-center justify-center gap-8 flex-col md:flex-row">
           {/* Left Side - Branding */}
-          <Box
-            sx={{
-              flex: 1,
-              textAlign: { xs: 'center', md: 'left' },
-              mb: { xs: 4, md: 0 },
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 3 }}>
-              <AccountBalanceIcon sx={{ fontSize: 48, color: 'primary.main', mr: 2 }} />
-              <Box>
-                <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+          <div className="flex-1 text-center md:text-left mb-8 md:mb-0">
+            <div className="flex items-center justify-center md:justify-start mb-6">
+              <Building2 className="h-12 w-12 text-blue-600 mr-3" />
+              <div>
+                <h1 className="text-4xl font-bold text-blue-600">
                   Locador Financial
-                </Typography>
-                <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 300 }}>
+                </h1>
+                <p className="text-lg text-gray-600 font-light">
                   Sistema de Gestão Financeira
-                </Typography>
-              </Box>
-            </Box>
+                </p>
+              </div>
+            </div>
             
-            <Typography variant="h5" sx={{ mb: 2, fontWeight: 500 }}>
+            <h2 className="text-2xl font-medium mb-2">
               Bem-vindo de volta
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', lineHeight: 1.6 }}>
+            </h2>
+            <p className="text-gray-600 mb-4 leading-relaxed">
               Faça login para acessar sua conta
-            </Typography>
+            </p>
             
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+            <p className="text-sm text-gray-500 mb-6">
               Acesse sua plataforma de gestão financeira com segurança.
-            </Typography>
+            </p>
 
             {/* Features */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <TrendingUpIcon sx={{ color: 'success.main' }} />
-                <Typography variant="body2">Análises</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <SecurityIcon sx={{ color: 'info.main' }} />
-                <Typography variant="body2">Segurança</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <AccountBalanceIcon sx={{ color: 'primary.main' }} />
-                <Typography variant="body2">Gestão Completa</Typography>
-              </Box>
-            </Box>
-          </Box>
+            <div className="flex flex-col gap-3 mt-8">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                <span className="text-sm">Análises</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <span className="text-sm">Segurança</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Building2 className="h-5 w-5 text-blue-600" />
+                <span className="text-sm">Gestão Completa</span>
+              </div>
+            </div>
+          </div>
 
           {/* Right Side - Login Form */}
-          <Box sx={{ flex: 1, maxWidth: 400, width: '100%' }}>
-            <Card
-              elevation={8}
-              sx={{
-                borderRadius: 3,
-                overflow: 'hidden',
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <CardContent sx={{ p: 4 }}>
-                <Box sx={{ textAlign: 'center', mb: 4 }}>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Login
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Entre com suas credenciais
-                  </Typography>
-                </Box>
-
-                <Divider sx={{ mb: 3 }} />
+          <div className="flex-1 max-w-md w-full">
+            <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-bold">Login</CardTitle>
+                <CardDescription>
+                  Entre com suas credenciais
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <Separator className="mb-4" />
 
                 {/* Error Alert */}
                 {error && (
-                  <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-                    {error}
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
 
                 {/* Login Form */}
-                <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-                  <TextField
-                    {...register('login')}
-                    fullWidth
-                    label="Usuário"
-                    variant="outlined"
-                    margin="normal"
-                    autoComplete="username"
-                    autoFocus
-                    error={!!errors.login}
-                    helperText={errors.login?.message}
-                    disabled={loading}
-                    sx={{
-                      mb: 2,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                      },
-                    }}
-                  />
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login">Usuário</Label>
+                    <Input
+                      id="login"
+                      {...register('login')}
+                      autoComplete="username"
+                      autoFocus
+                      disabled={loading}
+                      className={errors.login ? 'border-red-500' : ''}
+                    />
+                    {errors.login && (
+                      <p className="text-sm text-red-500">{errors.login.message}</p>
+                    )}
+                  </div>
 
-                  <TextField
-                    {...register('senha')}
-                    fullWidth
-                    label="Senha"
-                    type="password"
-                    variant="outlined"
-                    margin="normal"
-                    autoComplete="current-password"
-                    error={!!errors.senha}
-                    helperText={errors.senha?.message}
-                    disabled={loading}
-                    sx={{
-                      mb: 3,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                      },
-                    }}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="senha">Senha</Label>
+                    <Input
+                      id="senha"
+                      type="password"
+                      {...register('senha')}
+                      autoComplete="current-password"
+                      disabled={loading}
+                      className={errors.senha ? 'border-red-500' : ''}
+                    />
+                    {errors.senha && (
+                      <p className="text-sm text-red-500">{errors.senha.message}</p>
+                    )}
+                  </div>
 
                   <Button
                     type="submit"
-                    fullWidth
-                    variant="contained"
-                    size="large"
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                     disabled={loading}
-                    startIcon={loading && <CircularProgress size={20} />}
-                    sx={{
-                      py: 1.5,
-                      borderRadius: 2,
-                      fontSize: '1.1rem',
-                      fontWeight: 'bold',
-                      textTransform: 'none',
-                      background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                      '&:hover': {
-                        background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-                      },
-                    }}
                   >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {loading ? 'Entrando...' : 'Entrar'}
                   </Button>
-                </Box>
+                </form>
 
-                <Divider sx={{ my: 3 }} />
+                <Separator className="my-4" />
 
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: 'center', fontSize: '0.875rem' }}
-                >
+                <p className="text-xs text-gray-500 text-center">
                   © 2024 Sistema Locador - Gestão Financeira
-                </Typography>
+                </p>
               </CardContent>
             </Card>
-          </Box>
-        </Box>
-      </Container>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

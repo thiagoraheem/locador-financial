@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
-import { CircularProgress, Box } from '@mui/material';
+import { Loader2 } from 'lucide-react';
 import { RootState } from '../store';
 import { setUser, logout } from '../store/slices/authSlice';
 import { authApi } from '../services/api';
@@ -33,14 +33,9 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   if (initializing || loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
     );
   }
 

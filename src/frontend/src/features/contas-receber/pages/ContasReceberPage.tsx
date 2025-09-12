@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  useTheme,
-} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ContasReceberTable } from '../../../components/tables/ContasReceberTable';
 import { ContaReceberForm } from '../../../components/forms/ContaReceberForm';
@@ -14,7 +9,6 @@ import { createContaReceber, updateContaReceber, receberContaReceber } from '../
 
 export const ContasReceberPage: React.FC = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
   const dispatch = useAppDispatch();
   
   const [openForm, setOpenForm] = useState(false);
@@ -82,23 +76,18 @@ export const ContasReceberPage: React.FC = () => {
   };
 
   return (
-    <Box>
+    <div className="p-6">
       {/* Page Header */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        mb: 3 
-      }}>
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {t('contas_receber.title')}
-          </Typography>
-          <Typography variant="body1" color="textSecondary">
+          </h1>
+          <p className="text-gray-600">
             Gerencie suas contas a receber
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
 
       {/* Content */}
       <ContasReceberTable 
@@ -126,6 +115,6 @@ export const ContasReceberPage: React.FC = () => {
           error={error}
         />
       )}
-    </Box>
+    </div>
   );
 };

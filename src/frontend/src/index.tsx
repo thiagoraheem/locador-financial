@@ -3,15 +3,9 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { ptBR as dateFnsLocale } from 'date-fns/locale';
 
 import App from './App';
 import { store } from './store';
-import { theme } from './theme';
 import './i18n';
 import './globals.css';
 
@@ -35,12 +29,7 @@ root.render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <ThemeProvider theme={theme}>
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateFnsLocale}>
-              <CssBaseline />
-              <App />
-            </LocalizationProvider>
-          </ThemeProvider>
+          <App />
         </BrowserRouter>
       </QueryClientProvider>
     </Provider>

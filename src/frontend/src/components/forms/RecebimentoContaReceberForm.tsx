@@ -1,31 +1,39 @@
 import React, { useEffect } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-  FormHelperText,
-} from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { AccountsReceivableResponse } from '../../services/contasReceberApi';
+
+// ShadCN UI Components
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 // Types for the form - adjust to match yup schema exactly
 interface RecebimentoContaReceberFormData {
@@ -144,261 +152,280 @@ export const RecebimentoContaReceberForm: React.FC<RecebimentoContaReceberFormPr
   const valorTotal = valorOriginal + (juros || 0) + (multa || 0) - (desconto || 0);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {t('contas_receber.registrar_recebimento')}
-        </DialogTitle>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{t('contas_receber.registrar_recebimento')}</DialogTitle>
+        </DialogHeader>
         
-        <DialogContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+        {error && (
+          <Alert className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Conta information */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-lg font-semibold mb-3">
+            {t('contas_receber.informacoes_conta')}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <span className="font-medium">{t('contas_receber.cliente')}:</span> {contaReceber.cliente_nome}
+            </div>
+            <div>
+              <span className="font-medium">{t('lancamentos.numero_documento')}:</span> {contaReceber.NumeroDocumento || '-'}
+            </div>
+            <div>
+              <span className="font-medium">{t('contas_receber.valor_original')}:</span> {`R$ ${(typeof valorOriginal === 'number' && !isNaN(valorOriginal) ? valorOriginal : 0).toFixed(2)}`.replace('.', ',')}
+            </div>
+            <div>
+              <span className="font-medium">{t('contas_receber.valor_recebido')}:</span> {`R$ ${(typeof (contaReceber.ValorRecebido || 0) === 'number' && !isNaN(contaReceber.ValorRecebido || 0) ? (contaReceber.ValorRecebido || 0) : 0).toFixed(2)}`.replace('.', ',')}
+            </div>
+            <div>
+              <span className="font-medium">{t('contas_receber.valor_a_receber')}:</span> {`R$ ${(typeof valorAReceber === 'number' && !isNaN(valorAReceber) ? valorAReceber : 0).toFixed(2)}`.replace('.', ',')}
+            </div>
+          </div>
+        </div>
           
-          {/* Conta information */}
-          <Box sx={{ mb: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 1 }}>
-            <Typography variant="h6" gutterBottom>
-              {t('contas_receber.informacoes_conta')}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>{t('contas_receber.cliente')}:</strong> {contaReceber.cliente_nome}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>{t('lancamentos.numero_documento')}:</strong> {contaReceber.NumeroDocumento || '-'}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>{t('contas_receber.valor_original')}:</strong> {`R$ ${(typeof valorOriginal === 'number' && !isNaN(valorOriginal) ? valorOriginal : 0).toFixed(2)}`.replace('.', ',')}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>{t('contas_receber.valor_recebido')}:</strong> {`R$ ${(typeof (contaReceber.ValorRecebido || 0) === 'number' && !isNaN(contaReceber.ValorRecebido || 0) ? (contaReceber.ValorRecebido || 0) : 0).toFixed(2)}`.replace('.', ',')}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>{t('contas_receber.valor_a_receber')}:</strong> {`R$ ${(typeof valorAReceber === 'number' && !isNaN(valorAReceber) ? valorAReceber : 0).toFixed(2)}`.replace('.', ',')}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Box>
-          
-          <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-            <Grid container spacing={2}>
+        <div>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Data de Recebimento */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="DataRecebimento"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      label={t('contas_receber.data_recebimento')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error ? t(error.message || '') : null,
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="DataRecebimento"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t('contas_receber.data_recebimento')}</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP", { locale: ptBR })
+                            ) : (
+                              <span>Selecione uma data</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value || undefined}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Valor Recebido */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="ValorRecebido"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.valor_recebido')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0, step: 0.01 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="ValorRecebido"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas_receber.valor_recebido')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Conta Bancária */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="idConta"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas.conta')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="idConta"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas.conta')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="ID da conta"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Forma de Recebimento */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="CodFormaPagto"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.forma_recebimento')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
-                      InputProps={{
-                        inputProps: { min: 0 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="CodFormaPagto"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas_receber.forma_recebimento')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="Código da forma de recebimento"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Desconto */}
-              <Grid item xs={12} sm={4}>
-                <Controller
-                  name="Desconto"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.desconto')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0, step: 0.01 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="Desconto"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas_receber.desconto')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Juros */}
-              <Grid item xs={12} sm={4}>
-                <Controller
-                  name="Juros"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.juros')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0, step: 0.01 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="Juros"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas_receber.juros')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Multa */}
-              <Grid item xs={12} sm={4}>
-                <Controller
-                  name="Multa"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('contas_receber.multa')}
-                      type="number"
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      InputProps={{
-                        inputProps: { min: 0, step: 0.01 }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+              <FormField
+                control={control}
+                name="Multa"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contas_receber.multa')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-              {/* Número do Documento */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="NumeroDocumento"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.numero_documento')}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
+            {/* Número do Documento */}
+             <FormField
+               control={control}
+               name="NumeroDocumento"
+               render={({ field }) => (
+                 <FormItem>
+                   <FormLabel>{t('lancamentos.numero_documento')}</FormLabel>
+                   <FormControl>
+                     <Input
+                       {...field}
+                       value={field.value || ''}
+                       placeholder="Número do documento"
+                     />
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
+               )}
+             />
 
-              {/* Observações */}
-              <Grid item xs={12}>
-                <Controller
-                  name="Observacao"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('lancamentos.observacoes')}
-                      multiline
-                      rows={3}
-                      error={!!error}
-                      helperText={error ? t(error.message || '') : null}
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
-        
-        <DialogActions>
-          <Button onClick={handleClose} disabled={loading}>
+             {/* Observações */}
+             <FormField
+               control={control}
+               name="Observacao"
+               render={({ field }) => (
+                 <FormItem>
+                   <FormLabel>{t('lancamentos.observacoes')}</FormLabel>
+                   <FormControl>
+                     <Textarea
+                       {...field}
+                       value={field.value || ''}
+                       placeholder="Observações"
+                       rows={3}
+                     />
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
+               )}
+             />           
+          </form>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleClose} disabled={loading} variant="outline">
             {t('actions.cancel')}
           </Button>
           <Button 
             onClick={handleSubmit(handleFormSubmit)} 
-            variant="contained" 
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} /> : null}
           >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {loading ? t('messages.saving') : t('actions.save')}
           </Button>
-        </DialogActions>
-      </Dialog>
-    </LocalizationProvider>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

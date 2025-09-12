@@ -3,10 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
 import { configureStore } from '@reduxjs/toolkit';
 import { ContasPagarTable } from '../tables/ContasPagarTable';
-import { theme } from '../../theme';
 import { contasPagarSlice } from '../../store/slices/contasPagarSlice';
 import { uiSlice } from '../../store/slices/uiSlice';
 
@@ -61,9 +59,7 @@ const TestWrapper: React.FC<{
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          {children}
-        </ThemeProvider>
+        {children}
       </BrowserRouter>
     </Provider>
   );

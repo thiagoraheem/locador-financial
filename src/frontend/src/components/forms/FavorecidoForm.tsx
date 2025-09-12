@@ -1,26 +1,16 @@
 import React, { useEffect } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-  FormHelperText,
-} from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from 'lucide-react';
 
 // Types for the form - adjust to match yup schema exactly
 interface FavorecidoFormData {
@@ -116,163 +106,199 @@ export const FavorecidoForm: React.FC<FavorecidoFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {isEditing ? t('favorecidos.editar') : t('favorecidos.novo')}
-      </DialogTitle>
-      
-      <DialogContent>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? t('favorecidos.editar') : t('favorecidos.novo')}
+          </DialogTitle>
+          <DialogDescription>
+            {isEditing ? 'Edite as informações do favorecido' : 'Preencha as informações do novo favorecido'}
+          </DialogDescription>
+        </DialogHeader>
+        
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            {/* Nome do Favorecido */}
-            <Grid item xs={12}>
-              <Controller
-                name="NomFavorecido"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          {/* Nome do Favorecido */}
+          <div className="space-y-2">
+            <Label htmlFor="NomFavorecido">{t('lancamentos.favorecido')}</Label>
+            <Controller
+              name="NomFavorecido"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Input
+                    id="NomFavorecido"
                     {...field}
-                    fullWidth
-                    label={t('lancamentos.favorecido')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
+                    className={error ? 'border-red-500' : ''}
                   />
-                )}
-              />
-            </Grid>
+                  {error && (
+                    <p className="text-sm text-red-500">{t(error.message || '')}</p>
+                  )}
+                </>
+              )}
+            />
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Tipo de Favorecido */}
-            <Grid item xs={12} sm={6}>
+            <div className="space-y-2">
+              <Label htmlFor="TipoFavorecido">{t('clientes.tipo_pessoa')}</Label>
               <Controller
                 name="TipoFavorecido"
                 control={control}
                 render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.TipoFavorecido}>
-                    <InputLabel>{t('clientes.tipo_pessoa')}</InputLabel>
-                    <Select {...field} label={t('clientes.tipo_pessoa')}>
-                      <MenuItem value="F">{t('clientes.tipo_pessoa_f')}</MenuItem>
-                      <MenuItem value="J">{t('clientes.tipo_pessoa_j')}</MenuItem>
+                  <>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className={errors.TipoFavorecido ? 'border-red-500' : ''}>
+                        <SelectValue placeholder={t('clientes.tipo_pessoa')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="F">{t('clientes.tipo_pessoa_f')}</SelectItem>
+                        <SelectItem value="J">{t('clientes.tipo_pessoa_j')}</SelectItem>
+                      </SelectContent>
                     </Select>
                     {errors.TipoFavorecido && (
-                      <FormHelperText>{t(errors.TipoFavorecido.message || '')}</FormHelperText>
+                      <p className="text-sm text-red-500">{t(errors.TipoFavorecido.message || '')}</p>
                     )}
-                  </FormControl>
+                  </>
                 )}
               />
-            </Grid>
+            </div>
 
             {/* CPF/CNPJ */}
-            <Grid item xs={12} sm={6}>
+            <div className="space-y-2">
+              <Label htmlFor="CPF_CNPJ">{t('clientes.cpf')}/{t('clientes.cnpj')}</Label>
               <Controller
                 name="CPF_CNPJ"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.cpf') + '/' + t('clientes.cnpj')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                  <>
+                    <Input
+                      id="CPF_CNPJ"
+                      {...field}
+                      className={error ? 'border-red-500' : ''}
+                    />
+                    {error && (
+                      <p className="text-sm text-red-500">{t(error.message || '')}</p>
+                    )}
+                  </>
                 )}
               />
-            </Grid>
+            </div>
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Telefone */}
-            <Grid item xs={12} sm={6}>
+            <div className="space-y-2">
+              <Label htmlFor="Telefone">{t('clientes.telefone1')}</Label>
               <Controller
                 name="Telefone"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.telefone1')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
+                  <>
+                    <Input
+                      id="Telefone"
+                      {...field}
+                      className={error ? 'border-red-500' : ''}
+                    />
+                    {error && (
+                      <p className="text-sm text-red-500">{t(error.message || '')}</p>
+                    )}
+                  </>
                 )}
               />
-            </Grid>
+            </div>
 
             {/* Email */}
-            <Grid item xs={12} sm={6}>
+            <div className="space-y-2">
+              <Label htmlFor="Email">{t('clientes.email1')}</Label>
               <Controller
                 name="Email"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.email1')}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Endereço */}
-            <Grid item xs={12}>
-              <Controller
-                name="Endereco"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('clientes.endereco')}
-                    multiline
-                    rows={2}
-                    error={!!error}
-                    helperText={error ? t(error.message || '') : null}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Status */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="FlgAtivo"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.FlgAtivo}>
-                    <InputLabel>{t('categorias.ativo')}</InputLabel>
-                    <Select {...field} label={t('categorias.ativo')}>
-                      <MenuItem value="S">{t('categorias.ativo')}</MenuItem>
-                      <MenuItem value="N">{t('categorias.inativo')}</MenuItem>
-                    </Select>
-                    {errors.FlgAtivo && (
-                      <FormHelperText>{t(errors.FlgAtivo.message || '')}</FormHelperText>
+                  <>
+                    <Input
+                      id="Email"
+                      type="email"
+                      {...field}
+                      className={error ? 'border-red-500' : ''}
+                    />
+                    {error && (
+                      <p className="text-sm text-red-500">{t(error.message || '')}</p>
                     )}
-                  </FormControl>
+                  </>
                 )}
               />
-            </Grid>
-          </Grid>
-        </Box>
+            </div>
+          </div>
+
+          {/* Endereço */}
+          <div className="space-y-2">
+            <Label htmlFor="Endereco">{t('clientes.endereco')}</Label>
+            <Controller
+              name="Endereco"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Textarea
+                    id="Endereco"
+                    {...field}
+                    rows={2}
+                    className={error ? 'border-red-500' : ''}
+                  />
+                  {error && (
+                    <p className="text-sm text-red-500">{t(error.message || '')}</p>
+                  )}
+                </>
+              )}
+            />
+          </div>
+
+          {/* Status */}
+          <div className="space-y-2">
+            <Label htmlFor="FlgAtivo">{t('categorias.ativo')}</Label>
+            <Controller
+              name="FlgAtivo"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className={errors.FlgAtivo ? 'border-red-500' : ''}>
+                      <SelectValue placeholder={t('categorias.ativo')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="S">{t('categorias.ativo')}</SelectItem>
+                      <SelectItem value="N">{t('categorias.inativo')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.FlgAtivo && (
+                    <p className="text-sm text-red-500">{t(errors.FlgAtivo.message || '')}</p>
+                  )}
+                </>
+              )}
+            />
+          </div>
+        </form>
+        
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={handleClose} disabled={loading}>
+            {t('actions.cancel')}
+          </Button>
+          <Button 
+            onClick={handleSubmit(handleFormSubmit)} 
+            disabled={loading}
+          >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {loading ? t('messages.saving') : t('actions.save')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      
-      <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
-          {t('actions.cancel')}
-        </Button>
-        <Button 
-          onClick={handleSubmit(handleFormSubmit)} 
-          variant="contained" 
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
-        >
-          {loading ? t('messages.saving') : t('actions.save')}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };
