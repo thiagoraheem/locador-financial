@@ -79,10 +79,6 @@ class ClienteService:
         
         query = self.db.query(Cliente)
         
-        # Filter only active
-        if ativos_apenas:
-            query = query.filter(Cliente.FlgAtivo == 'S')
-        
         # Filter only liberados
         if liberados_apenas:
             query = query.filter(Cliente.FlgLiberado == True)
@@ -104,10 +100,6 @@ class ClienteService:
         
         query = self.db.query(Cliente)
         
-        # Filter only active
-        if ativos_apenas:
-            query = query.filter(Cliente.FlgAtivo == 'S')
-        
         # Filter only liberados
         if liberados_apenas:
             query = query.filter(Cliente.FlgLiberado == True)
@@ -119,7 +111,7 @@ class ClienteService:
                 Cliente.RazaoSocial.ilike(f"%{search_term}%"),
                 Cliente.CPF.ilike(f"%{search_term}%"),
                 Cliente.CNPJ.ilike(f"%{search_term}%"),
-                Cliente.Email1.ilike(f"%{search_term}%"),
+                Cliente.Email.ilike(f"%{search_term}%"),
                 Cliente.Email2.ilike(f"%{search_term}%")
             )
             query = query.filter(search_filter)
@@ -192,8 +184,8 @@ class ClienteService:
             )
         
         try:
-            # Logical deletion
-            cliente.FlgAtivo = 'N'
+            # Logical deletion - set FlgLiberado to False
+            cliente.FlgLiberado = False
             cliente.NomUsuario = current_user.Login
             
             self.db.commit()
@@ -207,7 +199,7 @@ class ClienteService:
     def _validate_document_unique(self, cliente_data: ClienteCreate, exclude_id: Optional[int] = None) -> None:
         """Validate document uniqueness (CPF or CNPJ)"""
         
-        query = self.db.query(Cliente).filter(Cliente.FlgAtivo == 'S')
+        query = self.db.query(Cliente)
         
         # Exclude current cliente if updating
         if exclude_id:

@@ -90,9 +90,60 @@ export const dashboardService = {
   async getFluxoCaixa(meses?: number): Promise<FluxoCaixaItem[]> {
     try {
       const response = await apiClient.get('/dashboard/fluxo-caixa', {
-        params: { meses: meses || 6 }
+        params: { months: meses || 12 }
       });
-      return response.data;
+      
+      const apiData = response.data;
+      console.log('Fluxo de caixa API response:', apiData);
+      
+      // O backend retorna: {periodo, entradas: [], saidas: [], saldo_mensal: []}
+      // Precisamos mapear para: [{mes, receitas, despesas, saldo}]
+      if (apiData && apiData.entradas && apiData.saidas && apiData.saldo_mensal) {
+        const fluxoData: FluxoCaixaItem[] = [];
+        
+        // Criar um mapa para facilitar o acesso aos dados
+        const entradasMap = new Map();
+        const saidasMap = new Map();
+        const saldoMap = new Map();
+        
+        apiData.entradas.forEach((item: any) => {
+          entradasMap.set(item.mes_ano, item.valor);
+        });
+        
+        apiData.saidas.forEach((item: any) => {
+          saidasMap.set(item.mes_ano, item.valor);
+        });
+        
+        apiData.saldo_mensal.forEach((item: any) => {
+          saldoMap.set(item.mes_ano, item.saldo);
+        });
+        
+        // Combinar todos os meses únicos
+        const allMonths = new Set([
+          ...apiData.entradas.map((item: any) => item.mes_ano),
+          ...apiData.saidas.map((item: any) => item.mes_ano),
+          ...apiData.saldo_mensal.map((item: any) => item.mes_ano)
+        ]);
+        
+        // Converter para o formato esperado pelo frontend
+         Array.from(allMonths).sort().forEach(mesAno => {
+           const [mes] = mesAno.split('/');
+           const mesNome = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+                           'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][parseInt(mes) - 1];
+          
+          fluxoData.push({
+            mes: mesNome,
+            receitas: entradasMap.get(mesAno) || 0,
+            despesas: saidasMap.get(mesAno) || 0,
+            saldo: saldoMap.get(mesAno) || 0
+          });
+        });
+        
+        console.log('Mapped fluxo data:', fluxoData);
+        return fluxoData;
+      }
+      
+      return [];
     } catch (error) {
       console.error('Erro ao buscar fluxo de caixa:', error);
       // Fallback com dados mockados

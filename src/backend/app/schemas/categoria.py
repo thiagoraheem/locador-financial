@@ -10,9 +10,9 @@ class CategoriaBase(BaseModel):
     """Schema base para categorias"""
     DesCategoria: str = Field(..., max_length=50, description="Descrição da categoria")
     Descricao: Optional[str] = Field(None, max_length=500, description="Descrição da categoria")
-    TipoCategoria: Literal['R', 'D', 'T'] = Field(..., description="Tipo: R=Receita, D=Despesa, T=Transferência")
+    TipoCategoria: Optional[Literal['R', 'D', 'T']] = Field(None, description="Tipo: R=Receita, D=Despesa, T=Transferência")
     CodCategoriaPai: Optional[int] = Field(None, description="Código da categoria pai (para subcategorias)")
-    FlgAtivo: Literal['S', 'N'] = Field(default='S', description="Ativo: S=Sim, N=Não")
+    FlgAtivo: Optional[Literal['S', 'N']] = Field(default='S', description="Ativo: S=Sim, N=Não")
 
 
 class CategoriaCreate(CategoriaBase):
@@ -25,17 +25,22 @@ class CategoriaUpdate(CategoriaBase):
     pass
 
 
-class CategoriaResponse(CategoriaBase):
+class CategoriaResponse(BaseModel):
     """Schema para resposta de categoria"""
     CodCategoria: int
+    DesCategoria: str = Field(..., max_length=50, description="Descrição da categoria")
+    TipoCategoria: str = Field(..., description="Tipo: R=Receita, D=Despesa")
+    FlgAtivo: Literal['S', 'N'] = Field(..., description="Ativo: S=Sim, N=Não")
+    CodCategoriaPai: Optional[int] = Field(None, alias="CodPai", description="Código da categoria pai")
     categoria_pai_nome: Optional[str] = None
-    subcategorias: Optional[List['CategoriaResponse']] = None
-    NomUsuario: str
-    DtCreate: datetime
-    DtAlter: Optional[datetime] = None
+    subcategorias: List['CategoriaResponse'] = Field(default_factory=list)
+    NomUsuario: str = Field(..., description="Nome do usuário que criou")
+    DtCreate: datetime = Field(..., description="Data de criação")
+    DtAlter: Optional[datetime] = Field(None, alias="DateUpdate", description="Data de alteração")
     
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 # Update forward reference

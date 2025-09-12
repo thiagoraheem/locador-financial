@@ -12,17 +12,40 @@ class Cliente(Base):
     
     __tablename__ = "tbl_Clientes"
 
+    # Colunas principais
     CodCliente = Column(Integer, primary_key=True, index=True)
     DesCliente = Column(String(100), nullable=False, comment="Nome/descrição do cliente")
     RazaoSocial = Column(String(200), comment="Razão social (para PJ)")
     FlgTipoPessoa = Column(String(1), nullable=False, comment="F=Física, J=Jurídica")
-    CNPJCPF = Column(String(20), unique=True, index=True, comment="CNPJ ou CPF")
-    InscricaoEstadual = Column(String(20), comment="Inscrição estadual (para PJ)")
-    Email = Column(String(100), comment="Email principal")
+    
+    # Documentos
+    CPF = Column(String(11), comment="CPF para pessoa física")
+    RG = Column(String(20), comment="RG para pessoa física")
+    CNPJ = Column(String(14), comment="CNPJ para pessoa jurídica")
+    IE = Column(String(20), comment="Inscrição estadual")
+    IM = Column(String(20), comment="Inscrição municipal")
+    
+    # Endereço
+    Endereco = Column(String(200), comment="Endereço")
+    EnderecoComplemento = Column(String(100), comment="Complemento do endereço")
+    Numero = Column(String(10), comment="Número")
+    Bairro = Column(String(100), comment="Bairro")
+    CEP = Column(String(8), comment="CEP")
+    Municipio = Column(String(100), comment="Município")
+    Estado = Column(String(2), comment="Estado")
+    
+    # Contatos
     Telefone = Column(String(20), comment="Telefone principal")
-    Endereco = Column(Text, comment="Endereço completo")
-    FlgAtivo = Column(Boolean, default=True, comment="Cliente ativo")
-    Observacoes = Column(Text, comment="Observações gerais")
+    Telefone2 = Column(String(20), comment="Telefone secundário")
+    Telefone3 = Column(String(20), comment="Telefone terciário")
+    Email = Column(String(100), comment="Email principal")
+    Email2 = Column(String(100), comment="Email secundário")
+    Email3 = Column(String(100), comment="Email terciário")
+    
+    # Flags e configurações
+    FlgLiberado = Column(Boolean, default=False, comment="Cliente liberado")
+    FlgVIP = Column(Boolean, default=False, comment="Cliente VIP")
+    FlgNegativado = Column(Integer, default=0, comment="Cliente negativado")
     
     # Colunas de auditoria (conforme estrutura real da tabela)
     DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -56,11 +79,6 @@ class Cliente(Base):
         return self.FlgTipoPessoa == 'J'
     
     @property
-    def is_active(self) -> bool:
-        """Verifica se o cliente está ativo"""
-        return self.FlgAtivo == 'S'
-    
-    @property
     def is_liberado(self) -> bool:
         """Verifica se o cliente está liberado"""
         return self.FlgLiberado == True
@@ -88,17 +106,21 @@ class Cliente(Base):
     def get_telefones(self) -> list:
         """Retorna lista de telefones não vazios"""
         telefones = []
-        if self.Telefone1:
-            telefones.append(self.Telefone1)
+        if self.Telefone:
+            telefones.append(self.Telefone)
         if self.Telefone2:
             telefones.append(self.Telefone2)
+        if self.Telefone3:
+            telefones.append(self.Telefone3)
         return telefones
     
     def get_emails(self) -> list:
         """Retorna lista de emails não vazios"""
         emails = []
-        if self.Email1:
-            emails.append(self.Email1)
+        if self.Email:
+            emails.append(self.Email)
         if self.Email2:
             emails.append(self.Email2)
+        if self.Email3:
+            emails.append(self.Email3)
         return emails

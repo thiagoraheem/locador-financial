@@ -30,18 +30,17 @@ class ClienteBase(BaseModel):
     Estado: Optional[str] = Field(None, max_length=2, description="Estado (UF)")
     
     # Dados de contato
-    Telefone1: Optional[str] = Field(None, max_length=20, description="Telefone principal")
+    Telefone: Optional[str] = Field(None, max_length=20, description="Telefone principal")
     Telefone2: Optional[str] = Field(None, max_length=20, description="Telefone secundário")
-    Email1: Optional[str] = Field(None, max_length=100, description="E-mail principal")
+    Telefone3: Optional[str] = Field(None, max_length=20, description="Telefone terciário")
+    Email: Optional[str] = Field(None, max_length=100, description="E-mail principal")
     Email2: Optional[str] = Field(None, max_length=100, description="E-mail secundário")
+    Email3: Optional[str] = Field(None, max_length=100, description="E-mail terciário")
     
     # Status e configurações
-    FlgLiberado: bool = Field(default=True, description="Status de liberação do cliente")
+    FlgLiberado: bool = Field(default=False, description="Status de liberação do cliente")
     FlgVIP: bool = Field(default=False, description="Cliente VIP")
-    FlgAtivo: Literal['S', 'N'] = Field(default='S', description="S=Ativo, N=Inativo")
-    
-    # Observações
-    Observacoes: Optional[str] = Field(None, description="Observações gerais sobre o cliente")
+    FlgNegativado: int = Field(default=0, description="Cliente negativado")
 
     @validator('CPF')
     def validate_cpf(cls, v, values):
@@ -112,11 +111,6 @@ class ClienteResponse(ClienteBase):
         return self.FlgTipoPessoa == 'J'
 
     @property
-    def is_active(self) -> bool:
-        """Verifica se o cliente está ativo"""
-        return self.FlgAtivo == 'S'
-
-    @property
     def is_liberado(self) -> bool:
         """Verifica se o cliente está liberado"""
         return self.FlgLiberado
@@ -144,17 +138,21 @@ class ClienteResponse(ClienteBase):
     def get_telefones(self) -> list:
         """Retorna lista de telefones não vazios"""
         telefones = []
-        if self.Telefone1:
-            telefones.append(self.Telefone1)
+        if self.Telefone:
+            telefones.append(self.Telefone)
         if self.Telefone2:
             telefones.append(self.Telefone2)
+        if self.Telefone3:
+            telefones.append(self.Telefone3)
         return telefones
 
     def get_emails(self) -> list:
         """Retorna lista de emails não vazios"""
         emails = []
-        if self.Email1:
-            emails.append(self.Email1)
+        if self.Email:
+            emails.append(self.Email)
         if self.Email2:
             emails.append(self.Email2)
+        if self.Email3:
+            emails.append(self.Email3)
         return emails
