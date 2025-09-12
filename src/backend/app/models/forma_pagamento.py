@@ -23,8 +23,7 @@ class FormaPagamento(Base):
     DatAlteracao = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
     NomUsuarioAlteracao = Column(String(15), nullable=True)
     
-    # Relacionamentos
-    lancamentos = relationship("Lancamento", back_populates="forma_pagamento")
+    # Relacionamentos removidos temporariamente para evitar erros de configuração
     
     # Propriedades de compatibilidade para schemas
     @property

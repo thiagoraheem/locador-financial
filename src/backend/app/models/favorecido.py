@@ -1,7 +1,7 @@
 """
 Modelo de Favorecidos
 """
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -11,29 +11,31 @@ class Favorecido(Base):
     
     __tablename__ = "tbl_FINFavorecido"
 
-    CodFavorecido = Column(Integer, primary_key=True, autoincrement=True)
-    DesFavorecido = Column(String(100), nullable=False)
-    Endereco = Column(String(150))
-    Numero = Column(String(10))
-    Bairro = Column(String(50))
-    CEP = Column(String(9))
-    Municipio = Column(String(20))
-    Estado = Column(String(2))
-    RG = Column(String(20))
-    CPF = Column(String(14))
-    CNPJ = Column(String(18))
-    IE = Column(String(15))
-    IM = Column(String(10))
-    FlgTipo = Column(String(1))
-    Email = Column(String(50))
-    Telefone = Column(String(16))
-    Comentario = Column(String(300))
-    DatCadastro = Column(DateTime)
-    NomUsuario = Column(String(15))
-    CodClienteLocador = Column(Integer)
+    # Campos conforme estrutura real da tabela tbl_FINFavorecido
+    CodFavorecido = Column(Integer, primary_key=True, name='CodFavorecido')
+    DesFavorecido = Column(String(100), name='DesFavorecido', nullable=False)
+    Endereco = Column(String(150), name='Endereco')
+    Numero = Column(String(10), name='Numero')
+    Bairro = Column(String(50), name='Bairro')
+    CEP = Column(String(9), name='CEP')
+    Municipio = Column(String(20), name='Municipio')
+    Estado = Column(String(2), name='Estado')
+    RG = Column(String(20), name='RG')
+    CPF = Column(String(14), name='CPF')
+    CNPJ = Column(String(18), name='CNPJ')
+    IE = Column(String(15), name='IE')
+    IM = Column(String(10), name='IM')
+    FlgTipo = Column(String(1), name='FlgTipo')
+    Email = Column(String(50), name='Email')
+    Telefone = Column(String(16), name='Telefone')
+    Comentario = Column(String(300), name='Comentario')
+    DatCadastro = Column(DateTime, name='DatCadastro')
+    NomUsuario = Column(String(15), name='NomUsuario')
+    CodClienteLocador = Column(Integer, name='CodClienteLocador')
     
-    # Relacionamento com lançamentos
+    # Relacionamentos
     lancamentos = relationship("Lancamento", back_populates="favorecido")
+    contas_pagar = relationship("AccountsPayable", back_populates="favorecido")
     
     def __repr__(self):
         return f"<Favorecido(CodFavorecido={self.CodFavorecido}, DesFavorecido='{self.DesFavorecido}')>"

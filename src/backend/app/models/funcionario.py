@@ -1,9 +1,9 @@
 """
 Modelo do funcionário para autenticação
 """
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, DECIMAL, LargeBinary
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Numeric, Date
 from datetime import datetime
-from app.core.database import Base
+from .base import Base
 
 
 class TblFuncionarios(Base):
@@ -11,31 +11,32 @@ class TblFuncionarios(Base):
     
     __tablename__ = 'tbl_Funcionarios'
     
-    CodFuncionario = Column(Integer, primary_key=True, index=True)
-    NumCTPS = Column(String(50))
-    CPF = Column(String(14))
-    Nome = Column(String(100))
-    Telefone = Column(String(20))
-    Endereco = Column(String(200))
-    Salario = Column(DECIMAL(10, 2))
-    DatAdmissao = Column(DateTime)
-    DatDemissao = Column(DateTime, nullable=True)  # NULL = usuário ativo
-    FlgComissao = Column(Boolean)
-    ValComissao = Column(DECIMAL(5, 2))
-    VlrDesconto = Column(DECIMAL(10, 2))
-    Email = Column(String(100))
-    Login = Column(String(50), unique=True, index=True)
-    Senha = Column(String(255))  # Hash SHA-256
-    AssinaturaDigitalizada = Column(LargeBinary)
-    CodSetor = Column(Integer)
-    CodFavorecido = Column(Integer)
-    CodFuncao = Column(Integer)
-    Settings = Column(String(500))
-    Foto = Column(LargeBinary)
-    DatCadastro = Column(DateTime, default=datetime.utcnow)
-    NomUsuario = Column(String(50), nullable=False)
-    DatAlteracao = Column(DateTime)
-    NomUsuarioAlteracao = Column(String(50))
+    # Campos conforme estrutura real do banco de dados
+    CodFuncionario = Column(Integer, primary_key=True, name='CodFuncionario')
+    NumCTPS = Column(String(15), name='NumCTPS')
+    CPF = Column(String(14), name='CPF')
+    Nome = Column(String(50), name='Nome')
+    Telefone = Column(String(16), name='Telefone')
+    Endereco = Column(String(100), name='Endereco')
+    Salario = Column(Numeric(19,4), name='Salario')
+    DatAdmissao = Column(DateTime, name='DatAdmissao')
+    DatDemissao = Column(DateTime, name='DatDemissao')
+    FlgComissao = Column(Boolean, name='FlgComissao', default=False)
+    ValComissao = Column(Numeric(8,2), name='ValComissao')
+    VlrDesconto = Column(Numeric(8,2), name='VlrDesconto', default=100)
+    Email = Column(String(100), name='Email')
+    Login = Column(String(15), name='Login')
+    Senha = Column(String(30), name='Senha')
+    AssinaturaDigitalizada = Column(Text, name='AssinaturaDigitalizada')  # image type
+    CodSetor = Column(Integer, name='CodSetor')
+    CodFavorecido = Column(Integer, name='CodFavorecido')
+    CodFuncao = Column(Integer, name='CodFuncao')
+    Settings = Column(Text, name='Settings')  # varchar(max)
+    Foto = Column(Text, name='Foto')  # image type
+    DatCadastro = Column(DateTime, name='DatCadastro', nullable=False)
+    NomUsuario = Column(String(15), name='NomUsuario', nullable=False)
+    DatAlteracao = Column(DateTime, name='DatAlteracao')
+    NomUsuarioAlteracao = Column(String(15), name='NomUsuarioAlteracao')
     
     def is_active(self) -> bool:
         """Verifica se o funcionário está ativo (não demitido)"""

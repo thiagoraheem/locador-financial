@@ -1,7 +1,7 @@
 """
 Modelo de Contas a Receber
 """
-from sqlalchemy import Column, Integer, String, DateTime, Numeric, ForeignKey, Boolean, Text
+from sqlalchemy import Column, Integer, String, DateTime, Numeric, ForeignKey, Boolean, Text, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
@@ -12,28 +12,32 @@ class AccountsReceivable(Base):
     
     __tablename__ = "tbl_AccountsReceivable"
 
-    IdAccountsReceivable = Column(Integer, primary_key=True, index=True)
-    IdCompany = Column(Integer, nullable=False, comment="Empresa")
-    DocumentNumber = Column(String(50), comment="Número do documento")
-    Amount = Column(Numeric(19, 4), nullable=False, comment="Valor original")
-    IssuanceDate = Column(DateTime, nullable=False, comment="Data de emissão")
-    DueDate = Column(DateTime, nullable=False, comment="Data de vencimento")
-    IdCostCenter = Column(Integer, comment="Centro de custo")
-    IdChartOfAccounts = Column(Integer, comment="Plano de contas")
-    Description = Column(Text, comment="Descrição")
-    IdCustomer = Column(Integer, ForeignKey("tbl_Clientes.CodCliente"), comment="Cliente")
-    PaymentDate = Column(DateTime, comment="Data do recebimento")
-    PaidAmount = Column(Numeric(19, 4), comment="Valor recebido")
-    Installment = Column(Integer, comment="Número da parcela")
-    TotalInstallments = Column(Integer, comment="Total de parcelas")
-    FineAmount = Column(Numeric(19, 4), comment="Valor da multa")
-    InterestAmount = Column(Numeric(19, 4), comment="Valor dos juros")
-    DiscountAmount = Column(Numeric(19, 4), comment="Valor do desconto")
-    IdBankAccount = Column(Integer, comment="Conta bancária")
-    IdPaymentMethod = Column(Integer, comment="Forma de pagamento")
-    IdParentAccountsReceivable = Column(Integer, comment="Conta pai")
-    IdInstallmentType = Column(Integer, nullable=False, comment="Tipo de parcela")
-    IdDocumentType = Column(Integer, nullable=False, comment="Tipo de documento")
+    # Campos principais
+    id = Column(Integer, primary_key=True, name='id')
+    cod_empresa = Column(Integer, name='CodEmpresa', default=1)
+    cod_cliente = Column(Integer, ForeignKey('tbl_Clientes.CodCliente'), name='CodCliente', nullable=False)
+    cod_categoria = Column(Integer, ForeignKey('tbl_FINCategorias.CodCategoria'), name='CodCategoria', nullable=False)
+    num_documento = Column(String(20), name='NumDocumento')
+    data_vencimento = Column(Date, name='DataVencimento', nullable=False)
+    data_emissao = Column(Date, name='DataEmissao')
+    valor_original = Column(Numeric(19,4), name='ValorOriginal', nullable=False)
+    valor_recebido = Column(Numeric(19,4), name='ValorRecebido', default=0)
+    valor_juros = Column(Numeric(19,4), name='ValorJuros', default=0)
+    valor_multa = Column(Numeric(19,4), name='ValorMulta', default=0)
+    valor_desconto = Column(Numeric(19,4), name='ValorDesconto', default=0)
+    observacoes = Column(Text, name='Observacoes')
+    flg_recebido = Column(Boolean, name='FlgRecebido', default=False)
+    data_recebimento = Column(Date, name='DataRecebimento')
+    cod_conta = Column(Integer, ForeignKey('tbl_Conta.idConta'), name='CodConta')
+    cod_forma_recebimento = Column(Integer, name='CodFormaRecebimento')
+    num_parcela = Column(Integer, name='NumParcela')
+    qtd_parcelas = Column(Integer, name='QtdParcelas')
+    cod_lancamento_origem = Column(Integer, name='CodLancamentoOrigem')
+    flg_recorrente = Column(Boolean, name='FlgRecorrente', default=False)
+    periodicidade = Column(String(1), name='Periodicidade')  # M=Mensal, A=Anual, etc
+    nosso_numero = Column(String(20), name='NossoNumero')
+    codigo_barras = Column(String(100), name='CodigoBarras')
+    linha_digitavel = Column(String(100), name='LinhaDigitavel')
     IdUserCreate = Column(Integer, nullable=False, comment="Usuário criação")
     IdUserAlter = Column(Integer, comment="Usuário alteração")
     DateCreate = Column(DateTime, nullable=False, comment="Data criação")
@@ -41,27 +45,29 @@ class AccountsReceivable(Base):
     
     # Relacionamentos
     cliente = relationship("Cliente", back_populates="contas_receber")
+    categoria = relationship("Categoria")
+    conta = relationship("Conta")
     
     # Propriedades calculadas
     @property
     def valor_pendente(self):
         """Calcula o valor ainda pendente de recebimento"""
-        return self.Amount - (self.PaidAmount or 0)
+        return self.valor_original - (self.valor_recebido or 0)
     
     @property
     def esta_vencido(self) -> bool:
         """Verifica se a conta está vencida"""
-        return self.DueDate < datetime.now() and self.PaymentDate is None
+        return self.data_vencimento < datetime.now().date() and not self.flg_recebido
     
     @property
     def dias_atraso(self) -> int:
         """Calcula quantos dias a conta está em atraso"""
         if not self.esta_vencido:
             return 0
-        return (datetime.now() - self.DueDate).days
+        return (datetime.now().date() - self.data_vencimento).days
     
     def __repr__(self):
-        return f"<AccountsReceivable(IdAccountsReceivable={self.IdAccountsReceivable}, Amount={self.Amount}, PaymentDate={self.PaymentDate})>"
+        return f"<AccountsReceivable(id={self.id}, valor_original={self.valor_original}, flg_recebido={self.flg_recebido})>"
 
 
 class AccountsReceivablePayment(Base):
@@ -70,7 +76,7 @@ class AccountsReceivablePayment(Base):
     __tablename__ = "tbl_AccountsReceivablePayments"
 
     CodPayment = Column(Integer, primary_key=True, index=True)
-    CodAccountsReceivable = Column(Integer, ForeignKey("tbl_AccountsReceivable.IdAccountsReceivable"), nullable=False)
+    CodAccountsReceivable = Column(Integer, ForeignKey("tbl_AccountsReceivable.id"), nullable=False)
     idConta = Column(Integer, ForeignKey("tbl_Conta.idConta"), comment="Conta bancária do recebimento")
     CodFormaPagto = Column(Integer, ForeignKey("tbl_FINFormaPagamento.CodFormaPagto"), comment="Forma de recebimento")
     

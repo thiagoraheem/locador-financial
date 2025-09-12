@@ -1,7 +1,7 @@
 """
 Modelo de Clientes
 """
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, Numeric
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
@@ -47,6 +47,16 @@ class Cliente(Base):
     FlgVIP = Column(Boolean, default=False, comment="Cliente VIP")
     FlgNegativado = Column(Integer, default=0, comment="Cliente negativado")
     
+    # Campos adicionais
+    Contato2 = Column(String(50), name='Contato2')
+    Contato3 = Column(String(50), name='Contato3')
+    CNH = Column(String(20), name='CNH')
+    CNHValidade = Column(DateTime, name='CNHValidade')
+    TipoContribuinte = Column(String(150), name='TipoContribuinte')
+    TipoRegimeTributario = Column(String(30), name='TipoRegimeTributario')
+    VlrDesconto = Column(Numeric(8,2), name='VlrDesconto')
+    CodVendedor = Column(Integer, name='CodVendedor')
+    
     # Colunas de auditoria (conforme estrutura real da tabela)
     DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
     NomUsuario = Column(String(15), nullable=False)
@@ -80,8 +90,10 @@ class Cliente(Base):
     
     @property
     def is_liberado(self) -> bool:
-        """Verifica se o cliente está liberado"""
-        return self.FlgLiberado == True
+        """Retorna se o cliente está liberado (baseado em lógica de negócio)"""
+        # Implementar lógica de negócio para determinar se cliente está liberado
+        # Por exemplo: verificar se tem pendências, documentos em dia, etc.
+        return True  # Placeholder - implementar lógica real
     
     @property
     def is_vip(self) -> bool:

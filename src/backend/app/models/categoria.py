@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, Numeric, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
@@ -7,18 +7,19 @@ from app.core.database import Base
 class Categoria(Base):
     __tablename__ = "tbl_FINCategorias"
     
-    CodCategoria = Column(Integer, primary_key=True, autoincrement=True)
-    DesCategoria = Column(String(50), nullable=False)
-    flgTipo = Column(String(1), nullable=False)  # R=Receita, D=Despesa
-    FlgAtivo = Column(String(1), default='S', nullable=False)  # S=Ativo, N=Inativo
-    CodGrupoCategoria = Column(Integer)
-    CodPai = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"))
-    idCostCenter = Column(Integer)
-    idChartsOfAccount = Column(Integer)
-    IdUserCreate = Column(Integer, nullable=False)
-    IdUserAlter = Column(Integer)
-    DateCreate = Column(DateTime, nullable=False, default=datetime.utcnow)
-    DateUpdate = Column(DateTime)
+    # Campos conforme estrutura real da tabela tbl_FINCategorias
+    CodCategoria = Column(Integer, primary_key=True, name='CodCategoria')
+    DesCategoria = Column(String(50), name='DesCategoria')
+    flgTipo = Column(String(1), name='flgTipo')
+    CodGrupoCategoria = Column(Integer, name='CodGrupoCategoria')
+    CodPai = Column(Integer, ForeignKey('tbl_FINCategorias.CodCategoria'), name='CodPai', nullable=True)
+    idCostCenter = Column(Integer, name='idCostCenter')
+    idChartsOfAccount = Column(Integer, name='idChartsOfAccount')
+    IdUserCreate = Column(Integer, name='IdUserCreate', nullable=False, default=1)
+    IdUserAlter = Column(Integer, name='IdUserAlter')
+    DateCreate = Column(DateTime, name='DateCreate', nullable=False, default=datetime.utcnow)
+    DateUpdate = Column(DateTime, name='DateUpdate')
+    FlgAtivo = Column(String(1), name='FlgAtivo', default='S')
     
     # Propriedades de compatibilidade para schemas
     @property

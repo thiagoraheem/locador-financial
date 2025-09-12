@@ -29,8 +29,7 @@ def test_get_banco(client, db_session: Session, auth_headers):
     # First create a banco
     banco = Banco(
         Codigo=321,
-        Nome="Test Bank",
-        NomUsuario="test"
+        Nome="Test Bank"
     )
     db_session.add(banco)
     db_session.commit()
@@ -49,13 +48,11 @@ def test_list_bancos(client, db_session: Session, auth_headers):
     # Create a couple of bancos
     banco1 = Banco(
         Codigo=100,
-        Nome="Bank 1",
-        NomUsuario="test"
+        Nome="Bank 1"
     )
     banco2 = Banco(
         Codigo=200,
-        Nome="Bank 2",
-        NomUsuario="test"
+        Nome="Bank 2"
     )
     db_session.add(banco1)
     db_session.add(banco2)
@@ -73,8 +70,7 @@ def test_update_banco(client, db_session: Session, auth_headers):
     # First create a banco
     banco = Banco(
         Codigo=999,
-        Nome="Original Bank",
-        NomUsuario="test"
+        Nome="Original Bank"
     )
     db_session.add(banco)
     db_session.commit()
@@ -96,8 +92,7 @@ def test_delete_banco(client, db_session: Session, auth_headers):
     # First create a banco
     banco = Banco(
         Codigo=777,
-        Nome="To Delete Bank",
-        NomUsuario="test"
+        Nome="To Delete Bank"
     )
     db_session.add(banco)
     db_session.commit()

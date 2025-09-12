@@ -1,7 +1,7 @@
 """
 Modelo de Contas Bancárias
 """
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, ForeignKey, Text, DateTime
+from sqlalchemy import Column, Integer, String, Numeric, Boolean, ForeignKey, Text, DateTime, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
@@ -12,24 +12,32 @@ class Conta(Base):
     
     __tablename__ = "tbl_Conta"
 
-    idConta = Column(Integer, primary_key=True, index=True)
-    CodEmpresa = Column(Integer, ForeignKey("tbl_Empresa.CodEmpresa"), nullable=False)
-    Banco = Column(Integer, ForeignKey("tbl_Banco.Codigo"), nullable=False)
-    Agencia = Column(String(4), nullable=False)
-    AgenciaDigito = Column(String(4))
-    Conta = Column(String(15), nullable=False)
-    ContaDigito = Column(String(4))
-    OperacaoConta = Column(String(15))
-    Convenio = Column(String(10))
-    NomConta = Column(String(50), nullable=False)
-    Saldo = Column(Numeric(15, 2), default=0.00)
-    TipoPix = Column(String(10))
-    ValorPix = Column(String(100))
-    FlgContaPadrao = Column(Boolean, default=False)
-    Carteira = Column(String(5))
-    VariacaoCarteira = Column(String(5))
-    EnableAPI = Column(Boolean, default=False)
-    ConfiguracaoAPI = Column(Text)
+    # Campos principais
+    idConta = Column(Integer, primary_key=True, name='idConta')
+    CodEmpresa = Column(Integer, ForeignKey('tbl_Empresa.CodEmpresa'), name='CodEmpresa', default=1)
+    Banco = Column(Integer, ForeignKey('tbl_Banco.Codigo'), name='Banco', nullable=False)
+    Agencia = Column(String(10), name='Agencia', nullable=False)
+    DigitoAgencia = Column(String(2), name='DigitoAgencia')
+    Conta = Column(String(20), name='Conta', nullable=False)
+    DigitoConta = Column(String(2), name='DigitoConta')
+    DesConta = Column(String(50), name='DesConta', nullable=False)
+    FlgAtivo = Column(String(1), name='FlgAtivo', default='S')
+    FlgContaCorrente = Column(Boolean, name='FlgContaCorrente', default=True)
+    FlgPoupanca = Column(Boolean, name='FlgPoupanca', default=False)
+    FlgPix = Column(Boolean, name='FlgPix', default=False)
+    ChavePix = Column(String(100), name='ChavePix')
+    TipoChavePix = Column(String(20), name='TipoChavePix')
+    saldo_inicial = Column(Numeric(19,4), name='SaldoInicial', default=0)
+    dat_saldo_inicial = Column(Date, name='DatSaldoInicial')
+    observacao = Column(Text, name='Observacao')
+    flg_conta_caixa = Column(Boolean, name='FlgContaCaixa', default=False)
+    limite_credito = Column(Numeric(19,4), name='LimiteCredito')
+    taxa_juros_mes = Column(Numeric(5,2), name='TaxaJurosMes')
+    convenio_cobranca = Column(String(20), name='ConvenioCobranca')
+    carteira_cobranca = Column(String(10), name='CarteiraCobranca')
+    nosso_numero_seq = Column(Integer, name='NossoNumeroSeq')
+    cod_cedente = Column(String(20), name='CodCedente')
+    digito_cedente = Column(String(2), name='DigitoCedente')
     
     # Colunas de auditoria (conforme estrutura real da tabela)
     DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
