@@ -73,9 +73,8 @@ class BancoService:
         
         query = self.db.query(Banco)
         
-        # Filter only active
-        if ativos_apenas:
-            query = query.filter(Banco.FlgAtivo == 'S')
+        # Note: tbl_Banco doesn't have FlgAtivo field
+        # All bancos are considered active
         
         # Order by code
         query = query.order_by(Banco.Codigo)
@@ -138,10 +137,8 @@ class BancoService:
             )
         
         try:
-            # Logical deletion
-            banco.FlgAtivo = 'N'
-            banco.NomUsuario = current_user.Login
-            
+            # Physical deletion since no FlgAtivo field exists
+            self.db.delete(banco)
             self.db.commit()
         except Exception as e:
             self.db.rollback()
@@ -154,10 +151,7 @@ class BancoService:
         """Validate banco code uniqueness"""
         
         query = self.db.query(Banco).filter(
-            and_(
-                Banco.Codigo == codigo,
-                Banco.FlgAtivo == 'S'
-            )
+            Banco.Codigo == codigo
         )
         
         # Exclude current banco if updating
@@ -175,9 +169,6 @@ class BancoService:
         # Check if any active conta references this banco
         from app.models.conta import Conta
         count = self.db.query(Conta).filter(
-            and_(
-                Conta.Banco == banco_id,
-                Conta.FlgAtivo == 'S'
-            )
+            Conta.Banco == banco_id
         ).count()
         return count > 0

@@ -223,7 +223,6 @@ export const CategoriasTable: React.FC<CategoriasTableProps> = ({ onEdit, onCrea
           <TableHeader>
             <TableRow>
               <TableHead>{t('categorias.nome')}</TableHead>
-              <TableHead>{t('categorias.descricao')}</TableHead>
               <TableHead>{t('categorias.tipo')}</TableHead>
               <TableHead>{t('categorias.categoria_pai')}</TableHead>
               <TableHead>{t('categorias.ativo')}</TableHead>
@@ -246,8 +245,7 @@ export const CategoriasTable: React.FC<CategoriasTableProps> = ({ onEdit, onCrea
             ) : (
               categorias.map((categoria) => (
                 <TableRow key={categoria.CodCategoria}>
-                  <TableCell className="font-medium">{categoria.NomCategoria}</TableCell>
-                  <TableCell>{categoria.Descricao || '-'}</TableCell>
+                  <TableCell className="font-medium">{categoria.DesCategoria}</TableCell>
                   <TableCell>{renderTipoCategoria(categoria.TipoCategoria)}</TableCell>
                   <TableCell>{categoria.categoria_pai_nome || '-'}</TableCell>
                   <TableCell>{renderStatus(categoria.FlgAtivo)}</TableCell>

@@ -8,20 +8,11 @@ from app.core.database import Base
 
 
 class Banco(Base):
-    """Modelo para bancos do sistema financeiro nacional"""
-    
     __tablename__ = "tbl_Banco"
-
-    CodBanco = Column(Integer, primary_key=True, index=True)
-    NomBanco = Column(String(100), nullable=False)
-    CodBacen = Column(String(10), unique=True, index=True)
-    Site = Column(String(200))
     
-    # Colunas de auditoria (conforme estrutura real da tabela)
-    DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
-    NomUsuario = Column(String(15), nullable=False)
-    DatAlteracao = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
-    NomUsuarioAlteracao = Column(String(15), nullable=True)
+    Codigo = Column(Integer, primary_key=True, index=True)
+    Digito = Column(String(4), nullable=True)
+    Nome = Column(String(100), nullable=True)
     
     # Relacionamentos
     contas = relationship("Conta", back_populates="banco")
@@ -47,8 +38,8 @@ class Banco(Base):
     
     @property
     def is_active(self) -> bool:
-        """Verifica se o banco está ativo"""
-        return self.FlgAtivo == 'S'
+        """Verifica se o banco está ativo - sempre True pois não há campo FlgAtivo"""
+        return True
     
     @classmethod
     def validate_codigo_febraban(cls, codigo: int) -> bool:

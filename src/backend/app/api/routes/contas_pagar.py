@@ -156,7 +156,7 @@ async def atualizar_pagamento(
     """
     service = ContaPagarService(db)
     pagamento_atualizado = service.update_payment(payment_id, pagamento, current_user)
-    return AccountsPayablePaymentResponse.from_orm(pagamento_atualizado)
+    return AccountsPayablePaymentResponse.model_validate(pagamento_atualizado)
 
 @router.delete("/pagamentos/{payment_id}", summary="Excluir pagamento")
 async def excluir_pagamento(

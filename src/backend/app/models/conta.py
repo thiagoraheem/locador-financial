@@ -14,7 +14,7 @@ class Conta(Base):
 
     idConta = Column(Integer, primary_key=True, index=True)
     CodEmpresa = Column(Integer, ForeignKey("tbl_Empresa.CodEmpresa"), nullable=False)
-    Banco = Column(Integer, ForeignKey("tbl_Banco.CodBanco"), nullable=False)
+    Banco = Column(Integer, ForeignKey("tbl_Banco.Codigo"), nullable=False)
     Agencia = Column(String(4), nullable=False)
     AgenciaDigito = Column(String(4))
     Conta = Column(String(15), nullable=False)
@@ -70,8 +70,8 @@ class Conta(Base):
     
     @property
     def is_active(self) -> bool:
-        """Verifica se a conta está ativa"""
-        return self.FlgAtivo == 'S'
+        """Verifica se a conta está ativa - sempre True pois não há campo FlgAtivo"""
+        return True
     
     @property
     def is_default(self) -> bool:

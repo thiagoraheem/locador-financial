@@ -34,5 +34,6 @@ class FavorecidoResponse(FavorecidoBase):
     DtCreate: datetime
     DtAlter: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }

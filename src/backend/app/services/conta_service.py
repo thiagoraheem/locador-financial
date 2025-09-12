@@ -86,9 +86,8 @@ class ContaService:
         
         query = self.db.query(Conta)
         
-        # Filter only active
-        if ativas_apenas:
-            query = query.filter(Conta.FlgAtivo == 'S')
+        # Note: tbl_Conta doesn't have FlgAtivo field
+        # All contas are considered active
         
         # Order by empresa and name
         query = query.order_by(Conta.CodEmpresa, Conta.NomConta)
@@ -107,9 +106,8 @@ class ContaService:
             Conta.CodEmpresa == empresa_id
         )
         
-        # Filter only active
-        if ativas_apenas:
-            query = query.filter(Conta.FlgAtivo == 'S')
+        # Note: tbl_Conta doesn't have FlgAtivo field
+        # All contas are considered active
         
         # Order by name
         query = query.order_by(Conta.NomConta)
@@ -186,9 +184,8 @@ class ContaService:
             )
         
         try:
-            # Logical deletion
-            conta.FlgAtivo = 'N'
-            conta.NomUsuario = current_user.Login
+            # Physical deletion since no FlgAtivo field exists
+            self.db.delete(conta)
             
             self.db.commit()
         except Exception as e:
@@ -201,10 +198,7 @@ class ContaService:
     def _validate_empresa_exists(self, empresa_id: int) -> Empresa:
         """Validate empresa exists and is active"""
         empresa = self.db.query(Empresa).filter(
-            and_(
-                Empresa.CodEmpresa == empresa_id,
-                Empresa.FlgAtivo == 'S'
-            )
+            Empresa.CodEmpresa == empresa_id
         ).first()
         
         if not empresa:
@@ -218,10 +212,7 @@ class ContaService:
     def _validate_banco_exists(self, banco_id: int) -> Banco:
         """Validate banco exists and is active"""
         banco = self.db.query(Banco).filter(
-            and_(
-                Banco.Codigo == banco_id,
-                Banco.FlgAtivo == 'S'
-            )
+            Banco.Codigo == banco_id
         ).first()
         
         if not banco:
@@ -247,8 +238,7 @@ class ContaService:
                 Conta.CodEmpresa == empresa_id,
                 Conta.Banco == banco_id,
                 Conta.Agencia == agencia,
-                Conta.Conta == conta,
-                Conta.FlgAtivo == 'S'
+                Conta.Conta == conta
             )
         )
         

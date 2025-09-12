@@ -97,8 +97,9 @@ class ClienteResponse(ClienteBase):
     DtCreate: datetime
     DtAlter: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
     @property
     def is_pessoa_fisica(self) -> bool:

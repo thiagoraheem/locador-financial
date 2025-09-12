@@ -35,13 +35,35 @@ class Categoria(Base):
     def DtCreate(self):
         return self.DateCreate
     
+    @property
+    def FlgAtivo_converted(self):
+        """Converte FlgAtivo do banco (1/0) para o formato esperado (S/N)"""
+        if self.FlgAtivo == '1':
+            return 'S'
+        elif self.FlgAtivo == '0':
+            return 'N'
+        else:
+            # Se já está no formato correto, retorna como está
+            return self.FlgAtivo
+    
     # Relacionamentos
     lancamentos = relationship("Lancamento", back_populates="categoria")
-    subcategorias = relationship(
+    _subcategorias_rel = relationship(
         "Categoria",
         backref="categoria_pai",
         remote_side=[CodCategoria]
     )
+    
+    @property
+    def subcategorias(self):
+        """Retorna subcategorias como lista (sempre)"""
+        if self._subcategorias_rel is None:
+            return []
+        elif isinstance(self._subcategorias_rel, list):
+            return self._subcategorias_rel
+        else:
+            # Se for um objeto único, converte para lista
+            return [self._subcategorias_rel]
     
     @property
     def is_active(self) -> bool:

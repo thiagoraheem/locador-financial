@@ -92,8 +92,9 @@ class AccountsReceivableResponse(AccountsReceivableBase):
     DtAlter: Optional[datetime] = None
     cliente_nome: Optional[str] = Field(None, description="Nome do cliente")
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class AccountsReceivablePaymentBase(BaseModel):
@@ -139,5 +140,6 @@ class AccountsReceivablePaymentResponse(AccountsReceivablePaymentBase):
     DtCreate: datetime
     DtAlter: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }

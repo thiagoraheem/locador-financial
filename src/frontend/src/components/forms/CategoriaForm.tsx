@@ -35,8 +35,7 @@ import {
 
 // Types for the form - adjust to match yup schema exactly
 interface CategoriaFormData {
-  NomCategoria: string;
-  Descricao?: string | null;
+  DesCategoria: string;
   TipoCategoria: 'R' | 'D' | 'T';
   CodCategoriaPai?: number | null;
   FlgAtivo: 'S' | 'N';
@@ -53,8 +52,7 @@ interface CategoriaFormProps {
 
 // Validation schema
 const categoriaSchema = yup.object({
-  NomCategoria: yup.string().required('validation.required').max(100, 'validation.max_length'),
-  Descricao: yup.string().max(500, 'validation.max_length').nullable(),
+  DesCategoria: yup.string().required('validation.required').max(100, 'validation.max_length'),
   TipoCategoria: yup.string().oneOf(['R', 'D', 'T']).required('validation.required'),
   CodCategoriaPai: yup.number().nullable(),
   FlgAtivo: yup.string().oneOf(['S', 'N']).required('validation.required'),
@@ -74,8 +72,7 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
   const form = useForm<CategoriaFormData>({
     resolver: yupResolver(categoriaSchema),
     defaultValues: {
-      NomCategoria: '',
-      Descricao: '',
+      DesCategoria: '',
       TipoCategoria: 'R',
       CodCategoriaPai: null,
       FlgAtivo: 'S',
@@ -93,16 +90,14 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
   useEffect(() => {
     if (open && initialData) {
       reset({
-        NomCategoria: initialData.NomCategoria || '',
-        Descricao: initialData.Descricao || '',
+        DesCategoria: initialData.DesCategoria || '',
         TipoCategoria: initialData.TipoCategoria || 'R',
         CodCategoriaPai: initialData.CodCategoriaPai !== undefined ? initialData.CodCategoriaPai : null,
         FlgAtivo: initialData.FlgAtivo || 'S',
       });
     } else if (open && !initialData) {
       reset({
-        NomCategoria: '',
-        Descricao: '',
+        DesCategoria: '',
         TipoCategoria: 'R',
         CodCategoriaPai: null,
         FlgAtivo: 'S',
@@ -138,27 +133,12 @@ export const CategoriaForm: React.FC<CategoriaFormProps> = ({
             {/* Nome da Categoria */}
             <FormField
               control={control}
-              name="NomCategoria"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('categorias.nome')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Descrição */}
-            <FormField
-              control={control}
-              name="Descricao"
+              name="DesCategoria"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('categorias.descricao')}</FormLabel>
                   <FormControl>
-                    <Textarea {...field} value={field.value || ''} className="min-h-[80px]" />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

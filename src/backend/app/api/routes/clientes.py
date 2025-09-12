@@ -32,7 +32,7 @@ async def listar_clientes(
         ativos_apenas=ativos_apenas, 
         liberados_apenas=liberados_apenas
     )
-    return [ClienteResponse.from_orm(cliente) for cliente in clientes]
+    return [ClienteResponse.model_validate(cliente) for cliente in clientes]
 
 
 @router.get("/search", response_model=List[ClienteResponse], summary="Buscar clientes")
@@ -68,7 +68,7 @@ async def obter_cliente(
     """
     service = ClienteService(db)
     cliente = service.get_cliente_by_id(cliente_id)
-    return ClienteResponse.from_orm(cliente)
+    return ClienteResponse.model_validate(cliente)
 
 
 @router.post("/", response_model=ClienteResponse, summary="Criar cliente", status_code=status.HTTP_201_CREATED)
@@ -82,7 +82,7 @@ async def criar_cliente(
     """
     service = ClienteService(db)
     novo_cliente = service.create_cliente(cliente, current_user)
-    return ClienteResponse.from_orm(novo_cliente)
+    return ClienteResponse.model_validate(novo_cliente)
 
 
 @router.put("/{cliente_id}", response_model=ClienteResponse, summary="Atualizar cliente")
@@ -97,7 +97,7 @@ async def atualizar_cliente(
     """
     service = ClienteService(db)
     cliente_atualizado = service.update_cliente(cliente_id, cliente, current_user)
-    return ClienteResponse.from_orm(cliente_atualizado)
+    return ClienteResponse.model_validate(cliente_atualizado)
 
 
 @router.delete("/{cliente_id}", summary="Excluir cliente")

@@ -26,7 +26,7 @@ async def listar_bancos(
     """
     service = BancoService(db)
     bancos = service.list_bancos(skip=skip, limit=limit, ativos_apenas=ativos_apenas)
-    return [BancoResponse.from_orm(banco) for banco in bancos]
+    return [BancoResponse.model_validate(banco) for banco in bancos]
 
 
 @router.get("/{banco_id}", response_model=BancoResponse, summary="Obter banco por código")
@@ -40,7 +40,7 @@ async def obter_banco(
     """
     service = BancoService(db)
     banco = service.get_banco_by_id(banco_id)
-    return BancoResponse.from_orm(banco)
+    return BancoResponse.model_validate(banco)
 
 
 @router.post("/", response_model=BancoResponse, summary="Criar banco", status_code=status.HTTP_201_CREATED)
@@ -54,7 +54,7 @@ async def criar_banco(
     """
     service = BancoService(db)
     novo_banco = service.create_banco(banco, current_user)
-    return BancoResponse.from_orm(novo_banco)
+    return BancoResponse.model_validate(novo_banco)
 
 
 @router.put("/{banco_id}", response_model=BancoResponse, summary="Atualizar banco")
@@ -69,7 +69,7 @@ async def atualizar_banco(
     """
     service = BancoService(db)
     banco_atualizado = service.update_banco(banco_id, banco, current_user)
-    return BancoResponse.from_orm(banco_atualizado)
+    return BancoResponse.model_validate(banco_atualizado)
 
 
 @router.delete("/{banco_id}", summary="Excluir banco")

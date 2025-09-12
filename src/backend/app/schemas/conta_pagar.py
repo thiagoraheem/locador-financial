@@ -82,8 +82,9 @@ class AccountsPayableResponse(AccountsPayableBase):
     DtAlter: Optional[datetime] = None
     fornecedor_nome: Optional[str] = Field(None, description="Nome do fornecedor")
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class AccountsPayablePaymentBase(BaseModel):
@@ -129,5 +130,6 @@ class AccountsPayablePaymentResponse(AccountsPayablePaymentBase):
     DtCreate: datetime
     DtAlter: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }

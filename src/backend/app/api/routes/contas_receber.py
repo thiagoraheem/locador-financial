@@ -45,7 +45,7 @@ async def listar_contas_receber(
         data_vencimento_inicio=data_vencimento_inicio,
         data_vencimento_fim=data_vencimento_fim
     )
-    return [AccountsReceivableResponse.from_orm(conta) for conta in contas]
+    return [AccountsReceivableResponse.model_validate(conta) for conta in contas]
 
 @router.get("/{conta_receber_id}", response_model=AccountsReceivableResponse, summary="Obter conta a receber por ID")
 async def obter_conta_receber(
@@ -58,7 +58,7 @@ async def obter_conta_receber(
     """
     service = ContaReceberService(db)
     conta = service.get_conta_receber_by_id(conta_receber_id)
-    return AccountsReceivableResponse.from_orm(conta)
+    return AccountsReceivableResponse.model_validate(conta)
 
 @router.post("/", response_model=AccountsReceivableResponse, summary="Criar conta a receber", status_code=status.HTTP_201_CREATED)
 async def criar_conta_receber(
@@ -71,7 +71,7 @@ async def criar_conta_receber(
     """
     service = ContaReceberService(db)
     nova_conta = service.create_conta_receber(conta, current_user)
-    return AccountsReceivableResponse.from_orm(nova_conta)
+    return AccountsReceivableResponse.model_validate(nova_conta)
 
 @router.put("/{conta_receber_id}", response_model=AccountsReceivableResponse, summary="Atualizar conta a receber")
 async def atualizar_conta_receber(
@@ -85,7 +85,7 @@ async def atualizar_conta_receber(
     """
     service = ContaReceberService(db)
     conta_atualizada = service.update_conta_receber(conta_receber_id, conta, current_user)
-    return AccountsReceivableResponse.from_orm(conta_atualizada)
+    return AccountsReceivableResponse.model_validate(conta_atualizada)
 
 @router.delete("/{conta_receber_id}", summary="Cancelar conta a receber")
 async def cancelar_conta_receber(
@@ -112,7 +112,7 @@ async def receber_conta_receber(
     """
     service = ContaReceberService(db)
     conta_atualizada = service.receive_conta_receber(conta_receber_id, recebimento, current_user)
-    return AccountsReceivableResponse.from_orm(conta_atualizada)
+    return AccountsReceivableResponse.model_validate(conta_atualizada)
 
 @router.put("/recebimentos/{payment_id}", response_model=AccountsReceivablePaymentResponse, summary="Atualizar recebimento")
 async def atualizar_recebimento(
@@ -126,7 +126,7 @@ async def atualizar_recebimento(
     """
     service = ContaReceberService(db)
     recebimento_atualizado = service.update_payment(payment_id, recebimento, current_user)
-    return AccountsReceivablePaymentResponse.from_orm(recebimento_atualizado)
+    return AccountsReceivablePaymentResponse.model_validate(recebimento_atualizado)
 
 @router.delete("/recebimentos/{payment_id}", summary="Excluir recebimento")
 async def excluir_recebimento(

@@ -8,11 +8,9 @@ from typing import Optional, Literal
 
 class BancoBase(BaseModel):
     """Base schema for Banco"""
-    Codigo: int = Field(..., ge=1, le=999, description="Código do banco (padrão FEBRABAN)")
-    Digito: Optional[str] = Field(None, max_length=1, description="Dígito verificador do banco")
-    Nome: str = Field(..., max_length=100, description="Nome do banco")
-    NomeAbreviado: Optional[str] = Field(None, max_length=20, description="Nome abreviado do banco")
-    FlgAtivo: Literal['S', 'N'] = Field(default='S', description="S=Ativo, N=Inativo")
+    Codigo: int = Field(..., description="Código do banco")
+    Digito: Optional[str] = Field(None, max_length=4, description="Dígito verificador do banco")
+    Nome: Optional[str] = Field(None, max_length=100, description="Nome do banco")
 
 
 class BancoCreate(BancoBase):
@@ -20,20 +18,19 @@ class BancoCreate(BancoBase):
     pass
 
 
-class BancoUpdate(BancoBase):
+class BancoUpdate(BaseModel):
     """Schema for updating Banco"""
-    Codigo: Optional[int] = Field(None, ge=1, le=999, description="Código do banco (padrão FEBRABAN)")
+    Codigo: Optional[int] = Field(None, description="Código do banco")
+    Digito: Optional[str] = Field(None, max_length=4, description="Dígito verificador do banco")
     Nome: Optional[str] = Field(None, max_length=100, description="Nome do banco")
 
 
 class BancoResponse(BancoBase):
     """Schema for Banco response"""
-    NomUsuario: str
-    DtCreate: datetime
-    DtAlter: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
+    
+    model_config = {
+        "from_attributes": True
+    }
 
     @property
     def codigo_completo(self) -> str:
@@ -44,5 +41,5 @@ class BancoResponse(BancoBase):
 
     @property
     def is_active(self) -> bool:
-        """Verifica se o banco está ativo"""
-        return self.FlgAtivo == 'S'
+        """Verifica se o banco está ativo - sempre True pois não há campo FlgAtivo"""
+        return True

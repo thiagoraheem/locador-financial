@@ -33,7 +33,7 @@ async def listar_lancamentos(
     lancamentos = service.list_lancamentos(skip=skip, limit=limit, filtros=filtros)
     
     # Converter para response (aqui seria ideal usar um mapper)
-    return [LancamentoResponse.from_orm(lancamento) for lancamento in lancamentos]
+    return [LancamentoResponse.model_validate(lancamento) for lancamento in lancamentos]
 
 @router.get("/{lancamento_id}", response_model=LancamentoResponse, summary="Obter lançamento por ID")
 async def obter_lancamento(
@@ -46,7 +46,7 @@ async def obter_lancamento(
     """
     service = LancamentoService(db)
     lancamento = service.get_lancamento_by_id(lancamento_id)
-    return LancamentoResponse.from_orm(lancamento)
+    return LancamentoResponse.model_validate(lancamento)
 
 @router.post("/", response_model=LancamentoResponse, summary="Criar lançamento", status_code=status.HTTP_201_CREATED)
 async def criar_lancamento(
@@ -59,7 +59,7 @@ async def criar_lancamento(
     """
     service = LancamentoService(db)
     novo_lancamento = service.create_lancamento(lancamento, current_user)
-    return LancamentoResponse.from_orm(novo_lancamento)
+    return LancamentoResponse.model_validate(novo_lancamento)
 
 @router.put("/{lancamento_id}", response_model=LancamentoResponse, summary="Atualizar lançamento")
 async def atualizar_lancamento(
@@ -73,7 +73,7 @@ async def atualizar_lancamento(
     """
     service = LancamentoService(db)
     lancamento_atualizado = service.update_lancamento(lancamento_id, lancamento, current_user)
-    return LancamentoResponse.from_orm(lancamento_atualizado)
+    return LancamentoResponse.model_validate(lancamento_atualizado)
 
 @router.delete("/{lancamento_id}", summary="Excluir lançamento")
 async def excluir_lancamento(
@@ -105,4 +105,4 @@ async def confirmar_lancamento(
     else:
         lancamento = service.unconfirm_lancamento(lancamento_id, current_user)
     
-    return LancamentoResponse.from_orm(lancamento)
+    return LancamentoResponse.model_validate(lancamento)

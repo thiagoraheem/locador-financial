@@ -23,6 +23,7 @@ export interface CategoriaUpdate {
 export interface CategoriaResponse extends CategoriaBase {
   CodCategoria: number;
   categoria_pai_nome?: string;
+  DesCategoria?: string;
   subcategorias?: CategoriaResponse[];
   NomUsuario: string;
   DtCreate: string;

@@ -26,7 +26,7 @@ async def listar_empresas(
     """
     service = EmpresaService(db)
     empresas = service.list_empresas(skip=skip, limit=limit, ativas_apenas=ativas_apenas)
-    return [EmpresaResponse.from_orm(empresa) for empresa in empresas]
+    return [EmpresaResponse.model_validate(empresa) for empresa in empresas]
 
 
 @router.get("/{empresa_id}", response_model=EmpresaResponse, summary="Obter empresa por ID")
@@ -40,7 +40,7 @@ async def obter_empresa(
     """
     service = EmpresaService(db)
     empresa = service.get_empresa_by_id(empresa_id)
-    return EmpresaResponse.from_orm(empresa)
+    return EmpresaResponse.model_validate(empresa)
 
 
 @router.post("/", response_model=EmpresaResponse, summary="Criar empresa", status_code=status.HTTP_201_CREATED)
@@ -54,7 +54,7 @@ async def criar_empresa(
     """
     service = EmpresaService(db)
     nova_empresa = service.create_empresa(empresa, current_user)
-    return EmpresaResponse.from_orm(nova_empresa)
+    return EmpresaResponse.model_validate(nova_empresa)
 
 
 @router.put("/{empresa_id}", response_model=EmpresaResponse, summary="Atualizar empresa")
@@ -69,7 +69,7 @@ async def atualizar_empresa(
     """
     service = EmpresaService(db)
     empresa_atualizada = service.update_empresa(empresa_id, empresa, current_user)
-    return EmpresaResponse.from_orm(empresa_atualizada)
+    return EmpresaResponse.model_validate(empresa_atualizada)
 
 
 @router.delete("/{empresa_id}", summary="Excluir empresa")

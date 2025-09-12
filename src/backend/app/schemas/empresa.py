@@ -71,8 +71,9 @@ class EmpresaResponse(EmpresaBase):
     DatAlteracao: Optional[datetime] = None
     NomUsuarioAlteracao: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
     @property
     def is_default(self) -> bool:

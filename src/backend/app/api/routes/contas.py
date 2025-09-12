@@ -26,7 +26,7 @@ async def listar_contas(
     """
     service = ContaService(db)
     contas = service.list_contas(skip=skip, limit=limit, ativas_apenas=ativas_apenas)
-    return [ContaResponse.from_orm(conta) for conta in contas]
+    return [ContaResponse.model_validate(conta) for conta in contas]
 
 
 @router.get("/{conta_id}", response_model=ContaResponse, summary="Obter conta por ID")
@@ -40,7 +40,7 @@ async def obter_conta(
     """
     service = ContaService(db)
     conta = service.get_conta_by_id(conta_id)
-    return ContaResponse.from_orm(conta)
+    return ContaResponse.model_validate(conta)
 
 
 @router.get("/empresa/{empresa_id}", response_model=List[ContaResponse], summary="Listar contas por empresa")
@@ -55,7 +55,7 @@ async def listar_contas_por_empresa(
     """
     service = ContaService(db)
     contas = service.list_contas_by_empresa(empresa_id=empresa_id, ativas_apenas=ativas_apenas)
-    return [ContaResponse.from_orm(conta) for conta in contas]
+    return [ContaResponse.model_validate(conta) for conta in contas]
 
 
 @router.post("/", response_model=ContaResponse, summary="Criar conta", status_code=status.HTTP_201_CREATED)
@@ -69,7 +69,7 @@ async def criar_conta(
     """
     service = ContaService(db)
     nova_conta = service.create_conta(conta, current_user)
-    return ContaResponse.from_orm(nova_conta)
+    return ContaResponse.model_validate(nova_conta)
 
 
 @router.put("/{conta_id}", response_model=ContaResponse, summary="Atualizar conta")
@@ -84,7 +84,7 @@ async def atualizar_conta(
     """
     service = ContaService(db)
     conta_atualizada = service.update_conta(conta_id, conta, current_user)
-    return ContaResponse.from_orm(conta_atualizada)
+    return ContaResponse.model_validate(conta_atualizada)
 
 
 @router.delete("/{conta_id}", summary="Excluir conta")
