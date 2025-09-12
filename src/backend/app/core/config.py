@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     PROJECT_VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
+    # Configurações do Servidor
+    PORT: int = 8000
+    HOST: str = "0.0.0.0"
+    
     # Configurações de Segurança
     SECRET_KEY: str = "your-secret-key-change-in-production"
     ALGORITHM: str = "HS256"

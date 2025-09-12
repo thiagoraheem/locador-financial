@@ -110,13 +110,32 @@ export const dashboardService = {
   // Obter resumo por categorias
   async getCategorias(tipo?: 'receita' | 'despesa', limite?: number): Promise<CategoriaResumo[]> {
     try {
+      // Mapear tipo do frontend para o backend
+      let tipoParam;
+      if (tipo === 'receita') {
+        tipoParam = 'S'; // Saída = Receita no backend
+      } else if (tipo === 'despesa') {
+        tipoParam = 'E'; // Entrada = Despesa no backend
+      }
+      
       const response = await apiClient.get('/dashboard/categorias', {
         params: {
-          tipo,
+          tipo: tipoParam,
           limite: limite || 10
         }
       });
-      return response.data;
+      
+      // Mapear resposta da API para o formato esperado pelo frontend
+      const apiData = response.data;
+      if (Array.isArray(apiData)) {
+        return apiData.map(item => ({
+          nome: item.categoria,
+          valor: item.valor,
+          percentual: 0 // Calcular percentual se necessário
+        }));
+      }
+      
+      return [];
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
       // Fallback com dados mockados

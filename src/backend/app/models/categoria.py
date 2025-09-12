@@ -9,6 +9,7 @@ class Categoria(Base):
     CodCategoria = Column(Integer, primary_key=True, autoincrement=True)
     DesCategoria = Column(String(50))
     flgTipo = Column(String(1))  # R=Receita, D=Despesa
+    FlgAtivo = Column(String(1), default='S')  # S=Ativo, N=Inativo
     CodGrupoCategoria = Column(Integer)
     CodPai = Column(Integer, ForeignKey("tbl_FINCategorias.CodCategoria"))
     idCostCenter = Column(Integer)
@@ -25,6 +26,11 @@ class Categoria(Base):
         backref="categoria_pai",
         remote_side=[CodCategoria]
     )
+    
+    @property
+    def is_active(self) -> bool:
+        """Verifica se a categoria está ativa"""
+        return self.FlgAtivo == 'S'
     
     def __repr__(self):
         return f"<Categoria(CodCategoria={self.CodCategoria}, DesCategoria='{self.DesCategoria}')>"

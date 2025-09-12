@@ -68,10 +68,11 @@ export const DashboardPage: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<{
     resumo: DashboardResumo | null;
     fluxoCaixa: FluxoCaixaItem[];
-    categorias: CategoriaResumo[];
+    categoriasReceitas: CategoriaResumo[];
+    categoriasDespesas: CategoriaResumo[];
     vencimentos: VencimentoItem[];
     favorecidos: FavorecidoItem[];
-  }>({ resumo: null, fluxoCaixa: [], categorias: [], vencimentos: [], favorecidos: [] });
+  }>({ resumo: null, fluxoCaixa: [], categoriasReceitas: [], categoriasDespesas: [], vencimentos: [], favorecidos: [] });
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,8 +83,29 @@ export const DashboardPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await dashboardService.getDashboardData();
-        setDashboardData(data);
+        
+        // Carregar dados básicos
+        const [resumo, fluxoCaixa, vencimentos, favorecidos] = await Promise.all([
+          dashboardService.getResumo(),
+          dashboardService.getFluxoCaixa(),
+          dashboardService.getVencimentos(),
+          dashboardService.getFavorecidos()
+        ]);
+        
+        // Carregar categorias separadamente para receitas e despesas
+        const [categoriasReceitas, categoriasDespesas] = await Promise.all([
+          dashboardService.getCategorias('receita', 10),
+          dashboardService.getCategorias('despesa', 10)
+        ]);
+        
+        setDashboardData({
+          resumo,
+          fluxoCaixa: Array.isArray(fluxoCaixa) ? fluxoCaixa : [],
+          categoriasReceitas: Array.isArray(categoriasReceitas) ? categoriasReceitas : [],
+          categoriasDespesas: Array.isArray(categoriasDespesas) ? categoriasDespesas : [],
+          vencimentos: Array.isArray(vencimentos) ? vencimentos : [],
+          favorecidos: Array.isArray(favorecidos) ? favorecidos : []
+        });
       } catch (err) {
         console.error('Erro ao carregar dados do dashboard:', err);
         setError('Erro ao carregar dados do dashboard');
@@ -115,9 +137,9 @@ export const DashboardPage: React.FC = () => {
       }))
     : [];
 
-  const revenueCategoryData = Array.isArray(dashboardData.categorias)
-    ? dashboardData.categorias
-        .filter(item => item.percentual > 0)
+  const revenueCategoryData = Array.isArray(dashboardData.categoriasReceitas)
+    ? dashboardData.categoriasReceitas
+        .filter(item => item.valor > 0)
         .map((item, index) => ({
           name: item.nome,
           value: item.valor,
@@ -125,9 +147,9 @@ export const DashboardPage: React.FC = () => {
         }))
     : [];
 
-  const expenseCategoryData = Array.isArray(dashboardData.categorias)
-    ? dashboardData.categorias
-        .filter(item => item.percentual > 0)
+  const expenseCategoryData = Array.isArray(dashboardData.categoriasDespesas)
+    ? dashboardData.categoriasDespesas
+        .filter(item => item.valor > 0)
         .map((item, index) => ({
           name: item.nome,
           value: item.valor,
