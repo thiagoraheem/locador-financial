@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
-import { Notification } from './Notification';
+
 import AppBreadcrumb from './AppBreadcrumb';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
@@ -29,8 +29,7 @@ export const Layout: React.FC = () => {
         </div>
       </main>
 
-      {/* Notification Snackbar */}
-      <Notification />
+
     </div>
   );
 };

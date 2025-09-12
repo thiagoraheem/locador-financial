@@ -1,11 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { LancamentosTable } from '@/components/tables/LancamentosTable';
+import { LancamentoForm } from '@/components/forms/LancamentoForm';
+import { useAppDispatch } from '@/store';
+import { createLancamento, updateLancamento } from '@/store/slices/lancamentosSlice';
+import { LancamentoResponse } from '@/services/lancamentosApi';
+import { lancamentoService } from '@/services/lancamentoService';
+import { toast } from 'sonner';
 
 export const LancamentosPage: React.FC = () => {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const [openForm, setOpenForm] = useState(false);
+  const [editingLancamento, setEditingLancamento] = useState<LancamentoResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCreate = () => {
+    setEditingLancamento(null);
+    setOpenForm(true);
+  };
+
+  const handleEdit = (lancamento: LancamentoResponse) => {
+    setEditingLancamento(lancamento);
+    setOpenForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setOpenForm(false);
+    setEditingLancamento(null);
+    setError(null);
+  };
+
+  const handleSubmitForm = async (data: any) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      if (editingLancamento) {
+        // Atualizar lançamento existente
+        await dispatch(updateLancamento({ id: editingLancamento.CodLancamento, data })).unwrap();
+        toast.success('Lançamento atualizado com sucesso!');
+      } else {
+        // Criar novo lançamento
+        await dispatch(createLancamento(data)).unwrap();
+        toast.success('Lançamento criado com sucesso!');
+      }
+      handleCloseForm();
+    } catch (err: any) {
+      const errorMessage = err.message || t('messages.error_occurred');
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -19,34 +70,24 @@ export const LancamentosPage: React.FC = () => {
             Gerencie seus lançamentos financeiros
           </p>
         </div>
-        <Button
-          onClick={() => {
-            // TODO: Implementar abertura do modal de criação
-            console.log('Novo lançamento');
-          }}
-        >
+        <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
           {t('lancamentos.novo')}
         </Button>
       </div>
 
-      {/* Content */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-80 flex items-center justify-center bg-muted/50 rounded-lg">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-muted-foreground">
-                Módulo de Lançamentos Financeiros
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Lista de lançamentos, filtros e formulários
-                <br />
-                (A ser implementado)
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Lancamentos Table */}
+      <LancamentosTable onEdit={handleEdit} onCreate={handleCreate} />
+
+      {/* Lancamento Form Modal */}
+      <LancamentoForm
+        open={openForm}
+        onClose={handleCloseForm}
+        onSubmit={handleSubmitForm}
+        initialData={editingLancamento}
+        loading={loading}
+        error={error}
+      />
     </div>
   );
 };

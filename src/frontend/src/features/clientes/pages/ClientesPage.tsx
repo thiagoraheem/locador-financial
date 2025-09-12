@@ -1,11 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { ClientesTable } from '@/components/tables/ClientesTable';
+import { ClienteForm } from '@/components/forms/ClienteForm';
+import { useAppDispatch } from '@/store';
+import { createCliente, updateCliente } from '@/store/slices/clientesSlice';
+import { ClienteResponse } from '@/services/clientesApi';
 
 export const ClientesPage: React.FC = () => {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const [openForm, setOpenForm] = useState(false);
+  const [editingCliente, setEditingCliente] = useState<ClienteResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCreate = () => {
+    setEditingCliente(null);
+    setOpenForm(true);
+  };
+
+  const handleEdit = (cliente: ClienteResponse) => {
+    setEditingCliente(cliente);
+    setOpenForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setOpenForm(false);
+    setEditingCliente(null);
+    setError(null);
+  };
+
+  const handleSubmitForm = (data: any) => {
+    setLoading(true);
+    setError(null);
+    
+    const action = editingCliente 
+      ? updateCliente({ id: editingCliente.CodCliente, data })
+      : createCliente(data);
+    
+    dispatch(action)
+      .then(() => {
+        handleCloseForm();
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || t('messages.error_occurred'));
+        setLoading(false);
+      });
+  };
 
   return (
     <div className="space-y-6">
@@ -19,46 +63,24 @@ export const ClientesPage: React.FC = () => {
             Gerencie os clientes do sistema
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              // TODO: Implementar abertura do modal de busca
-              console.log('Buscar clientes');
-            }}
-          >
-            <Search className="mr-2 h-4 w-4" />
-            {t('actions.search')}
-          </Button>
-          <Button
-            onClick={() => {
-              // TODO: Implementar abertura do modal de criação
-              console.log('Novo cliente');
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {t('clientes.novo')}
-          </Button>
-        </div>
+        <Button onClick={handleCreate}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t('clientes.novo')}
+        </Button>
       </div>
 
-      {/* Content */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-80 flex items-center justify-center bg-muted/50 rounded-lg">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-muted-foreground">
-                Módulo de Clientes
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Lista de clientes cadastrados
-                <br />
-                (A ser implementado)
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Clientes Table */}
+      <ClientesTable onEdit={handleEdit} onCreate={handleCreate} />
+
+      {/* Cliente Form Modal */}
+      <ClienteForm
+        open={openForm}
+        onClose={handleCloseForm}
+        onSubmit={handleSubmitForm}
+        initialData={editingCliente}
+        loading={loading}
+        error={error}
+      />
     </div>
   );
 };

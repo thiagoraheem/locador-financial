@@ -6,6 +6,12 @@ import { Layout } from './components/Layout';
 import { AuthGuard } from './components/AuthGuard';
 import { ThemeProvider } from './components/theme-provider';
 import { TestComponents } from './components/test-components';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
+import { NotificationContainer } from './components/ui/Notification';
+import { Loading } from './components/ui/Loading';
+import { useUI } from './hooks/useUI';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectNotifications, removeNotification } from './store/slices/uiSlice';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { LancamentosPage } from './features/lancamentos/pages/LancamentosPage';
@@ -21,11 +27,31 @@ function App() {
   const { ready } = useTranslation();
 
   if (!ready) {
-    return <div>Carregando...</div>;
+    return <Loading fullScreen text="Carregando aplicação..." />;
   }
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <AppContent />
+
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}
+
+function AppContent() {
+  const { globalLoading } = useUI();
+  const notifications = useSelector(selectNotifications);
+  const dispatch = useDispatch();
+
+  const handleCloseNotification = (id: string) => {
+    dispatch(removeNotification(id));
+  };
+
+  return (
+    <>
+      {globalLoading && <Loading fullScreen text="Processando..." />}
       <Routes>
       {/* Rota pública de login */}
       <Route path="/login" element={<LoginPage />} />
@@ -54,7 +80,11 @@ function App() {
       {/* Redirecionamento padrão */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-    </ThemeProvider>
+      <NotificationContainer 
+        notifications={notifications} 
+        onClose={handleCloseNotification} 
+      />
+    </>
   );
 }
 

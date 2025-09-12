@@ -1,11 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { CategoriasTable } from '@/components/tables/CategoriasTable';
+import { CategoriaForm } from '@/components/forms/CategoriaForm';
+import { useAppDispatch } from '@/store';
+import { createCategoria, updateCategoria } from '@/store/slices/categoriasSlice';
+import { CategoriaResponse } from '@/services/categoriasApi';
 
 export const CategoriasPage: React.FC = () => {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const [openForm, setOpenForm] = useState(false);
+  const [editingCategoria, setEditingCategoria] = useState<CategoriaResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCreate = () => {
+    setEditingCategoria(null);
+    setOpenForm(true);
+  };
+
+  const handleEdit = (categoria: CategoriaResponse) => {
+    setEditingCategoria(categoria);
+    setOpenForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setOpenForm(false);
+    setEditingCategoria(null);
+    setError(null);
+  };
+
+  const handleSubmitForm = (data: any) => {
+    setLoading(true);
+    setError(null);
+    
+    const action = editingCategoria 
+      ? updateCategoria({ id: editingCategoria.CodCategoria, data })
+      : createCategoria(data);
+    
+    dispatch(action)
+      .then(() => {
+        handleCloseForm();
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || t('messages.error_occurred'));
+        setLoading(false);
+      });
+  };
 
   return (
     <div className="space-y-6">
@@ -19,34 +63,24 @@ export const CategoriasPage: React.FC = () => {
             Organize suas categorias financeiras
           </p>
         </div>
-        <Button
-          onClick={() => {
-            // TODO: Implementar abertura do modal de criação
-            console.log('Nova categoria');
-          }}
-        >
+        <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
           {t('categorias.nova')}
         </Button>
       </div>
 
-      {/* Content */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-80 flex items-center justify-center bg-muted/50 rounded-lg">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-muted-foreground">
-                Módulo de Categorias
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Árvore de categorias hierárquicas
-                <br />
-                (A ser implementado)
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Categorias Table */}
+      <CategoriasTable onEdit={handleEdit} onCreate={handleCreate} />
+
+      {/* Categoria Form Modal */}
+      <CategoriaForm
+        open={openForm}
+        onClose={handleCloseForm}
+        onSubmit={handleSubmitForm}
+        initialData={editingCategoria}
+        loading={loading}
+        error={error}
+      />
     </div>
   );
 };

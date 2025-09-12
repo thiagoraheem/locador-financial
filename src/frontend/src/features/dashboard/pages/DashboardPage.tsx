@@ -1,35 +1,22 @@
-import React, { useEffect } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  CreditCard,
-  Receipt,
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../../../store';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loading } from '@/components/ui/Loading';
 import { 
-  fetchFinancialSummary, 
-  fetchCashFlow, 
-  fetchCategorySummary, 
-  fetchOverdueSummary, 
-  fetchTopFavorecidos 
-} from '../../../store/slices/dashboardSlice';
-import {
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie, 
   LineChart,
   Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie
+  Legend
 } from 'recharts';
+import { TrendingUp, TrendingDown, Wallet, CreditCard, Receipt } from 'lucide-react';
+import { dashboardService, DashboardResumo, FluxoCaixaItem, CategoriaResumo, VencimentoItem, FavorecidoItem } from '@/services/dashboardService';
 
 interface StatCardProps {
   title: string;
@@ -78,28 +65,35 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend })
 };
 
 export const DashboardPage: React.FC = () => {
-  const dispatch = useAppDispatch();
+  const [dashboardData, setDashboardData] = useState<{
+    resumo: DashboardResumo | null;
+    fluxoCaixa: FluxoCaixaItem[];
+    categorias: CategoriaResumo[];
+    vencimentos: VencimentoItem[];
+    favorecidos: FavorecidoItem[];
+  }>({ resumo: null, fluxoCaixa: [], categorias: [], vencimentos: [], favorecidos: [] });
   
-  const {
-    financialSummary,
-    cashFlow,
-    revenueCategories,
-    expenseCategories,
-    topReceitas,
-    topDespesas,
-    loading
-  } = useAppSelector((state) => state.dashboard);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Load dashboard data on component mount
   useEffect(() => {
-    dispatch(fetchFinancialSummary());
-    dispatch(fetchCashFlow(12));
-    dispatch(fetchCategorySummary('E'));
-    dispatch(fetchCategorySummary('S'));
-    dispatch(fetchOverdueSummary());
-    dispatch(fetchTopFavorecidos({ tipo: 'E', limit: 5 }));
-    dispatch(fetchTopFavorecidos({ tipo: 'S', limit: 5 }));
-  }, [dispatch]);
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await dashboardService.getDashboardData();
+        setDashboardData(data);
+      } catch (err) {
+        console.error('Erro ao carregar dados do dashboard:', err);
+        setError('Erro ao carregar dados do dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadDashboardData();
+  }, []);
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -109,90 +103,110 @@ export const DashboardPage: React.FC = () => {
     }).format(value);
   };
 
-  // Format number
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('pt-BR').format(value);
-  };
 
-  // Prepare data for charts
-  const cashFlowData = cashFlow ? cashFlow.saldo_mensal.map((item, index) => ({
-    name: item.mes_ano,
-    saldo: item.saldo,
-    entrada: cashFlow.entradas[index]?.valor || 0,
-    saida: cashFlow.saidas[index]?.valor || 0
-  })) : [];
 
-  const revenueCategoryData = revenueCategories.map((item, index) => ({
-    name: item.categoria,
-    value: item.valor,
-    fill: `hsl(${120 + index * 30}, 70%, 50%)`
-  }));
+  // Prepare data for charts with safe array handling
+  const cashFlowData = Array.isArray(dashboardData.fluxoCaixa) 
+    ? dashboardData.fluxoCaixa.map((item, index) => ({
+        name: item.mes,
+        saldo: item.saldo,
+        entrada: item.receitas,
+        saida: item.despesas
+      }))
+    : [];
 
-  const expenseCategoryData = expenseCategories.map((item, index) => ({
-    name: item.categoria,
-    value: item.valor,
-    fill: `hsl(${0 + index * 30}, 70%, 50%)`
-  }));
+  const revenueCategoryData = Array.isArray(dashboardData.categorias)
+    ? dashboardData.categorias
+        .filter(item => item.percentual > 0)
+        .map((item, index) => ({
+          name: item.nome,
+          value: item.valor,
+          fill: `hsl(${120 + index * 30}, 70%, 50%)`
+        }))
+    : [];
+
+  const expenseCategoryData = Array.isArray(dashboardData.categorias)
+    ? dashboardData.categorias
+        .filter(item => item.percentual > 0)
+        .map((item, index) => ({
+          name: item.nome,
+          value: item.valor,
+          fill: `hsl(${0 + index * 30}, 70%, 50%)`
+        }))
+    : [];
 
   // Comparison data for revenue vs expenses
-  const comparisonData = [
+  const comparisonData = dashboardData.resumo ? [
     {
       name: 'Receitas',
-      valor: financialSummary?.total_receitas || 0,
+      valor: dashboardData.resumo.receitas,
       fill: '#10b981'
     },
     {
       name: 'Despesas',
-      valor: financialSummary?.total_despesas || 0,
+      valor: dashboardData.resumo.despesas,
       fill: '#ef4444'
     }
-  ];
+  ] : [];
 
   // Stats data
-  const stats = financialSummary ? [
+  const stats = dashboardData.resumo ? [
     {
       title: 'Total de Receitas',
-      value: formatCurrency(financialSummary.total_receitas),
+      value: formatCurrency(dashboardData.resumo.receitas),
       icon: <TrendingUp className="h-5 w-5" />,
       color: '#10b981',
     },
     {
       title: 'Total de Despesas',
-      value: formatCurrency(financialSummary.total_despesas),
+      value: formatCurrency(dashboardData.resumo.despesas),
       icon: <TrendingDown className="h-5 w-5" />,
       color: '#ef4444',
     },
     {
       title: 'Saldo Atual',
-      value: formatCurrency(financialSummary.saldo),
+      value: formatCurrency(dashboardData.resumo.saldo),
       icon: <Wallet className="h-5 w-5" />,
-      color: financialSummary.saldo >= 0 ? '#10b981' : '#ef4444',
+      color: dashboardData.resumo.saldo >= 0 ? '#10b981' : '#ef4444',
     },
     {
-      title: 'Contas a Pagar',
-      value: formatNumber(financialSummary.contas_a_pagar),
+      title: 'Receitas Pendentes',
+      value: formatCurrency(dashboardData.resumo.receitasPendentes),
       icon: <CreditCard className="h-5 w-5" />,
       color: '#f59e0b',
     },
     {
-      title: 'Contas a Receber',
-      value: formatNumber(financialSummary.contas_a_receber),
+      title: 'Despesas Pendentes',
+      value: formatCurrency(dashboardData.resumo.despesasPendentes),
       icon: <Receipt className="h-5 w-5" />,
       color: '#3b82f6',
     },
   ] : [];
 
   return (
-    <div className="p-6">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Dashboard Financeiro
-        </h1>
-        <p className="text-gray-600">
-          Visão geral das suas finanças
-        </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <div className="text-sm text-gray-500">
+          Última atualização: {new Date().toLocaleString('pt-BR')}
+        </div>
       </div>
+
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Carregando dados...</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-red-600">{error}</div>
+        </div>
+      )}
+
+      {!loading && !error && (
+      <div className="p-6">
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -243,9 +257,11 @@ export const DashboardPage: React.FC = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <p className="text-gray-500">
-                    {loading ? '⏳ Carregando dados...' : '📊 Nenhum dado encontrado'}
-                  </p>
+                  {loading ? (
+                    <Loading size="sm" text="Carregando dados..." />
+                  ) : (
+                    <p className="text-gray-500">📊 Nenhum dado encontrado</p>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -306,9 +322,11 @@ export const DashboardPage: React.FC = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <p className="text-gray-500">
-                    {loading ? '⏳ Carregando...' : '📊 Nenhum dado encontrado'}
-                  </p>
+                  {loading ? (
+                    <Loading size="sm" text="Carregando..." />
+                  ) : (
+                    <p className="text-gray-500">📊 Nenhum dado encontrado</p>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -356,9 +374,9 @@ export const DashboardPage: React.FC = () => {
               <CardTitle>🏆 Top Receitas</CardTitle>
             </CardHeader>
             <CardContent>
-              {topReceitas.length > 0 ? (
+              {Array.isArray(dashboardData.favorecidos) && dashboardData.favorecidos.filter(f => f.valor > 0).length > 0 ? (
                 <div className="space-y-3">
-                  {topReceitas.map((item, index) => (
+                  {dashboardData.favorecidos.filter(f => f.valor > 0).slice(0, 5).map((item, index) => (
                      <div key={index} className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
                        <span className="font-medium text-gray-900">
                          {index + 1}. {item.nome}
@@ -384,15 +402,15 @@ export const DashboardPage: React.FC = () => {
               <CardTitle>💸 Top Despesas</CardTitle>
             </CardHeader>
             <CardContent>
-              {topDespesas.length > 0 ? (
+              {Array.isArray(dashboardData.favorecidos) && dashboardData.favorecidos.filter(f => f.valor < 0).length > 0 ? (
                 <div className="space-y-3">
-                  {topDespesas.map((item, index) => (
+                  {dashboardData.favorecidos.filter(f => f.valor < 0).slice(0, 5).map((item, index) => (
                      <div key={index} className="flex justify-between items-center p-3 bg-red-50 rounded-lg border border-red-200">
                        <span className="font-medium text-gray-900">
                          {index + 1}. {item.nome}
                        </span>
                        <span className="font-bold text-red-600">
-                         {formatCurrency(item.valor)}
+                         {formatCurrency(Math.abs(item.valor))}
                        </span>
                      </div>
                    ))}
@@ -406,6 +424,8 @@ export const DashboardPage: React.FC = () => {
           </Card>
         </div>
       </div>
+    </div>
+       )}
     </div>
   );
 };
