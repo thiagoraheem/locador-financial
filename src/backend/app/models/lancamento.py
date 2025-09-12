@@ -33,7 +33,7 @@ class Lancamento(Base):
     CodMedicao = Column(Integer)
     FlgTipoDivisao = Column(String(1))
     CodFormaPagto = Column(Integer, ForeignKey("tbl_FINFormaPagamento.CodFormaPagto"))
-    idConta = Column(Integer, ForeignKey("tbl_Conta.idConta"))
+    CodConta = Column(Integer, ForeignKey("tbl_Conta.idConta"))
     CodigoBarrasBoleto = Column(String(100))
     FlgBoletoEmitido = Column(Boolean)
     NumRemessa = Column(Integer)

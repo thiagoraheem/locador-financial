@@ -96,8 +96,8 @@ class LancamentoService:
             if filtros.cod_empresa:
                 query = query.filter(Lancamento.CodEmpresa == filtros.cod_empresa)
             
-            if filtros.id_conta:
-                query = query.filter(Lancamento.idConta == filtros.id_conta)
+            if filtros.cod_conta:
+                query = query.filter(Lancamento.CodConta == filtros.cod_conta)
             
             if filtros.valor_min:
                 query = query.filter(Lancamento.Valor >= filtros.valor_min)
