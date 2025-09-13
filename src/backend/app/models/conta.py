@@ -39,6 +39,17 @@ class Conta(Base):
     cod_cedente = Column(String(20), name='CodCedente')
     digito_cedente = Column(String(2), name='DigitoCedente')
     
+    # Campos PIX adicionais
+    TipoPix = Column(String(20), name='TipoPix')
+    ValorPix = Column(String(100), name='ValorPix')
+    
+    # Campos de operação e API
+    OperacaoConta = Column(String(10), name='OperacaoConta')
+    Convenio = Column(String(20), name='Convenio')
+    FlgContaPadrao = Column(Boolean, name='FlgContaPadrao', default=False)
+    EnableAPI = Column(Boolean, name='EnableAPI', default=False)
+    ConfiguracaoAPI = Column(Text, name='ConfiguracaoAPI')
+    
     # Colunas de auditoria (conforme estrutura real da tabela)
     DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
     NomUsuario = Column(String(15), nullable=False)

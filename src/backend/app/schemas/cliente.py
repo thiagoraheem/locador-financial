@@ -38,7 +38,6 @@ class ClienteBase(BaseModel):
     Email3: Optional[str] = Field(None, max_length=100, description="E-mail terciário")
     
     # Status e configurações
-    FlgLiberado: bool = Field(default=False, description="Status de liberação do cliente")
     FlgVIP: bool = Field(default=False, description="Cliente VIP")
     FlgNegativado: int = Field(default=0, description="Cliente negativado")
 
@@ -113,8 +112,10 @@ class ClienteResponse(ClienteBase):
 
     @property
     def is_liberado(self) -> bool:
-        """Verifica se o cliente está liberado"""
-        return self.FlgLiberado
+        """Verifica se o cliente está liberado (baseado em lógica de negócio)"""
+        # Implementar lógica de negócio para determinar se cliente está liberado
+        # Por exemplo: verificar se tem pendências, documentos em dia, etc.
+        return True  # Placeholder - implementar lógica real
 
     @property
     def is_vip(self) -> bool:

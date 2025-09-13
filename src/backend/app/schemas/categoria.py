@@ -2,8 +2,9 @@
 Schemas para categorias financeiras
 """
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, Literal, List
+from decimal import Decimal
 
 
 class CategoriaBase(BaseModel):
@@ -15,6 +16,15 @@ class CategoriaBase(BaseModel):
     idCostCenter: Optional[int] = Field(None, description="ID do centro de custo")
     idChartsOfAccount: Optional[int] = Field(None, description="ID do plano de contas")
     FlgAtivo: Optional[str] = Field(default='1', max_length=1, description="Ativo: 1=Sim, 0=Não")
+    
+    # Campos adicionais
+    flgImprimirRelEquip: Optional[bool] = Field(default=False, description="Imprimir relatório de equipamentos")
+    flgNecessitaSerial: Optional[bool] = Field(default=False, description="Necessita número serial")
+    FlgAplicarDescontoAuto: Optional[bool] = Field(default=False, description="Aplicar desconto automático")
+    VlrPercDesconto: Optional[Decimal] = Field(None, description="Valor percentual de desconto")
+    DatValidadeDesconto: Optional[date] = Field(None, description="Data de validade do desconto")
+    Observacao: Optional[str] = Field(None, description="Observações")
+    IdIncomeCenter: Optional[int] = Field(None, description="ID do centro de receita")
 
 
 class CategoriaCreate(CategoriaBase):

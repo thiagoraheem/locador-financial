@@ -43,7 +43,6 @@ class Cliente(Base):
     Email3 = Column(String(100), comment="Email terciário")
     
     # Flags e configurações
-    FlgLiberado = Column(Boolean, default=False, comment="Cliente liberado")
     FlgVIP = Column(Boolean, default=False, comment="Cliente VIP")
     FlgNegativado = Column(Integer, default=0, comment="Cliente negativado")
     

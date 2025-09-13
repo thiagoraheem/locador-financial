@@ -25,6 +25,14 @@ class FuncionarioBase(BaseModel):
     Senha: Optional[str] = Field(None, max_length=50, description="Senha")
     Email: Optional[str] = Field(None, max_length=100, description="E-mail")
     Observacao: Optional[str] = Field(None, description="Observações")
+    
+    # Campos de comissão e relacionamentos
+    FlgComissao: Optional[bool] = Field(default=False, description="Recebe comissão")
+    ValComissao: Optional[Decimal] = Field(None, description="Valor da comissão")
+    VlrDesconto: Optional[Decimal] = Field(None, description="Valor de desconto")
+    CodSetor: Optional[int] = Field(None, description="Código do setor")
+    CodFavorecido: Optional[int] = Field(None, description="Código do favorecido")
+    CodFuncao: Optional[int] = Field(None, description="Código da função")
 
 
 class FuncionarioCreate(FuncionarioBase):
