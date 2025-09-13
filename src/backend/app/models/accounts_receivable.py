@@ -32,7 +32,7 @@ class AccountsReceivable(Base):
     discount_amount = Column(Numeric(19,4), name='DiscountAmount')
     id_bank_account = Column(Integer, ForeignKey('tbl_Conta.idConta'), name='IdBankAccount')
     id_payment_method = Column(Integer, ForeignKey('tbl_FINFormaPagamento.CodFormaPagto'), name='IdPaymentMethod')
-    id_categoria = Column(Integer, ForeignKey('tbl_FINCategorias.CodCategoria'), name='IdCategoria')
+    # Campo id_categoria removido - não existe na tabela do banco de dados
     id_parent_accounts_receivable = Column(Integer, name='IdParentAccountsReceivable')
     id_installment_type = Column(Integer, name='IdInstallmentType', default=0)
     id_document_type = Column(Integer, ForeignKey('tbl_AccountsReceivableDocumentType.IdDocumentType'), name='IdDocumentType', nullable=False)
@@ -45,7 +45,7 @@ class AccountsReceivable(Base):
     # Removido relacionamento com Cliente pois não há FK direta
     # Este modelo se relaciona com Favorecido através de id_customer
     favorecido = relationship("Favorecido", back_populates="contas_receber")
-    categoria = relationship("Categoria", foreign_keys=[id_categoria])
+    # Relacionamento com categoria removido - campo id_categoria não existe no banco
     conta = relationship("Conta", foreign_keys=[id_bank_account])
     
     # Propriedades calculadas

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, Numeric, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
@@ -21,14 +21,9 @@ class Categoria(Base):
     DateUpdate = Column(DateTime, name='DateUpdate')
     FlgAtivo = Column(String(1), name='FlgAtivo', default='S')
     
-    # Campos adicionais identificados na análise
-    flgImprimirRelEquip = Column(Boolean, name='flgImprimirRelEquip', default=False)
-    flgNecessitaSerial = Column(Boolean, name='flgNecessitaSerial', default=False)
-    FlgAplicarDescontoAuto = Column(Boolean, name='FlgAplicarDescontoAuto', default=False)
-    VlrPercDesconto = Column(Numeric(18,2), name='VlrPercDesconto')
-    DatValidadeDesconto = Column(Date, name='DatValidadeDesconto')
-    Observacao = Column(Text, name='Observacao')
-    IdIncomeCenter = Column(Integer, name='IdIncomeCenter')
+    # Removidos campos que não existem na tabela real:
+    # flgImprimirRelEquip, flgNecessitaSerial, FlgAplicarDescontoAuto,
+    # VlrPercDesconto, DatValidadeDesconto, Observacao, IdIncomeCenter
     
     # Propriedades de compatibilidade para schemas
     @property

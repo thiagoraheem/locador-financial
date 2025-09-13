@@ -12,7 +12,7 @@ class AccountsPayableBase(BaseModel):
     CodEmpresa: int = Field(..., gt=0, description="Código da empresa")
     CodFornecedor: int = Field(..., gt=0, description="Código do fornecedor")
     idConta: Optional[int] = Field(None, gt=0, description="Código da conta bancária")
-    CodCategoria: Optional[int] = Field(None, gt=0, description="Código da categoria")
+    # CodCategoria removido - não existe no modelo AccountsPayable
     
     # Datas
     DataEmissao: datetime = Field(..., description="Data de emissão")
@@ -48,7 +48,7 @@ class AccountsPayableUpdate(BaseModel):
     CodEmpresa: Optional[int] = Field(None, gt=0, description="Código da empresa")
     CodFornecedor: Optional[int] = Field(None, gt=0, description="Código do fornecedor")
     idConta: Optional[int] = Field(None, gt=0, description="Código da conta bancária")
-    CodCategoria: Optional[int] = Field(None, gt=0, description="Código da categoria")
+    # CodCategoria removido - não existe no modelo AccountsPayable
     
     # Datas
     DataEmissao: Optional[datetime] = Field(None, description="Data de emissão")

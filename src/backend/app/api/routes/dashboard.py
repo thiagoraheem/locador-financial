@@ -11,6 +11,8 @@ from app.services.dashboard_service import DashboardService
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
+
+
 @router.get("/resumo", summary="Resumo financeiro")
 async def resumo_financeiro(
     empresa_id: Optional[int] = Query(None, description="Filtrar por empresa"),
