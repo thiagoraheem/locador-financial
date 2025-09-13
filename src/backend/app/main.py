@@ -4,7 +4,7 @@ FastAPI application main module for Financial Web Application
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import auth, lancamentos, contas_pagar, contas_receber, categorias, dashboard, empresas, bancos, contas, clientes
+from app.api.routes import auth, lancamentos, contas_pagar, contas_receber, categorias, dashboard, empresas, bancos, contas, clientes, favorecidos
 from app.core.config import settings
 from app.services.ip_service import print_external_ip
 
@@ -53,6 +53,7 @@ app.include_router(empresas.router, prefix=settings.API_V1_STR)
 app.include_router(bancos.router, prefix=settings.API_V1_STR)
 app.include_router(contas.router, prefix=settings.API_V1_STR)
 app.include_router(clientes.router, prefix=settings.API_V1_STR)
+app.include_router(favorecidos.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():

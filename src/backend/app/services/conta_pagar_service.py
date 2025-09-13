@@ -89,7 +89,7 @@ class ContaPagarService:
         """List accounts payable with filters"""
         
         query = self.db.query(AccountsPayable).join(
-            Favorecido, AccountsPayable.cod_favorecido == Favorecido.CodFavorecido
+            Favorecido, AccountsPayable.favorecido == Favorecido.CodFavorecido
         )
         
         # Apply filters

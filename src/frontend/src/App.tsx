@@ -21,7 +21,8 @@ import { ContasReceberPage } from './features/contas-receber/pages/ContasReceber
 import { EmpresasPage } from './features/empresas/pages/EmpresasPage';
 import { BancosPage } from './features/bancos/pages/BancosPage';
 import { ContasPage } from './features/contas/pages/ContasPage';
-import { ClientesPage } from './features/clientes/pages/ClientesPage';
+import { ClientesPage } from '@/features/clientes/pages/ClientesPage';
+import { FavorecidosPage } from '@/features/favorecidos/pages/FavorecidosPage';
 
 function App() {
   const { ready } = useTranslation();
@@ -69,7 +70,8 @@ function AppContent() {
         <Route path="empresas" element={<EmpresasPage />} />
         <Route path="bancos" element={<BancosPage />} />
         <Route path="contas" element={<ContasPage />} />
-        <Route path="clientes" element={<ClientesPage />} />
+        <Route path="/clientes" element={<ClientesPage />} />
+              <Route path="/favorecidos" element={<FavorecidosPage />} />
         <Route path="contas-pagar" element={<ContasPagarPage />} />
         <Route path="contas-receber" element={<ContasReceberPage />} />
       </Route>

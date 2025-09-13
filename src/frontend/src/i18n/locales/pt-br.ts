@@ -7,6 +7,7 @@ export const ptBrTranslations = {
   'nav.bancos': 'Bancos',
   'nav.contas': 'Contas Bancárias',
   'nav.clientes': 'Clientes',
+  'nav.favorecidos': 'Favorecidos',
   'nav.contas_pagar': 'Contas a Pagar',
   'nav.contas_receber': 'Contas a Receber',
   'nav.relatorios': 'Relatórios',
@@ -295,4 +296,20 @@ export const ptBrTranslations = {
   'clientes.vip': 'Cliente VIP',
   'clientes.ativo': 'Ativo',
   'clientes.observacoes': 'Observações',
+
+  // Favorecidos
+  'favorecidos.title': 'Favorecidos',
+  'favorecidos.novo': 'Novo Favorecido',
+  'favorecidos.editar': 'Editar Favorecido',
+  'favorecidos.excluir': 'Excluir Favorecido',
+  'favorecidos.nome': 'Nome do Favorecido',
+  'favorecidos.tipo_pessoa': 'Tipo de Pessoa',
+  'favorecidos.tipo_pessoa_f': 'Pessoa Física',
+  'favorecidos.tipo_pessoa_j': 'Pessoa Jurídica',
+  'favorecidos.cpf_cnpj': 'CPF/CNPJ',
+  'favorecidos.telefone': 'Telefone',
+  'favorecidos.email': 'E-mail',
+  'favorecidos.endereco': 'Endereço',
+  'favorecidos.ativo': 'Ativo',
+  'favorecidos.inativo': 'Inativo',
 };

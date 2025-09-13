@@ -72,9 +72,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
       path: '/contas',
     },
     {
-      text: t('nav.clientes'),
+      text: t('nav.favorecidos'),
       icon: <Users className="h-5 w-5" />,
-      path: '/clientes',
+      path: '/favorecidos',
     },
     {
       text: t('nav.contas_pagar'),
