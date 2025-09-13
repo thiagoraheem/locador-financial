@@ -57,7 +57,7 @@ class ContaReceberService:
     def get_conta_receber_by_id(self, conta_receber_id: int) -> AccountsReceivable:
         """Get accounts receivable by ID"""
         conta_receber = self.db.query(AccountsReceivable).filter(
-            AccountsReceivable.CodAccountsReceivable == conta_receber_id
+            AccountsReceivable.id == conta_receber_id
         ).first()
 
         if not conta_receber:
@@ -67,8 +67,8 @@ class ContaReceberService:
             )
 
         # Add cliente_nome to the response by querying Cliente table
-        if conta_receber.IdCustomer:
-            cliente = self.db.query(Cliente).filter(Cliente.CodCliente == conta_receber.IdCustomer).first()
+        if conta_receber.cod_cliente:
+            cliente = self.db.query(Cliente).filter(Cliente.CodCliente == conta_receber.cod_cliente).first()
             if cliente:
                 conta_receber.cliente_nome = cliente.DesCliente
         
@@ -90,30 +90,30 @@ class ContaReceberService:
         
         # Apply filters
         if status:
-            query = query.filter(AccountsReceivable.Status == status)
+            query = query.filter(AccountsReceivable.status == status)
         
         if empresa_id:
-            query = query.filter(AccountsReceivable.CodEmpresa == empresa_id)
+            query = query.filter(AccountsReceivable.id_company == empresa_id)
         
         if cliente_id:
-            query = query.filter(AccountsReceivable.CodCliente == cliente_id)
+            query = query.filter(AccountsReceivable.cod_cliente == cliente_id)
         
         if data_vencimento_inicio:
-            query = query.filter(AccountsReceivable.DueDate >= data_vencimento_inicio)
+            query = query.filter(AccountsReceivable.due_date >= data_vencimento_inicio)
         
         if data_vencimento_fim:
-            query = query.filter(AccountsReceivable.DueDate <= data_vencimento_fim)
+            query = query.filter(AccountsReceivable.due_date <= data_vencimento_fim)
         
         # Order by due date
-        query = query.order_by(AccountsReceivable.DueDate)
+        query = query.order_by(AccountsReceivable.due_date)
         
         # Apply pagination
         contas_receber = query.offset(skip).limit(limit).all()
         
         # Add cliente_nome to each record by querying Cliente table
         for conta in contas_receber:
-            if conta.IdCustomer:
-                cliente = self.db.query(Cliente).filter(Cliente.CodCliente == conta.IdCustomer).first()
+            if conta.cod_cliente:
+                cliente = self.db.query(Cliente).filter(Cliente.CodCliente == conta.cod_cliente).first()
                 if cliente:
                     conta.cliente_nome = cliente.DesCliente
         
@@ -237,7 +237,7 @@ class ContaReceberService:
             
             # Update accounts receivable
             conta_receber.ValorRecebido += payment_data.ValorRecebido
-            conta_receber.DataRecebimento = payment_data.DataRecebimento if not conta_receber.DataRecebimento else conta_receber.DataRecebimento
+            conta_receber.payment_date = payment_data.DataRecebimento if not conta_receber.payment_date else conta_receber.payment_date
             conta_receber.NomUsuario = current_user.Login
             
             # Update status and overdue days
@@ -351,13 +351,13 @@ class ContaReceberService:
         
         query = self.db.query(AccountsReceivable).filter(
             and_(
-                AccountsReceivable.DataVencimento >= data_inicio,
-                AccountsReceivable.DataVencimento <= data_fim
+                AccountsReceivable.due_date >= data_inicio,
+                AccountsReceivable.due_date <= data_fim
             )
         )
         
         if status:
-            query = query.filter(AccountsReceivable.Status == status)
+            query = query.filter(AccountsReceivable.status == status)
         
         contas = query.all()
         total = sum(conta.Valor for conta in contas)
@@ -370,8 +370,8 @@ class ContaReceberService:
         
         count = self.db.query(AccountsReceivable).filter(
             and_(
-                AccountsReceivable.Status == 'V',  # Vencido
-                AccountsReceivable.DataVencimento < datetime.now()
+                AccountsReceivable.status == 'V',  # Vencido
+                AccountsReceivable.due_date < datetime.now()
             )
         ).count()
         
@@ -380,7 +380,7 @@ class ContaReceberService:
     def get_delinquent_count(self) -> int:
         """Get count of delinquent accounts receivable"""
         count = self.db.query(AccountsReceivable).filter(
-            AccountsReceivable.FlgProtestado == True
+            AccountsReceivable.flg_protestado == True
         ).count()
         
         return count

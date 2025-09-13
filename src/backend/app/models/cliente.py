@@ -63,7 +63,8 @@ class Cliente(Base):
     NomUsuarioAlteracao = Column(String(15), nullable=True)
     
     # Relacionamentos
-    contas_receber = relationship("AccountsReceivable", back_populates="cliente")
+    # Removido relacionamento direto com AccountsReceivable pois não há FK direta
+    # AccountsReceivable se relaciona com Favorecido, não diretamente com Cliente
     
     # Propriedades de compatibilidade para schemas
     @property

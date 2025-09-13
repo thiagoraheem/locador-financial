@@ -44,10 +44,22 @@ class LancamentoUpdate(BaseModel):
     Observacao: Optional[str] = Field(None, max_length=500, description="Observações")
 
 
-class LancamentoResponse(LancamentoBase):
+class LancamentoResponse(BaseModel):
     """Schema para resposta de lançamento"""
     CodLancamento: int
-    FlgConfirmacao: bool
+    Data: datetime = Field(..., description="Data do lançamento")
+    DataEmissao: Optional[datetime] = Field(None, description="Data de emissão do documento", alias="data_emissao")
+    CodEmpresa: Optional[int] = Field(None, description="Código da empresa")
+    CodConta: Optional[int] = Field(None, description="Código da conta bancária")
+    CodFavorecido: int = Field(..., description="Código do favorecido")
+    CodCategoria: int = Field(..., description="Código da categoria")
+    Valor: Decimal = Field(..., ge=0, description="Valor do lançamento")
+    IndMov: bool = Field(..., description="Indicador de movimento: True=Entrada, False=Saída")
+    NumDocto: Optional[str] = Field(None, max_length=50, description="Número do documento")
+    CodFormaPagto: Optional[int] = Field(None, description="Código da forma de pagamento", alias="cod_forma_pagto")
+    FlgFrequencia: Optional[int] = Field(None, description="Frequência: código numérico da frequência", alias="flg_frequencia")
+    Comentario: Optional[str] = Field(None, description="Observações")
+    flg_confirmacao: bool
     favorecido_nome: Optional[str] = None
     categoria_nome: Optional[str] = None  
     forma_pagamento_nome: Optional[str] = None

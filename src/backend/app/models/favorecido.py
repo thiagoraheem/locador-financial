@@ -36,6 +36,7 @@ class Favorecido(Base):
     # Relacionamentos
     lancamentos = relationship("Lancamento", back_populates="favorecido")
     contas_pagar = relationship("AccountsPayable", back_populates="favorecido")
+    contas_receber = relationship("AccountsReceivable", back_populates="favorecido")
     
     def __repr__(self):
         return f"<Favorecido(CodFavorecido={self.CodFavorecido}, DesFavorecido='{self.DesFavorecido}')>"

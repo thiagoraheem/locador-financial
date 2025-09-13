@@ -91,7 +91,7 @@ class LancamentoService:
                 query = query.filter(Lancamento.IndMov == filtros.ind_mov)
             
             if filtros.confirmado is not None:
-                query = query.filter(Lancamento.FlgConfirmacao == filtros.confirmado)
+                query = query.filter(Lancamento.flg_confirmacao == filtros.confirmado)
             
             if filtros.cod_empresa:
                 query = query.filter(Lancamento.CodEmpresa == filtros.cod_empresa)
@@ -137,7 +137,7 @@ class LancamentoService:
         lancamento = self.get_lancamento_by_id(lancamento_id)
         
         # Validar se pode ser alterado
-        if lancamento.FlgConfirmacao:
+        if lancamento.flg_confirmacao:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Não é possível alterar lançamento já confirmado"
@@ -176,7 +176,7 @@ class LancamentoService:
         lancamento = self.get_lancamento_by_id(lancamento_id)
         
         # Validar se pode ser excluído
-        if lancamento.FlgConfirmacao:
+        if lancamento.flg_confirmacao:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Não é possível excluir lançamento já confirmado"
@@ -199,7 +199,7 @@ class LancamentoService:
         lancamento = self.get_lancamento_by_id(lancamento_id)
         
         # Validar se já está confirmado
-        if lancamento.FlgConfirmacao:
+        if lancamento.flg_confirmacao:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Lançamento já está confirmado"
@@ -207,7 +207,7 @@ class LancamentoService:
         
         try:
             # Confirmar
-            lancamento.FlgConfirmacao = True
+            lancamento.flg_confirmacao = True
             lancamento.NomUsuario = current_user.Login
             
             # TODO: Aqui seria o local para atualizar saldos, gerar movimentações, etc.
@@ -230,7 +230,7 @@ class LancamentoService:
         lancamento = self.get_lancamento_by_id(lancamento_id)
         
         # Validar se está confirmado
-        if not lancamento.FlgConfirmacao:
+        if not lancamento.flg_confirmacao:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Lançamento não está confirmado"
@@ -238,7 +238,7 @@ class LancamentoService:
         
         try:
             # Desconfirmar
-            lancamento.FlgConfirmacao = False
+            lancamento.flg_confirmacao = False
             lancamento.NomUsuario = current_user.Login
             
             # TODO: Aqui seria o local para reverter saldos, estornar movimentações, etc.
@@ -266,7 +266,7 @@ class LancamentoService:
             and_(
                 Lancamento.Data >= data_inicio,
                 Lancamento.Data <= data_fim,
-                Lancamento.FlgConfirmacao == True
+                Lancamento.flg_confirmacao == True
             )
         )
         

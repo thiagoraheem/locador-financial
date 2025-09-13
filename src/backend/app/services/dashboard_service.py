@@ -98,7 +98,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == True  # Campo bit: True = confirmado
+                Lancamento.flg_confirmacao == True  # Campo bit: True = confirmado
             )
         )
         
@@ -155,7 +155,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == tipo,
-                Lancamento.FlgConfirmacao == True  # Campo bit: True = confirmado
+                Lancamento.flg_confirmacao == True  # Campo bit: True = confirmado
             )
         )
         
@@ -188,7 +188,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == True  # Campo bit: True = confirmado
+                Lancamento.flg_confirmacao == True  # Campo bit: True = confirmado
             )
         )
         
@@ -203,25 +203,25 @@ class DashboardService:
         """Get count of active accounts (payable or receivable)"""
         
         if account_type == 'payable':
-            # Contas em aberto são aquelas que não foram pagas (PaymentDate é NULL)
+            # Contas em aberto são aquelas que não foram pagas (payment_date é NULL)
             query = self.db.query(AccountsPayable).filter(
-                AccountsPayable.PaymentDate.is_(None)
+                AccountsPayable.payment_date.is_(None)
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsPayable.IdCompany == empresa_id)
+                query = query.filter(AccountsPayable.id_company == empresa_id)
                 
             return query.count()
         else:  # receivable
-            # Contas em aberto são aquelas que não foram recebidas (PaymentDate é NULL)
+            # Contas em aberto são aquelas que não foram recebidas (payment_date é NULL)
             query = self.db.query(AccountsReceivable).filter(
-                AccountsReceivable.PaymentDate.is_(None)
+                AccountsReceivable.payment_date.is_(None)
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsReceivable.IdCompany == empresa_id)
+                query = query.filter(AccountsReceivable.id_company == empresa_id)
                 
             return query.count()
 
@@ -236,7 +236,7 @@ class DashboardService:
         ).filter(
             and_(
                 Lancamento.IndMov == ind_mov,
-                Lancamento.FlgConfirmacao == True,  # Campo bit: True = confirmado
+                Lancamento.flg_confirmacao == True,  # Campo bit: True = confirmado
                 Lancamento.Data >= start_date,
                 Lancamento.Data <= end_date
             )
@@ -276,28 +276,28 @@ class DashboardService:
             # Contas vencidas são aquelas não pagas e com data de vencimento anterior a hoje
             query = self.db.query(AccountsPayable).filter(
                 and_(
-                    AccountsPayable.PaymentDate.is_(None),  # Não pago
-                    AccountsPayable.DueDate < datetime.now()  # Vencido
+                    AccountsPayable.payment_date.is_(None),  # Não pago
+                    AccountsPayable.due_date < datetime.now().date()  # Vencido
                 )
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsPayable.IdCompany == empresa_id)
+                query = query.filter(AccountsPayable.id_company == empresa_id)
                 
             return query.count()
         else:  # receivable
             # Contas vencidas são aquelas não recebidas e com data de vencimento anterior a hoje
             query = self.db.query(AccountsReceivable).filter(
                 and_(
-                    AccountsReceivable.PaymentDate.is_(None),  # Não recebido
-                    AccountsReceivable.DueDate < datetime.now()  # Vencido
+                    AccountsReceivable.payment_date.is_(None),  # Não recebido
+                    AccountsReceivable.due_date < datetime.now().date()  # Vencido
                 )
             )
             
             # Filter by empresa if provided
             if empresa_id:
-                query = query.filter(AccountsReceivable.IdCompany == empresa_id)
+                query = query.filter(AccountsReceivable.id_company == empresa_id)
                 
             return query.count()
 
@@ -311,13 +311,13 @@ class DashboardService:
         
         query = self.db.query(AccountsReceivable).filter(
             and_(
-                AccountsReceivable.PaymentDate.is_(None),  # Não recebido
-                AccountsReceivable.DueDate < thirty_days_ago  # Vencido há mais de 30 dias
+                AccountsReceivable.payment_date.is_(None),  # Não recebido
+                AccountsReceivable.due_date < thirty_days_ago.date()  # Vencido há mais de 30 dias
             )
         )
         
         # Filter by empresa if provided
         if empresa_id:
-            query = query.filter(AccountsReceivable.IdCompany == empresa_id)
+            query = query.filter(AccountsReceivable.id_company == empresa_id)
             
         return query.count()

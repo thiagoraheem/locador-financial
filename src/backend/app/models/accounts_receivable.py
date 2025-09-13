@@ -12,62 +12,62 @@ class AccountsReceivable(Base):
     
     __tablename__ = "tbl_AccountsReceivable"
 
-    # Campos principais
-    id = Column(Integer, primary_key=True, name='id')
-    cod_empresa = Column(Integer, name='CodEmpresa', default=1)
-    cod_cliente = Column(Integer, ForeignKey('tbl_Clientes.CodCliente'), name='CodCliente', nullable=False)
-    cod_categoria = Column(Integer, ForeignKey('tbl_FINCategorias.CodCategoria'), name='CodCategoria', nullable=False)
-    num_documento = Column(String(20), name='NumDocumento')
-    data_vencimento = Column(Date, name='DataVencimento', nullable=False)
-    data_emissao = Column(Date, name='DataEmissao')
-    valor_original = Column(Numeric(19,4), name='ValorOriginal', nullable=False)
-    valor_recebido = Column(Numeric(19,4), name='ValorRecebido', default=0)
-    valor_juros = Column(Numeric(19,4), name='ValorJuros', default=0)
-    valor_multa = Column(Numeric(19,4), name='ValorMulta', default=0)
-    valor_desconto = Column(Numeric(19,4), name='ValorDesconto', default=0)
-    observacoes = Column(Text, name='Observacoes')
-    flg_recebido = Column(Boolean, name='FlgRecebido', default=False)
-    data_recebimento = Column(Date, name='DataRecebimento')
-    cod_conta = Column(Integer, ForeignKey('tbl_Conta.idConta'), name='CodConta')
-    cod_forma_recebimento = Column(Integer, name='CodFormaRecebimento')
-    num_parcela = Column(Integer, name='NumParcela')
-    qtd_parcelas = Column(Integer, name='QtdParcelas')
-    cod_lancamento_origem = Column(Integer, name='CodLancamentoOrigem')
-    flg_recorrente = Column(Boolean, name='FlgRecorrente', default=False)
-    periodicidade = Column(String(1), name='Periodicidade')  # M=Mensal, A=Anual, etc
-    nosso_numero = Column(String(20), name='NossoNumero')
-    codigo_barras = Column(String(100), name='CodigoBarras')
-    linha_digitavel = Column(String(100), name='LinhaDigitavel')
-    IdUserCreate = Column(Integer, nullable=False, comment="Usuário criação")
-    IdUserAlter = Column(Integer, comment="Usuário alteração")
-    DateCreate = Column(DateTime, nullable=False, comment="Data criação")
-    DateUpdate = Column(DateTime, comment="Data alteração")
+    # Campos principais baseados na estrutura real do banco
+    id = Column(Integer, primary_key=True, name='IdAccountsReceivable')
+    id_company = Column(Integer, name='IdCompany', default=1)
+    document_number = Column(String(15), name='DocumentNumber')
+    amount = Column(Numeric(19,4), name='Amount', nullable=False)
+    issuance_date = Column(Date, name='IssuanceDate', nullable=False)
+    due_date = Column(Date, name='DueDate', nullable=False)
+    id_cost_center = Column(Integer, ForeignKey('tbl_CostCenters.IdCostCenter'), name='IdCostCenter')
+    id_chart_of_accounts = Column(Integer, ForeignKey('tbl_ChartOfAccounts.IdChartOfAccounts'), name='IdChartOfAccounts')
+    description = Column(Text, name='Description')
+    id_customer = Column(Integer, ForeignKey('tbl_FINFavorecido.CodFavorecido'), name='IdCustomer')
+    payment_date = Column(Date, name='PaymentDate')
+    paid_amount = Column(Numeric(19,4), name='PaidAmount')
+    installment = Column(Integer, name='Installment')
+    total_installments = Column(Integer, name='TotalInstallments')
+    fine_amount = Column(Numeric(19,4), name='FineAmount')
+    interest_amount = Column(Numeric(19,4), name='InterestAmount')
+    discount_amount = Column(Numeric(19,4), name='DiscountAmount')
+    id_bank_account = Column(Integer, ForeignKey('tbl_Conta.idConta'), name='IdBankAccount')
+    id_payment_method = Column(Integer, ForeignKey('tbl_FINFormaPagamento.CodFormaPagto'), name='IdPaymentMethod')
+    id_categoria = Column(Integer, ForeignKey('tbl_FINCategorias.CodCategoria'), name='IdCategoria')
+    id_parent_accounts_receivable = Column(Integer, name='IdParentAccountsReceivable')
+    id_installment_type = Column(Integer, name='IdInstallmentType', default=0)
+    id_document_type = Column(Integer, ForeignKey('tbl_AccountsReceivableDocumentType.IdDocumentType'), name='IdDocumentType', nullable=False)
+    id_user_create = Column(Integer, name='IdUserCreate', nullable=False)
+    id_user_alter = Column(Integer, name='IdUserAlter')
+    date_create = Column(DateTime, name='DateCreate', nullable=False)
+    date_update = Column(DateTime, name='DateUpdate')
     
     # Relacionamentos
-    cliente = relationship("Cliente", back_populates="contas_receber")
-    categoria = relationship("Categoria")
-    conta = relationship("Conta")
+    # Removido relacionamento com Cliente pois não há FK direta
+    # Este modelo se relaciona com Favorecido através de id_customer
+    favorecido = relationship("Favorecido", back_populates="contas_receber")
+    categoria = relationship("Categoria", foreign_keys=[id_categoria])
+    conta = relationship("Conta", foreign_keys=[id_bank_account])
     
     # Propriedades calculadas
     @property
     def valor_pendente(self):
         """Calcula o valor ainda pendente de recebimento"""
-        return self.valor_original - (self.valor_recebido or 0)
+        return self.amount - (self.paid_amount or 0)
     
     @property
     def esta_vencido(self) -> bool:
         """Verifica se a conta está vencida"""
-        return self.data_vencimento < datetime.now().date() and not self.flg_recebido
+        return self.due_date < datetime.now().date() and not self.payment_date
     
     @property
     def dias_atraso(self) -> int:
         """Calcula quantos dias a conta está em atraso"""
         if not self.esta_vencido:
             return 0
-        return (datetime.now().date() - self.data_vencimento).days
+        return (datetime.now().date() - self.due_date).days
     
     def __repr__(self):
-        return f"<AccountsReceivable(id={self.id}, valor_original={self.valor_original}, flg_recebido={self.flg_recebido})>"
+        return f"<AccountsReceivable(id={self.id}, amount={self.amount}, payment_date={self.payment_date})>"
 
 
 class AccountsReceivablePayment(Base):

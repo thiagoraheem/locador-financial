@@ -57,9 +57,9 @@ class ContaPagarService:
     def get_conta_pagar_by_id(self, conta_pagar_id: int) -> AccountsPayable:
         """Get accounts payable by ID"""
         conta_pagar = self.db.query(AccountsPayable).join(
-            Favorecido, AccountsPayable.IdCustomer == Favorecido.CodFavorecido
+            Favorecido, AccountsPayable.cod_favorecido == Favorecido.CodFavorecido
         ).filter(
-            AccountsPayable.IdAccountsPayable == conta_pagar_id
+            AccountsPayable.id == conta_pagar_id
         ).first()
 
         if not conta_pagar:
@@ -89,26 +89,26 @@ class ContaPagarService:
         """List accounts payable with filters"""
         
         query = self.db.query(AccountsPayable).join(
-            Favorecido, AccountsPayable.IdCustomer == Favorecido.CodFavorecido
+            Favorecido, AccountsPayable.cod_favorecido == Favorecido.CodFavorecido
         )
         
         # Apply filters
         # Note: Status field doesn't exist in AccountsPayable model - removing filter
         
         if empresa_id:
-            query = query.filter(AccountsPayable.IdCompany == empresa_id)
+            query = query.filter(AccountsPayable.id_company == empresa_id)
         
         if fornecedor_id:
-            query = query.filter(AccountsPayable.IdCustomer == fornecedor_id)
+            query = query.filter(AccountsPayable.id_customer == fornecedor_id)
         
         if data_vencimento_inicio:
-            query = query.filter(AccountsPayable.DueDate >= data_vencimento_inicio)
+            query = query.filter(AccountsPayable.due_date >= data_vencimento_inicio)
         
         if data_vencimento_fim:
-            query = query.filter(AccountsPayable.DueDate <= data_vencimento_fim)
+            query = query.filter(AccountsPayable.due_date <= data_vencimento_fim)
         
         # Order by due date
-        query = query.order_by(AccountsPayable.DueDate)
+        query = query.order_by(AccountsPayable.due_date)
         
         # Apply pagination
         contas = query.offset(skip).limit(limit).all()
@@ -240,7 +240,7 @@ class ContaPagarService:
             
             # Update accounts payable
             conta_pagar.ValorPago += payment_data.ValorPago
-            conta_pagar.DataPagamento = payment_data.DataPagamento if not conta_pagar.DataPagamento else conta_pagar.DataPagamento
+            conta_pagar.payment_date = payment_data.DataPagamento if not conta_pagar.payment_date else conta_pagar.payment_date
             conta_pagar.NomUsuario = current_user.Login
             
             # Update status based on values
