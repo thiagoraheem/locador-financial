@@ -3,8 +3,10 @@ Schemas para lançamentos financeiros
 """
 from pydantic import BaseModel, Field
 from datetime import datetime, date
-from typing import Optional, Literal
+from typing import Optional, Literal, List, Generic, TypeVar
 from decimal import Decimal
+
+T = TypeVar('T')
 
 
 class LancamentoBase(BaseModel):
@@ -116,3 +118,19 @@ class LancamentoFilter(BaseModel):
 class LancamentoConfirm(BaseModel):
     """Schema para confirmação de lançamento"""
     confirmar: bool = Field(..., description="True para confirmar, False para cancelar confirmação")
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    """Schema genérico para respostas paginadas"""
+    data: List[T] = Field(..., description="Lista de dados")
+    total: int = Field(..., description="Total de registros")
+    skip: int = Field(..., description="Registros pulados")
+    limit: int = Field(..., description="Limite de registros por página")
+    
+    class Config:
+        from_attributes = True
+
+
+class LancamentosPaginatedResponse(PaginatedResponse[LancamentoResponse]):
+    """Schema para resposta paginada de lançamentos"""
+    pass

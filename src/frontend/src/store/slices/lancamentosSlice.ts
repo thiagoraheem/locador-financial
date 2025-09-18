@@ -89,6 +89,13 @@ interface LancamentosState {
   };
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  skip: number;
+  limit: number;
+}
+
 // Initial state
 const initialState: LancamentosState = {
   lancamentos: [],
@@ -133,10 +140,12 @@ export const lancamentosSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchLancamentos.fulfilled, (state, action: PayloadAction<LancamentoResponse[]>) => {
+      .addCase(fetchLancamentos.fulfilled, (state, action: PayloadAction<PaginatedResponse<LancamentoResponse>>) => {
         state.loading = false;
-        state.lancamentos = action.payload;
-        state.totalCount = action.payload.length;
+        state.lancamentos = action.payload.data;
+        state.totalCount = action.payload.total;
+        state.pagination.skip = action.payload.skip;
+        state.pagination.limit = action.payload.limit;
       })
       .addCase(fetchLancamentos.rejected, (state, action) => {
         state.loading = false;

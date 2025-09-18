@@ -14,7 +14,8 @@ from app.schemas.lancamento import (
     LancamentoCreate, 
     LancamentoUpdate, 
     LancamentoResponse,
-    LancamentoFilter
+    LancamentoFilter,
+    LancamentosPaginatedResponse
 )
 
 
@@ -128,8 +129,86 @@ class LancamentoService:
                 # Ordenação padrão: mais recentes primeiro
                 query = query.order_by(desc(Lancamento.Data))
             
-            # Aplicar paginação
-            return query.offset(skip).limit(limit).all()
+        # Aplicar paginação
+        return query.offset(skip).limit(limit).all()
+    
+    def list_lancamentos_paginated(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        filtros: Optional[LancamentoFilter] = None
+    ) -> LancamentosPaginatedResponse:
+        """Listar lançamentos com filtros, paginação e total count"""
+        
+        query = self.db.query(Lancamento).options(
+            joinedload(Lancamento.favorecido),
+            joinedload(Lancamento.categoria)
+        )
+        
+        # Aplicar filtros se fornecidos
+        if filtros:
+            if filtros.data_inicio:
+                query = query.filter(Lancamento.Data >= filtros.data_inicio)
+            
+            if filtros.data_fim:
+                query = query.filter(Lancamento.Data <= filtros.data_fim)
+            
+            if filtros.cod_categoria:
+                query = query.filter(Lancamento.CodCategoria == filtros.cod_categoria)
+            
+            if filtros.cod_favorecido:
+                query = query.filter(Lancamento.CodFavorecido == filtros.cod_favorecido)
+            
+            if filtros.ind_mov:
+                query = query.filter(Lancamento.IndMov == filtros.ind_mov)
+            
+            if filtros.confirmado is not None:
+                query = query.filter(Lancamento.flg_confirmacao == filtros.confirmado)
+            
+            if filtros.cod_empresa:
+                query = query.filter(Lancamento.CodEmpresa == filtros.cod_empresa)
+            
+            if filtros.cod_conta:
+                query = query.filter(Lancamento.CodConta == filtros.cod_conta)
+            
+            if filtros.valor_min:
+                query = query.filter(Lancamento.Valor >= filtros.valor_min)
+            
+            if filtros.valor_max:
+                query = query.filter(Lancamento.Valor <= filtros.valor_max)
+            
+            if filtros.num_docto:
+                query = query.filter(Lancamento.NumDocto.ilike(f"%{filtros.num_docto}%"))
+        
+        # Ordenação
+        if filtros and filtros.order_by:
+            if filtros.order_by == "data_desc":
+                query = query.order_by(desc(Lancamento.Data))
+            elif filtros.order_by == "data_asc":
+                query = query.order_by(asc(Lancamento.Data))
+            elif filtros.order_by == "valor_desc":
+                query = query.order_by(desc(Lancamento.Valor))
+            elif filtros.order_by == "valor_asc":
+                query = query.order_by(asc(Lancamento.Valor))
+        else:
+            # Ordenação padrão: mais recentes primeiro
+            query = query.order_by(desc(Lancamento.Data))
+        
+        # Obter total count antes da paginação
+        total = query.count()
+        
+        # Aplicar paginação e obter dados
+        lancamentos = query.offset(skip).limit(limit).all()
+        
+        # Converter para response com relacionamentos
+        data = [LancamentoResponse.from_orm_with_relations(lancamento) for lancamento in lancamentos]
+        
+        return LancamentosPaginatedResponse(
+            data=data,
+            total=total,
+            skip=skip,
+            limit=limit
+        )
         
     def update_lancamento(
         self, 

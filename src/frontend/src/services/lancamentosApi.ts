@@ -69,9 +69,16 @@ export interface LancamentoConfirm {
   confirmar: boolean;
 }
 
+export interface PaginatedLancamentosResponse {
+  data: LancamentoResponse[];
+  total: number;
+  skip: number;
+  limit: number;
+}
+
 // API functions
 export const lancamentosApi = {
-  list: (params?: LancamentoFilter & { skip?: number; limit?: number }): Promise<AxiosResponse<LancamentoResponse[]>> =>
+  list: (params?: LancamentoFilter & { skip?: number; limit?: number }): Promise<AxiosResponse<PaginatedLancamentosResponse>> =>
     apiClient.get('/lancamentos', { params }),
   
   get: (id: number): Promise<AxiosResponse<LancamentoResponse>> =>

@@ -69,18 +69,15 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
   } = useAppSelector((state) => state.lancamentos);
 
   const [localFilters, setLocalFilters] = useState(filters);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
-    const skip = (currentPage - 1) * pageSize;
     dispatch(fetchLancamentos({
-      ...localFilters,
-      skip,
-      limit: pageSize,
+      ...filters,
+      skip: pagination.skip,
+      limit: pagination.limit,
     }));
-  }, [dispatch, currentPage, pageSize, localFilters]);
+  }, [dispatch, filters, pagination.skip, pagination.limit]);
 
   // Handle filter changes
   const handleFilterChange = (field: string, value: any) => {
@@ -106,15 +103,12 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    const skip = (page - 1) * pageSize;
-    dispatch(setPagination({ skip, limit: pageSize }));
+    const skip = (page - 1) * pagination.limit;
+    dispatch(setPagination({ skip, limit: pagination.limit }));
   };
 
   const handlePageSizeChange = (newPageSize: string) => {
     const size = parseInt(newPageSize);
-    setPageSize(size);
-    setCurrentPage(1);
     dispatch(setPagination({ skip: 0, limit: size }));
   };
 
@@ -202,9 +196,10 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
   };
 
   // Pagination calculations
-  const totalPages = Math.ceil(totalCount / pageSize);
-  const startIndex = (currentPage - 1) * pageSize + 1;
-  const endIndex = Math.min(currentPage * pageSize, totalCount);
+  const currentPage = Math.floor(pagination.skip / pagination.limit) + 1;
+  const totalPages = Math.ceil(totalCount / pagination.limit);
+  const startIndex = pagination.skip + 1;
+  const endIndex = Math.min(pagination.skip + pagination.limit, totalCount);
 
   return (
     <div className="space-y-4">
@@ -282,7 +277,7 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
           </TableHeader>
           <TableBody>
             {loading ? (
-              Array.from({ length: pageSize }).map((_, index) => (
+              Array.from({ length: pagination.limit }).map((_, index) => (
                 <TableRow key={index}>
                   <TableCell colSpan={10} className="h-12">
                     <div className="flex items-center space-x-2">
@@ -338,7 +333,7 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">Linhas por página</p>
-            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+            <Select value={pagination.limit.toString()} onValueChange={handlePageSizeChange}>
               <SelectTrigger className="h-8 w-[70px]">
                 <SelectValue />
               </SelectTrigger>

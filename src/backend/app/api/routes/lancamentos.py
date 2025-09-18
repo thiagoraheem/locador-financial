@@ -12,13 +12,14 @@ from app.schemas.lancamento import (
     LancamentoUpdate, 
     LancamentoResponse, 
     LancamentoFilter,
-    LancamentoConfirm
+    LancamentoConfirm,
+    LancamentosPaginatedResponse
 )
 from app.services.lancamento_service import LancamentoService
 
 router = APIRouter(prefix="/lancamentos", tags=["lançamentos"])
 
-@router.get("/", response_model=List[LancamentoResponse], summary="Listar lançamentos")
+@router.get("/", response_model=LancamentosPaginatedResponse, summary="Listar lançamentos")
 async def listar_lancamentos(
     skip: int = Query(0, ge=0, description="Registros a pular"),
     limit: int = Query(100, ge=1, le=1000, description="Limite de registros"),
@@ -30,10 +31,7 @@ async def listar_lancamentos(
     Lista lançamentos com paginação e filtros opcionais
     """
     service = LancamentoService(db)
-    lancamentos = service.list_lancamentos(skip=skip, limit=limit, filtros=filtros)
-    
-    # Converter para response com relacionamentos
-    return [LancamentoResponse.from_orm_with_relations(lancamento) for lancamento in lancamentos]
+    return service.list_lancamentos_paginated(skip=skip, limit=limit, filtros=filtros)
 
 @router.get("/{lancamento_id}", response_model=LancamentoResponse, summary="Obter lançamento por ID")
 async def obter_lancamento(
