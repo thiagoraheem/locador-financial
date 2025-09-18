@@ -90,7 +90,7 @@ class ContaService:
         # All contas are considered active
         
         # Order by empresa and name
-        query = query.order_by(Conta.CodEmpresa, Conta.NomConta)
+        query = query.order_by(Conta.CodEmpresa, Conta.DesConta)
         
         # Apply pagination
         return query.offset(skip).limit(limit).all()
@@ -110,7 +110,7 @@ class ContaService:
         # All contas are considered active
         
         # Order by name
-        query = query.order_by(Conta.NomConta)
+        query = query.order_by(Conta.DesConta)
         
         return query.all()
 

@@ -1,11 +1,35 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ContasBancariasTable } from '../../../components/tables/ContasBancariasTable';
+import { ContaBancariaForm } from '../../../components/forms/ContaBancariaForm';
+import { ContaResponse } from '../../../services/contasApi';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export const ContasPage: React.FC = () => {
   const { t } = useTranslation();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingConta, setEditingConta] = useState<ContaResponse | null>(null);
+
+  const handleCreate = () => {
+    setEditingConta(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (conta: ContaResponse) => {
+    setEditingConta(conta);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingConta(null);
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setEditingConta(null);
+    // A tabela será recarregada automaticamente
+  };
 
   return (
     <div className="space-y-6">
@@ -19,34 +43,17 @@ export const ContasPage: React.FC = () => {
             Gerencie as contas bancárias do sistema
           </p>
         </div>
-        <Button
-          onClick={() => {
-            // TODO: Implementar abertura do modal de criação
-            console.log('Nova conta');
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          {t('contas.nova')}
-        </Button>
       </div>
 
       {/* Content */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-80 flex items-center justify-center bg-muted/50 rounded-lg">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-muted-foreground">
-                Módulo de Contas Bancárias
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Lista de contas bancárias cadastradas
-                <br />
-                (A ser implementado)
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ContasBancariasTable onEdit={handleEdit} onCreate={handleCreate} />
+
+      <ContaBancariaForm
+        open={isFormOpen}
+        onClose={handleCloseForm}
+        onSubmit={handleFormSuccess}
+        initialData={editingConta}
+      />
     </div>
   );
 };

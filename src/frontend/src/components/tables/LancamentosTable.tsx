@@ -138,7 +138,12 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
   // Format currency
   const formatCurrency = (value: number) => {
     const numValue = typeof value === 'number' && !isNaN(value) ? value : 0;
-    return `R$ ${numValue.toFixed(2)}`.replace('.', ',');
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(numValue);
   };
 
   // Render tipo movimento badge
@@ -263,20 +268,23 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('lancamentos.data')}</TableHead>
-              <TableHead>{t('lancamentos.favorecido')}</TableHead>
-              <TableHead>{t('lancamentos.categoria')}</TableHead>
-              <TableHead>{t('lancamentos.tipo')}</TableHead>
-              <TableHead>{t('lancamentos.valor')}</TableHead>
-              <TableHead>{t('lancamentos.status')}</TableHead>
-              <TableHead className="w-[100px]">{t('actions.actions')}</TableHead>
+              <TableHead className="w-24">{t('lancamentos.data')}</TableHead>
+              <TableHead className="w-24">Documento</TableHead>
+              <TableHead className="w-32">{t('lancamentos.favorecido')}</TableHead>
+              <TableHead className="w-28">{t('lancamentos.categoria')}</TableHead>
+              <TableHead className="w-16">{t('lancamentos.tipo')}</TableHead>
+              <TableHead className="w-24">{t('lancamentos.valor')}</TableHead>
+              <TableHead className="w-20">Parcelas</TableHead>
+              <TableHead className="w-20">{t('lancamentos.status')}</TableHead>
+              <TableHead className="w-24">Quitação</TableHead>
+              <TableHead className="w-20">{t('actions.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: pageSize }).map((_, index) => (
                 <TableRow key={index}>
-                  <TableCell colSpan={7} className="h-12">
+                  <TableCell colSpan={10} className="h-12">
                     <div className="flex items-center space-x-2">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
                       <span>Carregando...</span>
@@ -286,20 +294,33 @@ export const LancamentosTable: React.FC<LancamentosTableProps> = ({ onEdit, onCr
               ))
             ) : lancamentos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={10} className="h-24 text-center">
                   Nenhum lançamento encontrado.
                 </TableCell>
               </TableRow>
             ) : (
               lancamentos.map((lancamento) => (
                 <TableRow key={lancamento.CodLancamento}>
-                  <TableCell>{formatDate(lancamento.Data)}</TableCell>
-                  <TableCell className="font-medium">{lancamento.favorecido_nome}</TableCell>
-                  <TableCell>{lancamento.categoria_nome}</TableCell>
-                  <TableCell>{renderTipoMovimento(lancamento.IndMov)}</TableCell>
-                  <TableCell>{formatCurrency(lancamento.Valor)}</TableCell>
-                  <TableCell>{renderStatus(lancamento.FlgConfirmacao)}</TableCell>
-                  <TableCell>{renderActions(lancamento)}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(lancamento.Data)}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">{lancamento.NumDocto || '-'}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 truncate max-w-32 font-medium">{lancamento.favorecido_nome || '-'}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 truncate max-w-28">{lancamento.categoria_nome || '-'}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap">{renderTipoMovimento(lancamento.IndMov)}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(lancamento.Valor)}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {lancamento.ParcelaAtual && lancamento.QtdParcelas 
+                      ? `${lancamento.ParcelaAtual}/${lancamento.QtdParcelas}`
+                      : '-'
+                    }
+                  </TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap">{renderStatus(lancamento.FlgConfirmacao)}</TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {lancamento.DatConfirmacao 
+                      ? formatDate(lancamento.DatConfirmacao)
+                      : '-'
+                    }
+                  </TableCell>
+                  <TableCell className="px-3 py-4 whitespace-nowrap text-sm font-medium">{renderActions(lancamento)}</TableCell>
                 </TableRow>
               ))
             )}

@@ -71,7 +71,7 @@ class Conta(Base):
         return self.DatAlteracao
     
     def __repr__(self):
-        return f"<Conta(idConta={self.idConta}, NomConta='{self.NomConta}', Banco={self.Banco})>"
+        return f"<Conta(idConta={self.idConta}, DesConta='{self.DesConta}', Banco={self.Banco})>"
     
     @property
     def agencia_completa(self) -> str:

@@ -2,25 +2,29 @@
 Schemas para lançamentos financeiros
 """
 from pydantic import BaseModel, Field
-from datetime import datetime
-from decimal import Decimal
+from datetime import datetime, date
 from typing import Optional, Literal
+from decimal import Decimal
 
 
 class LancamentoBase(BaseModel):
-    """Schema base para lançamentos"""
-    Data: datetime = Field(..., description="Data do lançamento")
-    DataEmissao: datetime = Field(..., description="Data de emissão do documento")
-    CodEmpresa: Optional[int] = Field(None, description="Código da empresa")
-    CodConta: Optional[int] = Field(None, description="Código da conta bancária")
+    Data: date = Field(..., description="Data do lançamento")
+    DataEmissao: Optional[datetime] = Field(None, description="Data de emissão do documento")
+    CodEmpresa: int = Field(..., description="Código da empresa")
+    CodConta: int = Field(..., description="Código da conta")
     CodFavorecido: int = Field(..., description="Código do favorecido")
     CodCategoria: int = Field(..., description="Código da categoria")
-    Valor: Decimal = Field(..., ge=0, description="Valor do lançamento")
+    Valor: float = Field(..., description="Valor do lançamento")
     IndMov: bool = Field(..., description="Indicador de movimento: True=Entrada, False=Saída")
-    NumDocto: Optional[str] = Field(None, max_length=50, description="Número do documento")
-    CodFormaPagto: int = Field(..., description="Código da forma de pagamento")
-    FlgFrequencia: Optional[int] = Field(None, description="Frequência: código numérico da frequência")
-    Observacao: Optional[str] = Field(None, max_length=500, description="Observações")
+    NumDocto: Optional[str] = Field(None, description="Número do documento")
+    CodFormaPagto: Optional[int] = Field(None, description="Código da forma de pagamento")
+    FlgFrequencia: Optional[int] = Field(None, description="Flag de frequência")
+    Observacao: Optional[str] = Field(None, description="Observação")
+    flg_confirmacao: Optional[bool] = Field(None, description="Flag de confirmação")
+    dat_confirmacao: Optional[date] = Field(None, description="Data de confirmação")
+    parcela_atual: Optional[int] = Field(None, description="Parcela atual")
+    qtd_parcelas: Optional[int] = Field(None, description="Quantidade de parcelas")
+    NomUsuario: Optional[str] = Field(None, description="Nome do usuário")
 
 
 class LancamentoCreate(LancamentoBase):
@@ -30,7 +34,7 @@ class LancamentoCreate(LancamentoBase):
 
 class LancamentoUpdate(BaseModel):
     """Schema para atualização de lançamento"""
-    Data: Optional[datetime] = Field(None, description="Data do lançamento")
+    Data: Optional[date] = Field(None, description="Data do lançamento")
     DataEmissao: Optional[datetime] = Field(None, description="Data de emissão do documento")
     CodEmpresa: Optional[int] = Field(None, description="Código da empresa")
     CodConta: Optional[int] = Field(None, description="Código da conta bancária")
@@ -44,34 +48,51 @@ class LancamentoUpdate(BaseModel):
     Observacao: Optional[str] = Field(None, max_length=500, description="Observações")
 
 
-class LancamentoResponse(BaseModel):
+class LancamentoResponse(LancamentoBase):
     """Schema para resposta de lançamento"""
     CodLancamento: int
-    Data: datetime = Field(..., description="Data do lançamento")
-    DataEmissao: Optional[datetime] = Field(None, description="Data de emissão do documento", alias="data_emissao")
-    CodEmpresa: Optional[int] = Field(None, description="Código da empresa")
-    CodConta: Optional[int] = Field(None, description="Código da conta bancária")
-    CodFavorecido: int = Field(..., description="Código do favorecido")
-    CodCategoria: int = Field(..., description="Código da categoria")
-    Valor: Decimal = Field(..., ge=0, description="Valor do lançamento")
-    IndMov: bool = Field(..., description="Indicador de movimento: True=Entrada, False=Saída")
-    NumDocto: Optional[str] = Field(None, max_length=50, description="Número do documento")
-    CodFormaPagto: Optional[int] = Field(None, description="Código da forma de pagamento", alias="cod_forma_pagto")
-    FlgFrequencia: Optional[int] = Field(None, description="Frequência: código numérico da frequência", alias="flg_frequencia")
-    Comentario: Optional[str] = Field(None, description="Observações")
     flg_confirmacao: bool
+    dat_confirmacao: Optional[date] = None
+    parcela_atual: Optional[int] = None
+    qtd_parcelas: Optional[int] = None
     favorecido_nome: Optional[str] = None
-    categoria_nome: Optional[str] = None  
-    forma_pagamento_nome: Optional[str] = None
-    empresa_nome: Optional[str] = None
-    conta_nome: Optional[str] = None
+    categoria_nome: Optional[str] = None
     NomUsuario: str
-    DtCreate: datetime = Field(alias="DatCadastro")
-    DtAlter: Optional[datetime] = None
     
-    model_config = {
-        "from_attributes": True
-    }
+    @classmethod
+    def from_orm_with_relations(cls, lancamento):
+        """Criar response com dados dos relacionamentos"""
+        try:
+            data = {
+                'CodLancamento': lancamento.CodLancamento,
+                'Data': lancamento.Data,
+                'DataEmissao': getattr(lancamento, 'data_emissao', None),
+                'CodEmpresa': lancamento.CodEmpresa or 1,
+                'CodConta': lancamento.CodConta,
+                'CodFavorecido': lancamento.CodFavorecido,
+                'CodCategoria': lancamento.CodCategoria,
+                'Valor': float(lancamento.Valor) if lancamento.Valor else 0.0,
+                'IndMov': bool(lancamento.IndMov) if lancamento.IndMov is not None else False,
+                'NumDocto': lancamento.NumDocto,
+                'CodFormaPagto': getattr(lancamento, 'cod_forma_pagto', None),
+                'FlgFrequencia': getattr(lancamento, 'flg_frequencia', None),
+                'Observacao': getattr(lancamento, 'Comentario', None),
+                'flg_confirmacao': bool(getattr(lancamento, 'flg_confirmacao', False)),
+                'dat_confirmacao': getattr(lancamento, 'dat_confirmacao', None),
+                'parcela_atual': getattr(lancamento, 'parcela_atual', None),
+                'qtd_parcelas': getattr(lancamento, 'qtd_parcelas', None),
+                'NomUsuario': getattr(lancamento, 'NomUsuario', ''),
+                'favorecido_nome': lancamento.favorecido.DesFavorecido if lancamento.favorecido else None,
+                'categoria_nome': lancamento.categoria.DesCategoria if lancamento.categoria else None
+            }
+            return cls(**data)
+        except Exception as e:
+            # Log do erro para debug
+            print(f"Erro ao converter lançamento {getattr(lancamento, 'CodLancamento', 'N/A')}: {str(e)}")
+            raise
+    
+    class Config:
+        from_attributes = True
 
 
 class LancamentoFilter(BaseModel):

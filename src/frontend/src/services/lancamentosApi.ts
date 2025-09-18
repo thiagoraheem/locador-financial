@@ -37,6 +37,9 @@ export interface LancamentoUpdate {
 export interface LancamentoResponse extends LancamentoBase {
   CodLancamento: number;
   FlgConfirmacao: boolean;
+  DatConfirmacao?: string;
+  ParcelaAtual?: number;
+  QtdParcelas?: number;
   favorecido_nome?: string;
   categoria_nome?: string;
   forma_pagamento_nome?: string;

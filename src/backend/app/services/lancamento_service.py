@@ -4,7 +4,7 @@ Serviço de Lançamentos Financeiros
 from typing import List, Optional
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, desc, asc
 from fastapi import HTTPException, status
 
@@ -51,7 +51,10 @@ class LancamentoService:
     
     def get_lancamento_by_id(self, lancamento_id: int) -> Lancamento:
         """Buscar lançamento por ID"""
-        lancamento = self.db.query(Lancamento).filter(
+        lancamento = self.db.query(Lancamento).options(
+            joinedload(Lancamento.favorecido),
+            joinedload(Lancamento.categoria)
+        ).filter(
             Lancamento.CodLancamento == lancamento_id
         ).first()
         
@@ -71,7 +74,10 @@ class LancamentoService:
     ) -> List[Lancamento]:
         """Listar lançamentos com filtros e paginação"""
         
-        query = self.db.query(Lancamento)
+        query = self.db.query(Lancamento).options(
+            joinedload(Lancamento.favorecido),
+            joinedload(Lancamento.categoria)
+        )
         
         # Aplicar filtros se fornecidos
         if filtros:
