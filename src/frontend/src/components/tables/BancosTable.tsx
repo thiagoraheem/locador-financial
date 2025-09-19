@@ -50,9 +50,9 @@ export const BancosTable: React.FC<BancosTableProps> = ({ onEdit, onCreate }) =>
   // Filter bancos based on search and status
   const filteredBancos = bancos.filter((banco) => {
     const matchesSearch = 
-      banco.Nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      banco.NomeAbreviado.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      banco.Codigo.toString().includes(searchTerm);
+      (banco.Nome || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (banco.NomeAbreviado || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (banco.Codigo || '').toString().includes(searchTerm);
     
     const matchesStatus = statusFilter === 'all' || banco.FlgAtivo === statusFilter;
     

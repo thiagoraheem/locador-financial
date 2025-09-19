@@ -88,12 +88,12 @@ export const LancamentosDoDiaTabela: React.FC<LancamentosDoDiaTabelaProps> = ({
           valorB = b.Valor;
           break;
         case 'favorecido':
-          valorA = a.favorecido_nome.toLowerCase();
-          valorB = b.favorecido_nome.toLowerCase();
+          valorA = (a.favorecido_nome || '').toLowerCase();
+          valorB = (b.favorecido_nome || '').toLowerCase();
           break;
         case 'categoria':
-          valorA = a.categoria_nome.toLowerCase();
-          valorB = b.categoria_nome.toLowerCase();
+          valorA = (a.categoria_nome || '').toLowerCase();
+          valorB = (b.categoria_nome || '').toLowerCase();
           break;
         case 'conta':
           valorA = (a.conta_nome || '').toLowerCase();
@@ -151,6 +151,7 @@ export const LancamentosDoDiaTabela: React.FC<LancamentosDoDiaTabelaProps> = ({
   };
 
   const getStatusBadge = (status: string) => {
+    if (!status) return null;
     const statusNormalizado = status.toLowerCase() === 'confirmado' ? 'confirmado' : 
                              status.toLowerCase() === 'pendente' ? 'pendente' : 'cancelado';
     
@@ -184,6 +185,7 @@ export const LancamentosDoDiaTabela: React.FC<LancamentosDoDiaTabelaProps> = ({
   };
 
   const getTipoMovimentoBadge = (tipo: string) => {
+    if (!tipo) return null;
     const tipoNormalizado = tipo.toLowerCase() === 'entrada' ? 'entrada' : 'saida';
     return (
       <Badge 

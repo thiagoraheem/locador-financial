@@ -182,6 +182,7 @@ export const lancamentosDoDiaUtils = {
    * Formata status para exibição
    */
   formatarStatus: (status: string): string => {
+    if (!status) return '';
     const statusMap: Record<string, string> = {
       'confirmado': 'Confirmado',
       'pendente': 'Pendente',

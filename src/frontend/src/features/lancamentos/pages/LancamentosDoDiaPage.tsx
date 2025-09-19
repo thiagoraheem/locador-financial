@@ -319,7 +319,7 @@ export const LancamentosDoDiaPage: React.FC = () => {
   // Calcular valor total dos selecionados
   const valorTotalSelecionados = state.lancamentos_selecionados.reduce((total, id) => {
     const lancamento = state.lancamentos.find(l => l.CodLancamento === id);
-    if (lancamento) {
+    if (lancamento && lancamento.tipo_movimento) {
       return total + (lancamento.tipo_movimento.toLowerCase() === 'entrada' ? lancamento.Valor : -lancamento.Valor);
     }
     return total;
