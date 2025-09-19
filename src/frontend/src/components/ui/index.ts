@@ -19,5 +19,7 @@ export { RadioGroup, RadioGroupItem } from './radio-group';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 export { Separator } from './separator';
 export { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from './sheet';
+export { Skeleton } from './skeleton';
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './table';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 export { Textarea } from './textarea';
