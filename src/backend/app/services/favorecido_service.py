@@ -67,9 +67,9 @@ class FavorecidoService:
         
         query = self.db.query(Favorecido)
         
-        # Filter only active
-        if ativos_apenas:
-            query = query.filter(Favorecido.FlgAtivo == 'S')
+        # Filter only active - removido pois FlgAtivo não existe na tabela
+        # if ativos_apenas:
+        #     query = query.filter(Favorecido.FlgAtivo == 'S')
         
         # Order by name
         query = query.order_by(Favorecido.DesFavorecido)
@@ -87,9 +87,9 @@ class FavorecidoService:
         
         query = self.db.query(Favorecido)
         
-        # Filter only active
-        if ativos_apenas:
-            query = query.filter(Favorecido.FlgAtivo == 'S')
+        # Filter only active - removido pois FlgAtivo não existe na tabela
+        # if ativos_apenas:
+        #     query = query.filter(Favorecido.FlgAtivo == 'S')
         
         # Search by term
         if search_term:
@@ -156,8 +156,8 @@ class FavorecidoService:
             )
         
         try:
-            # Logical deletion
-            favorecido.FlgAtivo = 'N'
+            # Logical deletion - removido pois FlgAtivo não existe na tabela
+            # favorecido.FlgAtivo = 'N'
             favorecido.NomUsuario = current_user.Login
             
             self.db.commit()
@@ -174,7 +174,7 @@ class FavorecidoService:
         favorecido = self.get_favorecido_by_id(favorecido_id)
         
         try:
-            favorecido.FlgAtivo = 'S'
+            # favorecido.FlgAtivo = 'S' - removido pois FlgAtivo não existe na tabela
             favorecido.NomUsuario = current_user.Login
             
             self.db.commit()
@@ -194,7 +194,8 @@ class FavorecidoService:
         if not favorecido_data.CPF_CNPJ:
             return
             
-        query = self.db.query(Favorecido).filter(Favorecido.FlgAtivo == 'S')
+        query = self.db.query(Favorecido)
+        # .filter(Favorecido.FlgAtivo == 'S') - removido pois FlgAtivo não existe na tabela
         
         # Exclude current favorecido if updating
         if exclude_id:
