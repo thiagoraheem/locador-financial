@@ -95,7 +95,9 @@ class LancamentoService:
                 query = query.filter(Lancamento.CodFavorecido == filtros.cod_favorecido)
             
             if filtros.ind_mov:
-                query = query.filter(Lancamento.IndMov == filtros.ind_mov)
+                # Converter 'E'/'S' para True/False
+                ind_mov_bool = True if filtros.ind_mov == 'E' else False
+                query = query.filter(Lancamento.IndMov == ind_mov_bool)
             
             if filtros.confirmado is not None:
                 query = query.filter(Lancamento.flg_confirmacao == filtros.confirmado)
@@ -160,7 +162,9 @@ class LancamentoService:
                 query = query.filter(Lancamento.CodFavorecido == filtros.cod_favorecido)
             
             if filtros.ind_mov:
-                query = query.filter(Lancamento.IndMov == filtros.ind_mov)
+                # Converter 'E'/'S' para True/False
+                ind_mov_bool = True if filtros.ind_mov == 'E' else False
+                query = query.filter(Lancamento.IndMov == ind_mov_bool)
             
             if filtros.confirmado is not None:
                 query = query.filter(Lancamento.flg_confirmacao == filtros.confirmado)

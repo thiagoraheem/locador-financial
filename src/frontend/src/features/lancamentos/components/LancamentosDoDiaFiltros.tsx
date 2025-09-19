@@ -204,14 +204,14 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
         <div className="space-y-2">
           <Label htmlFor="favorecido">Favorecido</Label>
           <Select
-            value={filtrosLocais.cod_favorecido?.toString() || ''}
-            onValueChange={(value) => atualizarFiltro('cod_favorecido', value ? parseInt(value) : undefined)}
+            value={filtrosLocais.cod_favorecido?.toString() || 'todos'}
+            onValueChange={(value) => atualizarFiltro('cod_favorecido', value === 'todos' ? undefined : parseInt(value))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todos os favorecidos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os favorecidos</SelectItem>
+              <SelectItem value="todos">Todos os favorecidos</SelectItem>
               {opcoes.favorecidos.map((favorecido) => (
                 <SelectItem key={favorecido.value} value={favorecido.value.toString()}>
                   {favorecido.label}
@@ -225,14 +225,14 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
         <div className="space-y-2">
           <Label htmlFor="categoria">Categoria</Label>
           <Select
-            value={filtrosLocais.cod_categoria?.toString() || ''}
-            onValueChange={(value) => atualizarFiltro('cod_categoria', value ? parseInt(value) : undefined)}
+            value={filtrosLocais.cod_categoria?.toString() || 'todos'}
+            onValueChange={(value) => atualizarFiltro('cod_categoria', value === 'todos' ? undefined : parseInt(value))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todas as categorias" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as categorias</SelectItem>
+              <SelectItem value="todos">Todas as categorias</SelectItem>
               {opcoes.categorias.map((categoria) => (
                 <SelectItem key={categoria.value} value={categoria.value.toString()}>
                   {categoria.label}
@@ -249,14 +249,14 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
         <div className="space-y-2">
           <Label htmlFor="conta">Conta</Label>
           <Select
-            value={filtrosLocais.id_conta?.toString() || ''}
-            onValueChange={(value) => atualizarFiltro('id_conta', value ? parseInt(value) : undefined)}
+            value={filtrosLocais.id_conta?.toString() || 'todos'}
+            onValueChange={(value) => atualizarFiltro('id_conta', value === 'todos' ? undefined : parseInt(value))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todas as contas" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as contas</SelectItem>
+              <SelectItem value="todos">Todas as contas</SelectItem>
               {opcoes.contas.map((conta) => (
                 <SelectItem key={conta.value} value={conta.value.toString()}>
                   {conta.label}
@@ -270,14 +270,14 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
         <div className="space-y-2">
           <Label htmlFor="tipo_lancamento">Tipo de Lançamento</Label>
           <Select
-            value={filtrosLocais.tipo_lancamento || ''}
-            onValueChange={(value) => atualizarFiltro('tipo_lancamento', value || undefined)}
+            value={filtrosLocais.tipo_lancamento || 'todos'}
+            onValueChange={(value) => atualizarFiltro('tipo_lancamento', value === 'todos' ? undefined : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todos os tipos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os tipos</SelectItem>
+              <SelectItem value="todos">Todos os tipos</SelectItem>
               <SelectItem value="conta_pagar">Conta a Pagar</SelectItem>
               <SelectItem value="conta_receber">Conta a Receber</SelectItem>
               <SelectItem value="transferencia">Transferência</SelectItem>
@@ -301,14 +301,14 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
         <div className="space-y-2">
           <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
           <Select
-            value={filtrosLocais.cod_forma_pagto?.toString() || ''}
-            onValueChange={(value) => atualizarFiltro('cod_forma_pagto', value ? parseInt(value) : undefined)}
+            value={filtrosLocais.cod_forma_pagto?.toString() || 'todos'}
+            onValueChange={(value) => atualizarFiltro('cod_forma_pagto', value === 'todos' ? undefined : parseInt(value))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todas as formas" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as formas</SelectItem>
+              <SelectItem value="todos">Todas as formas</SelectItem>
               {opcoes.formas_pagamento.map((forma) => (
                 <SelectItem key={forma.value} value={forma.value.toString()}>
                   {forma.label}
@@ -324,9 +324,9 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
         <div className="space-y-2">
           <Label htmlFor="confirmado">Status</Label>
           <Select
-            value={filtrosLocais.confirmado !== undefined ? filtrosLocais.confirmado.toString() : ''}
+            value={filtrosLocais.confirmado !== undefined ? filtrosLocais.confirmado.toString() : 'todos'}
             onValueChange={(value) => {
-              if (value === '') {
+              if (value === 'todos') {
                 atualizarFiltro('confirmado', undefined);
               } else {
                 atualizarFiltro('confirmado', value === 'true');
@@ -337,7 +337,7 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
               <SelectValue placeholder="Todos os status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os status</SelectItem>
+              <SelectItem value="todos">Todos os status</SelectItem>
               <SelectItem value="true">Confirmados</SelectItem>
               <SelectItem value="false">Pendentes</SelectItem>
             </SelectContent>
