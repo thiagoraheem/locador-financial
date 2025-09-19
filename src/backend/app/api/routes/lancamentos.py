@@ -166,7 +166,7 @@ async def obter_filtro_opcoes(
     favorecidos_opcoes = [{'value': f.CodFavorecido, 'label': f.DesFavorecido} for f in favorecidos]
     
     # Buscar categorias
-    categorias = db.query(Categoria).filter(Categoria.FlgAtivo == 1).all()
+    categorias = db.query(Categoria).filter(Categoria.FlgAtivo == 'S').all()
     categorias_opcoes = [{'value': c.CodCategoria, 'label': c.DesCategoria} for c in categorias]
     
     # Buscar contas
