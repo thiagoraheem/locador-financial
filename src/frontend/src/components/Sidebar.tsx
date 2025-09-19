@@ -12,6 +12,7 @@ import {
   Building2,
   Landmark,
   Users,
+  CalendarDays,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -90,6 +91,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
       text: t('nav.relatorios'),
       icon: <BarChart3 className="h-5 w-5" />,
       path: '/relatorios',
+    },
+    {
+      text: t('nav.lancamentos_do_dia'),
+      icon: <CalendarDays className="h-5 w-5" />,
+      path: '/lancamentos-do-dia',
     },
   ];
 

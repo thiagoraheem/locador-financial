@@ -15,53 +15,59 @@ class Conta(Base):
     # Campos principais
     idConta = Column(Integer, primary_key=True, name='idConta')
     CodEmpresa = Column(Integer, ForeignKey('tbl_Empresa.CodEmpresa'), name='CodEmpresa', default=1)
-    Banco = Column(Integer, ForeignKey('tbl_Banco.Codigo'), name='Banco', nullable=False)
-    Agencia = Column(String(10), name='Agencia', nullable=False)
-    DigitoAgencia = Column(String(2), name='DigitoAgencia')
-    Conta = Column(String(20), name='Conta', nullable=False)
-    DigitoConta = Column(String(2), name='DigitoConta')
-    DesConta = Column(String(50), name='DesConta', nullable=False)
-    FlgAtivo = Column(String(1), name='FlgAtivo', default='S')
-    FlgContaCorrente = Column(Boolean, name='FlgContaCorrente', default=True)
-    FlgPoupanca = Column(Boolean, name='FlgPoupanca', default=False)
-    FlgPix = Column(Boolean, name='FlgPix', default=False)
-    ChavePix = Column(String(100), name='ChavePix')
-    TipoChavePix = Column(String(20), name='TipoChavePix')
-    saldo_inicial = Column(Numeric(19,4), name='SaldoInicial', default=0)
-    dat_saldo_inicial = Column(Date, name='DatSaldoInicial')
-    observacao = Column(Text, name='Observacao')
-    flg_conta_caixa = Column(Boolean, name='FlgContaCaixa', default=False)
-    limite_credito = Column(Numeric(19,4), name='LimiteCredito')
-    taxa_juros_mes = Column(Numeric(5,2), name='TaxaJurosMes')
-    convenio_cobranca = Column(String(20), name='ConvenioCobranca')
-    carteira_cobranca = Column(String(10), name='CarteiraCobranca')
-    nosso_numero_seq = Column(Integer, name='NossoNumeroSeq')
-    cod_cedente = Column(String(20), name='CodCedente')
-    digito_cedente = Column(String(2), name='DigitoCedente')
+    Banco = Column(Integer, ForeignKey('tbl_Banco.Codigo'), name='Banco')
+    Agencia = Column(String(4), name='Agencia')
+    AgenciaDigito = Column(String(4), name='AgenciaDigito')
+    Conta = Column(String(15), name='Conta')
+    ContaDigito = Column(String(4), name='ContaDigito')
+    NomConta = Column(String(50), name='NomConta')
     
-    # Campos PIX adicionais
-    TipoPix = Column(String(20), name='TipoPix')
+    # Campos de operação
+    OperacaoConta = Column(String(15), name='OperacaoConta')
+    Convenio = Column(String(10), name='Convenio')
+    Saldo = Column(Numeric(19,4), name='Saldo', default=0)
+    
+    # Campos PIX
+    TipoPix = Column(String(10), name='TipoPix')
     ValorPix = Column(String(100), name='ValorPix')
     
-    # Campos de operação e API
-    OperacaoConta = Column(String(10), name='OperacaoConta')
-    Convenio = Column(String(20), name='Convenio')
+    # Flags
     FlgContaPadrao = Column(Boolean, name='FlgContaPadrao', default=False)
+    
+    # Campos de carteira
+    Carteira = Column(String(5), name='Carteira')
+    VariacaoCarteira = Column(String(5), name='VariacaoCarteira')
+    
+    # Campos de API
     EnableAPI = Column(Boolean, name='EnableAPI', default=False)
     ConfiguracaoAPI = Column(Text, name='ConfiguracaoAPI')
-    
-    # Colunas de auditoria (conforme estrutura real da tabela)
-    DatCadastro = Column(DateTime, default=datetime.utcnow, nullable=False)
-    NomUsuario = Column(String(15), nullable=False)
-    DatAlteracao = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
-    NomUsuarioAlteracao = Column(String(15), nullable=True)
+    # Campos de auditoria
+    DatCadastro = Column(DateTime, name='DatCadastro', default=datetime.utcnow)
+    NomUsuario = Column(String(15), name='NomUsuario', default='admin')
+    DatAlteracao = Column(DateTime, name='DatAlteracao')
+    NomUsuarioAlteracao = Column(String(15), name='NomUsuarioAlteracao')
     
     # Relacionamentos
     empresa = relationship("Empresa", back_populates="contas_bancarias")
     banco = relationship("Banco", back_populates="contas")
     lancamentos = relationship("Lancamento", back_populates="conta")
     
-    # Propriedades de compatibilidade para schemas
+    # Propriedades de compatibilidade
+    @property
+    def DesConta(self):
+        """Compatibilidade com código antigo"""
+        return self.NomConta
+    
+    @property
+    def DigitoAgencia(self):
+        """Compatibilidade com código antigo"""
+        return self.AgenciaDigito
+    
+    @property
+    def DigitoConta(self):
+        """Compatibilidade com código antigo"""
+        return self.ContaDigito
+    
     @property
     def DtCreate(self):
         return self.DatCadastro
@@ -71,21 +77,21 @@ class Conta(Base):
         return self.DatAlteracao
     
     def __repr__(self):
-        return f"<Conta(idConta={self.idConta}, DesConta='{self.DesConta}', Banco={self.Banco})>"
+        return f"<Conta(idConta={self.idConta}, NomConta='{self.NomConta}', Banco={self.Banco})>"
     
     @property
     def agencia_completa(self) -> str:
         """Retorna agência com dígito"""
         if self.AgenciaDigito:
             return f"{self.Agencia}-{self.AgenciaDigito}"
-        return self.Agencia
+        return self.Agencia or ""
     
     @property
     def conta_completa(self) -> str:
         """Retorna conta com dígito"""
         if self.ContaDigito:
             return f"{self.Conta}-{self.ContaDigito}"
-        return self.Conta
+        return self.Conta or ""
     
     @property
     def is_active(self) -> bool:

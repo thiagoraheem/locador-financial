@@ -23,6 +23,7 @@ import { BancosPage } from './features/bancos/pages/BancosPage';
 import { ContasPage } from './features/contas/pages/ContasPage';
 import { ClientesPage } from '@/features/clientes/pages/ClientesPage';
 import { FavorecidosPage } from '@/features/favorecidos/pages/FavorecidosPage';
+import { LancamentosDoDiaPage } from '@/features/lancamentos/pages/LancamentosDoDiaPage';
 
 function App() {
   const { ready } = useTranslation();
@@ -74,6 +75,7 @@ function AppContent() {
               <Route path="/favorecidos" element={<FavorecidosPage />} />
         <Route path="contas-pagar" element={<ContasPagarPage />} />
         <Route path="contas-receber" element={<ContasReceberPage />} />
+        <Route path="lancamentos-do-dia" element={<LancamentosDoDiaPage />} />
       </Route>
 
       {/* Rota de teste dos componentes ShadCN */}

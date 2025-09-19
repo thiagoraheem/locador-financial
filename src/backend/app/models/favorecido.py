@@ -26,6 +26,7 @@ class Favorecido(Base):
     IE = Column(String(15), name='IE')
     IM = Column(String(10), name='IM')
     FlgTipo = Column(String(1), name='FlgTipo')
+    FlgAtivo = Column(String(1), name='FlgAtivo', default='S')
     Email = Column(String(50), name='Email')
     Telefone = Column(String(16), name='Telefone')
     Comentario = Column(String(300), name='Comentario')

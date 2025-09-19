@@ -57,7 +57,7 @@ class ContaPagarService:
     def get_conta_pagar_by_id(self, conta_pagar_id: int) -> AccountsPayable:
         """Get accounts payable by ID"""
         conta_pagar = self.db.query(AccountsPayable).join(
-            Favorecido, AccountsPayable.cod_favorecido == Favorecido.CodFavorecido
+            Favorecido, AccountsPayable.id_customer == Favorecido.CodFavorecido
         ).filter(
             AccountsPayable.id == conta_pagar_id
         ).first()
@@ -89,7 +89,7 @@ class ContaPagarService:
         """List accounts payable with filters"""
         
         query = self.db.query(AccountsPayable).join(
-            Favorecido, AccountsPayable.favorecido == Favorecido.CodFavorecido
+            Favorecido, AccountsPayable.id_customer == Favorecido.CodFavorecido
         )
         
         # Apply filters

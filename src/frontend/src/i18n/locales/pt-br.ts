@@ -11,6 +11,7 @@ export const ptBrTranslations = {
   'nav.contas_pagar': 'Contas a Pagar',
   'nav.contas_receber': 'Contas a Receber',
   'nav.relatorios': 'Relatórios',
+  'nav.lancamentos_do_dia': 'Lançamentos do Dia',
   'nav.configuracoes': 'Configurações',
   'nav.logout': 'Sair',
   'nav.profile': 'Perfil',
