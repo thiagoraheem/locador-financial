@@ -8,12 +8,12 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { authSlice } from '@/store/slices/authSlice';
 import { uiSlice } from '@/store/slices/uiSlice';
 
-// Mock das APIs
-jest.mock('@/services/api', () => ({
-  authApi: {
-    login: jest.fn(),
-  },
-}));
+// Mock simples da API de autenticação
+const mockAuthApi = {
+  login: jest.fn(),
+  logout: jest.fn(),
+  getCurrentUser: jest.fn()
+};
 
 // Mock do react-router-dom
 const mockNavigate = jest.fn();
@@ -99,7 +99,7 @@ describe('LoginPage', () => {
   });
 
   test('submits form with valid data', async () => {
-    const mockLogin = require('@/services/api').authApi.login;
+    const mockLogin = mockAuthApi.login;
     
     mockLogin.mockResolvedValue({
       data: {

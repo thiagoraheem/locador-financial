@@ -4,12 +4,8 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
 import AppBreadcrumb from './AppBreadcrumb';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { cn } from '@/lib/utils';
 
 export const Layout: React.FC = () => {
-  const { sidebarOpen } = useSelector((state: RootState) => state.ui);
   const sidebarWidth = 280;
 
   return (

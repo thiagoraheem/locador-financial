@@ -6,17 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { authSlice } from '@/store/slices/authSlice';
 import { uiSlice } from '@/store/slices/uiSlice';
 
-// Mock das APIs
-jest.mock('@/services/api', () => ({
-  authApi: {
-    login: jest.fn(),
-    logout: jest.fn(),
-  },
-  dashboardApi: {
-    getFinancialSummary: jest.fn(),
-    getCashFlow: jest.fn(),
-  },
-}));
+// Mock simples sem dependências externas
 
 // Mock do react-i18next
 jest.mock('react-i18next', () => ({

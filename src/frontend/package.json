@@ -48,9 +48,12 @@
     "@types/react": "^18.2.41",
     "@types/react-dom": "^18.2.17",
     "eslint": "^8.55.0",
+    "msw": "^2.11.2",
     "prettier": "^3.1.0",
     "react-scripts": "5.0.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.4.4",
+    "whatwg-fetch": "^3.6.20"
   },
   "scripts": {
     "start": "craco start",

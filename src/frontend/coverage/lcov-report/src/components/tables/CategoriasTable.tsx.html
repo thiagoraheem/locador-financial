@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">1.56% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/64</span>
+                <span class='fraction'>0/64</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/41</span>
+                <span class='fraction'>0/39</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">1.61% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/62</span>
+                <span class='fraction'>0/62</span>
             </div>
         
             
@@ -382,9 +382,7 @@
 <a name='L317'></a><a href='#L317'>317</a>
 <a name='L318'></a><a href='#L318'>318</a>
 <a name='L319'></a><a href='#L319'>319</a>
-<a name='L320'></a><a href='#L320'>320</a>
-<a name='L321'></a><a href='#L321'>321</a>
-<a name='L322'></a><a href='#L322'>322</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L320'></a><a href='#L320'>320</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -410,7 +408,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -630,9 +628,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -731,7 +727,7 @@ interface CategoriasTableProps {
   onCreate: () =&gt; void;
 }
 &nbsp;
-export const CategoriasTable: React.FC&lt;CategoriasTableProps&gt; = <span class="fstat-no" title="function not covered" >({</span> onEdit, onCreate }) =&gt; {
+export const CategoriasTable: React.FC&lt;CategoriasTableProps&gt; = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >({</span> onEdit, onCreate }) =&gt; {</span>
   const { t } = <span class="cstat-no" title="statement not covered" >useTranslation();</span>
   const dispatch = <span class="cstat-no" title="statement not covered" >useAppDispatch();</span>
   const {
@@ -930,7 +926,6 @@ export const CategoriasTable: React.FC&lt;CategoriasTableProps&gt; = <span class
           &lt;TableHeader&gt;
             &lt;TableRow&gt;
               &lt;TableHead&gt;{t('categorias.nome')}&lt;/TableHead&gt;
-              &lt;TableHead&gt;{t('categorias.descricao')}&lt;/TableHead&gt;
               &lt;TableHead&gt;{t('categorias.tipo')}&lt;/TableHead&gt;
               &lt;TableHead&gt;{t('categorias.categoria_pai')}&lt;/TableHead&gt;
               &lt;TableHead&gt;{t('categorias.ativo')}&lt;/TableHead&gt;
@@ -953,8 +948,7 @@ export const CategoriasTable: React.FC&lt;CategoriasTableProps&gt; = <span class
             ) : (
               categorias.map(<span class="fstat-no" title="function not covered" >(c</span>ategoria) =&gt; (
 <span class="cstat-no" title="statement not covered" >                &lt;TableRow key={categoria.CodCategoria}&gt;</span>
-                  &lt;TableCell className="font-medium"&gt;{categoria.NomCategoria}&lt;/TableCell&gt;
-                  &lt;TableCell&gt;{categoria.Descricao || '-'}&lt;/TableCell&gt;
+                  &lt;TableCell className="font-medium"&gt;{categoria.DesCategoria}&lt;/TableCell&gt;
                   &lt;TableCell&gt;{renderTipoCategoria(categoria.TipoCategoria)}&lt;/TableCell&gt;
                   &lt;TableCell&gt;{categoria.categoria_pai_nome || '-'}&lt;/TableCell&gt;
                   &lt;TableCell&gt;{renderStatus(categoria.FlgAtivo)}&lt;/TableCell&gt;
@@ -1033,7 +1027,7 @@ export const CategoriasTable: React.FC&lt;CategoriasTableProps&gt; = <span class
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-12T03:07:22.672Z
+                at 2025-09-19T18:01:31.696Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

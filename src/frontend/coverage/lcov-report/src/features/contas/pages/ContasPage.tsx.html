@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/4</span>
+                <span class='fraction'>0/17</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>0/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/4</span>
+                <span class='fraction'>0/17</span>
             </div>
         
             
@@ -114,24 +114,14 @@
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
 <a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -139,6 +129,32 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -163,16 +179,38 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ContasBancariasTable } from '../../../components/tables/ContasBancariasTable';
+import { ContaBancariaForm } from '../../../components/forms/ContaBancariaForm';
+import { ContaResponse } from '../../../services/contasApi';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 &nbsp;
-export const ContasPage: React.FC = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+export const ContasPage: React.FC = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
   const { t } = <span class="cstat-no" title="statement not covered" >useTranslation();</span>
+  const [isFormOpen, setIsFormOpen] = <span class="cstat-no" title="statement not covered" >useState(false);</span>
+  const [editingConta, setEditingConta] = <span class="cstat-no" title="statement not covered" >useState&lt;ContaResponse | null&gt;(null);</span>
+&nbsp;
+  const handleCreate = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setEditingConta(null);</span>
+<span class="cstat-no" title="statement not covered" >    setIsFormOpen(true);</span>
+  };
+&nbsp;
+  const handleEdit = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(c</span>onta: ContaResponse) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setEditingConta(conta);</span>
+<span class="cstat-no" title="statement not covered" >    setIsFormOpen(true);</span>
+  };
+&nbsp;
+  const handleCloseForm = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setIsFormOpen(false);</span>
+<span class="cstat-no" title="statement not covered" >    setEditingConta(null);</span>
+  };
+&nbsp;
+  const handleFormSuccess = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setIsFormOpen(false);</span>
+<span class="cstat-no" title="statement not covered" >    setEditingConta(null);</span>
+    // A tabela será recarregada automaticamente
+  };
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;div className="space-y-6"&gt;
@@ -186,34 +224,17 @@ export const ContasPage: React.FC = <span class="fstat-no" title="function not c
             Gerencie as contas bancárias do sistema
           &lt;/p&gt;
         &lt;/div&gt;
-        &lt;Button
-          onClick={<span class="fstat-no" title="function not covered" >()</span> =&gt; {
-            // TODO: Implementar abertura do modal de criação
-<span class="cstat-no" title="statement not covered" >            console.log('Nova conta');</span>
-          }}
-        &gt;
-          &lt;Plus className="mr-2 h-4 w-4" /&gt;
-          {t('contas.nova')}
-        &lt;/Button&gt;
       &lt;/div&gt;
 &nbsp;
       {/* Content */}
-      &lt;Card&gt;
-        &lt;CardContent className="p-6"&gt;
-          &lt;div className="h-80 flex items-center justify-center bg-muted/50 rounded-lg"&gt;
-            &lt;div className="text-center"&gt;
-              &lt;h3 className="text-lg font-semibold text-muted-foreground"&gt;
-                Módulo de Contas Bancárias
-              &lt;/h3&gt;
-              &lt;p className="text-sm text-muted-foreground mt-2"&gt;
-                Lista de contas bancárias cadastradas
-                &lt;br /&gt;
-                (A ser implementado)
-              &lt;/p&gt;
-            &lt;/div&gt;
-          &lt;/div&gt;
-        &lt;/CardContent&gt;
-      &lt;/Card&gt;
+      &lt;ContasBancariasTable onEdit={handleEdit} onCreate={handleCreate} /&gt;
+&nbsp;
+      &lt;ContaBancariaForm
+        open={isFormOpen}
+        onClose={handleCloseForm}
+        onSubmit={handleFormSuccess}
+        initialData={editingConta}
+      /&gt;
     &lt;/div&gt;
   );
 };</pre></td></tr></table></pre>
@@ -223,7 +244,7 @@ export const ContasPage: React.FC = <span class="fstat-no" title="function not c
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-12T03:07:22.672Z
+                at 2025-09-19T18:01:31.696Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

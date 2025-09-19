@@ -7,19 +7,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { authSlice } from '@/store/slices/authSlice';
 import { uiSlice } from '@/store/slices/uiSlice';
 
-// Mock das APIs
-jest.mock('@/services/api', () => ({
-  authApi: {
-    login: jest.fn(),
-    me: jest.fn(),
-    logout: jest.fn(),
-    validate: jest.fn(),
-  },
-  dashboardApi: {
-    getResumo: jest.fn(),
-    getFluxoCaixa: jest.fn(),
-  },
-}));
+// Mock simples para testes de integração
 
 // Componente simples para teste de integração
 const TestComponent: React.FC = () => {

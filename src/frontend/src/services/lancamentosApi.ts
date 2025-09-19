@@ -1,4 +1,4 @@
-import { apiClient, UserInfo } from './api';
+import { apiClient } from './api';
 import { AxiosResponse } from 'axios';
 
 // Types for Lancamentos

@@ -12,7 +12,6 @@ import {
   showInfo,
   removeNotification,
   clearNotifications,
-  selectLoading,
   selectGlobalLoading,
   selectNotifications,
   selectIsAnyLoading,

@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     
     # Configurações do Banco de Dados
     DATABASE_URI: str = "mssql+pyodbc://user:password@host:1433/database?driver=ODBC+Driver+17+for+SQL+Server"
+    TEST_DATABASE_URL: Optional[str] = "sqlite:///:memory:"
     
     # Configurações de CORS
     CORS_ORIGINS: List[str] = [

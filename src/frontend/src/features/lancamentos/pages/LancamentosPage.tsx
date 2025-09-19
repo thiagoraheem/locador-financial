@@ -7,7 +7,6 @@ import { LancamentoForm } from '@/components/forms/LancamentoForm';
 import { useAppDispatch } from '@/store';
 import { createLancamento, updateLancamento } from '@/store/slices/lancamentosSlice';
 import { LancamentoResponse } from '@/services/lancamentosApi';
-import { lancamentoService } from '@/services/lancamentoService';
 import { toast } from 'sonner';
 
 export const LancamentosPage: React.FC = () => {

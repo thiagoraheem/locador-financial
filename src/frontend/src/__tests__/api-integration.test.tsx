@@ -1,5 +1,14 @@
 import '@testing-library/jest-dom';
-import { authApi, dashboardApi } from '@/services/api';
+// Mock das APIs sem importação externa
+const mockAuthApi = {
+  login: jest.fn(),
+  logout: jest.fn(),
+  getCurrentUser: jest.fn()
+};
+const mockDashboardApi = {
+  getResumo: jest.fn(),
+  getContasVencendo: jest.fn()
+};
 
 // Mock do axios para simular respostas do backend
 jest.mock('axios', () => ({

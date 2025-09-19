@@ -177,7 +177,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ width }) => {
         "border-r bg-card transition-all duration-300 ease-in-out",
         sidebarOpen ? "w-80" : "w-0 overflow-hidden"
       )}
-      style={{ width: sidebarOpen ? width : 0 }}
     >
       {sidebarContent}
     </aside>

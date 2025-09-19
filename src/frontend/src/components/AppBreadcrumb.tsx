@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Home } from 'lucide-react';
 
-interface BreadcrumbItem {
+interface BreadcrumbItemData {
   label: string;
   path: string;
   isLast: boolean;
@@ -35,9 +35,9 @@ const AppBreadcrumb: React.FC = () => {
     '/relatorios': t('nav.relatorios'),
   };
 
-  const generateBreadcrumbs = (): BreadcrumbItem[] => {
+  const generateBreadcrumbs = (): BreadcrumbItemData[] => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
-    const breadcrumbs: BreadcrumbItem[] = [];
+    const breadcrumbs: BreadcrumbItemData[] = [];
 
     // Sempre adicionar Home como primeiro item
     breadcrumbs.push({

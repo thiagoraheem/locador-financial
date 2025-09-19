@@ -7,13 +7,17 @@ import { configureStore } from '@reduxjs/toolkit';
 import { authSlice } from '@/store/slices/authSlice';
 import { uiSlice } from '@/store/slices/uiSlice';
 
-// Mock das APIs
-jest.mock('@/services/api', () => ({
-  authApi: {
-    login: jest.fn(),
-    logout: jest.fn(),
-  },
-}));
+// Mock simples das APIs
+const mockContasPagarApi = {
+  create: jest.fn(),
+  update: jest.fn(),
+  getAll: jest.fn()
+};
+const mockContasReceberApi = {
+  create: jest.fn(),
+  update: jest.fn(),
+  getAll: jest.fn()
+};
 
 // Componente de formulário simples para teste
 const SimpleForm: React.FC = () => {

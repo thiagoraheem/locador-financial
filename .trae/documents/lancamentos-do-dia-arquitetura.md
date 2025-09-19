@@ -8,7 +8,7 @@ graph TD
     B --> C[Redux Store]
     B --> D[ShadCN UI Components]
     B --> E[API Backend Express]
-    E --> F[Banco de Dados PostgreSQL]
+    E --> F[Banco de Dados SQL Server]
     E --> G[Serviços de Integração]
     
     subgraph "Camada Frontend"
@@ -29,53 +29,62 @@ graph TD
 
 ## 2. Descrição das Tecnologias
 
-- Frontend: React@18 + TypeScript + ShadCN UI + TailwindCSS + Vite
-- Backend: Express.js + Node.js
-- Estado: Redux Toolkit + RTK Query
-- Gráficos: Recharts
-- Datas: date-fns
-- Banco de Dados: PostgreSQL
+* Frontend: React\@18 + TypeScript + ShadCN UI + TailwindCSS + Vite
+
+* Backend: Express.js + Node.js
+
+* Estado: Redux Toolkit + RTK Query
+
+* Gráficos: Recharts
+
+* Datas: date-fns
+
+* Banco de Dados: SQL Server
 
 ## 3. Definições de Rotas
 
-| Rota | Propósito |
-|------|----------|
-| /lancamentos-do-dia | Página principal de consulta de lançamentos do dia |
-| /lancamentos/novo | Modal/página para criar novo lançamento |
-| /contas-pagar/nova | Modal/página para criar nova conta a pagar |
-| /contas-receber/nova | Modal/página para criar nova conta a receber |
-| /transferencias/nova | Modal/página para criar nova transferência |
+| Rota                 | Propósito                                          |
+| -------------------- | -------------------------------------------------- |
+| /lancamentos-do-dia  | Página principal de consulta de lançamentos do dia |
+| /lancamentos/novo    | Modal/página para criar novo lançamento            |
+| /contas-pagar/nova   | Modal/página para criar nova conta a pagar         |
+| /contas-receber/nova | Modal/página para criar nova conta a receber       |
+| /transferencias/nova | Modal/página para criar nova transferência         |
 
 ## 4. Definições de API
 
 ### 4.1 APIs Principais
 
 **Consulta de lançamentos do dia**
+
 ```
 GET /api/lancamentos/dia
 ```
 
 Request:
-| Nome do Parâmetro | Tipo | Obrigatório | Descrição |
-|-------------------|------|-------------|----------|
-| data | string | true | Data no formato YYYY-MM-DD |
-| valorMin | number | false | Valor mínimo para filtro |
-| valorMax | number | false | Valor máximo para filtro |
-| favorecidoId | number | false | ID do favorecido |
-| categoriaId | number | false | ID da categoria |
-| contaId | number | false | ID da conta bancária |
-| tipoLancamento | string | false | Tipo: TODOS, LANCAMENTOS, TRANSFERENCIAS, CONTAS_PAGAR, CONTAS_RECEBER |
-| numeroDocumento | string | false | Número do documento |
-| formaPagamentoId | number | false | ID da forma de pagamento |
+
+| Nome do Parâmetro | Tipo   | Obrigatório | Descrição                                                                |
+| ----------------- | ------ | ----------- | ------------------------------------------------------------------------ |
+| data              | string | true        | Data no formato YYYY-MM-DD                                               |
+| valorMin          | number | false       | Valor mínimo para filtro                                                 |
+| valorMax          | number | false       | Valor máximo para filtro                                                 |
+| favorecidoId      | number | false       | ID do favorecido                                                         |
+| categoriaId       | number | false       | ID da categoria                                                          |
+| contaId           | number | false       | ID da conta bancária                                                     |
+| tipoLancamento    | string | false       | Tipo: TODOS, LANCAMENTOS, TRANSFERENCIAS, CONTAS\_PAGAR, CONTAS\_RECEBER |
+| numeroDocumento   | string | false       | Número do documento                                                      |
+| formaPagamentoId  | number | false       | ID da forma de pagamento                                                 |
 
 Response:
-| Nome do Parâmetro | Tipo | Descrição |
-|-------------------|------|----------|
-| lancamentos | array | Lista de lançamentos |
-| resumo | object | Totais consolidados |
-| graficoFormasPagamento | array | Dados para gráfico de pizza |
+
+| Nome do Parâmetro      | Tipo   | Descrição                   |
+| ---------------------- | ------ | --------------------------- |
+| lancamentos            | array  | Lista de lançamentos        |
+| resumo                 | object | Totais consolidados         |
+| graficoFormasPagamento | array  | Dados para gráfico de pizza |
 
 Exemplo:
+
 ```json
 {
   "lancamentos": [
@@ -114,17 +123,20 @@ Exemplo:
 ```
 
 **Confirmar pagamentos múltiplos**
+
 ```
 POST /api/lancamentos/confirmar-multiplos
 ```
 
 Request:
-| Nome do Parâmetro | Tipo | Obrigatório | Descrição |
-|-------------------|------|-------------|----------|
-| lancamentoIds | array | true | Array de IDs dos lançamentos |
-| dataConfirmacao | string | true | Data de confirmação |
+
+| Nome do Parâmetro | Tipo   | Obrigatório | Descrição                    |
+| ----------------- | ------ | ----------- | ---------------------------- |
+| lancamentoIds     | array  | true        | Array de IDs dos lançamentos |
+| dataConfirmacao   | string | true        | Data de confirmação          |
 
 **Exportar para Excel**
+
 ```
 GET /api/lancamentos/exportar-excel
 ```
@@ -213,6 +225,7 @@ erDiagram
 ### 6.2 Linguagem de Definição de Dados
 
 **View unificada para consulta de lançamentos do dia**
+
 ```sql
 -- Criar view unificada para lançamentos do dia
 CREATE OR REPLACE VIEW vw_lancamentos_dia AS
@@ -318,3 +331,4 @@ CREATE INDEX idx_accounts_payable_data ON tbl_AccountsPayable(dataVencimento);
 CREATE INDEX idx_accounts_receivable_data ON tbl_AccountsReceivable(dataVencimento);
 CREATE INDEX idx_transferencia_data ON tbl_FINTransferencia(data);
 ```
+

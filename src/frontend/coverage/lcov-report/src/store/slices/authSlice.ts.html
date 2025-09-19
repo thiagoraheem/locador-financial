@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">69.23% </span>
+                <span class="strong">11.53% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>18/26</span>
+                <span class='fraction'>3/26</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/6</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">69.23% </span>
+                <span class="strong">11.53% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>18/26</span>
+                <span class='fraction'>3/26</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -160,37 +160,37 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -205,7 +205,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -217,7 +217,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span></td><td class="text"><pre class="prettyprint lang-js">import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+<span class="cline-any cline-yes">3x</span></td><td class="text"><pre class="prettyprint lang-js">import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 &nbsp;
 export interface User {
   cod_funcionario: number;
@@ -249,25 +249,25 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    loginStart: (state) =&gt; {
-      state.loading = true;
-      state.error = null;
+    loginStart: <span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; {
+<span class="cstat-no" title="statement not covered" >      state.loading = true;</span>
+<span class="cstat-no" title="statement not covered" >      state.error = null;</span>
     },
-    loginSuccess: (state, action: PayloadAction&lt;{ user: User; token: string }&gt;) =&gt; {
-      state.isAuthenticated = true;
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      state.loading = false;
-      state.error = null;
-      localStorage.setItem('token', action.payload.token);
+    loginSuccess: <span class="fstat-no" title="function not covered" >(s</span>tate, action: PayloadAction&lt;{ user: User; token: string }&gt;) =&gt; {
+<span class="cstat-no" title="statement not covered" >      state.isAuthenticated = true;</span>
+<span class="cstat-no" title="statement not covered" >      state.user = action.payload.user;</span>
+<span class="cstat-no" title="statement not covered" >      state.token = action.payload.token;</span>
+<span class="cstat-no" title="statement not covered" >      state.loading = false;</span>
+<span class="cstat-no" title="statement not covered" >      state.error = null;</span>
+<span class="cstat-no" title="statement not covered" >      localStorage.setItem('token', action.payload.token);</span>
     },
-    loginFailure: (state, action: PayloadAction&lt;string&gt;) =&gt; {
-      state.isAuthenticated = false;
-      state.user = null;
-      state.token = null;
-      state.loading = false;
-      state.error = action.payload;
-      localStorage.removeItem('token');
+    loginFailure: <span class="fstat-no" title="function not covered" >(s</span>tate, action: PayloadAction&lt;string&gt;) =&gt; {
+<span class="cstat-no" title="statement not covered" >      state.isAuthenticated = false;</span>
+<span class="cstat-no" title="statement not covered" >      state.user = null;</span>
+<span class="cstat-no" title="statement not covered" >      state.token = null;</span>
+<span class="cstat-no" title="statement not covered" >      state.loading = false;</span>
+<span class="cstat-no" title="statement not covered" >      state.error = action.payload;</span>
+<span class="cstat-no" title="statement not covered" >      localStorage.removeItem('token');</span>
     },
     logout: <span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; {
 <span class="cstat-no" title="statement not covered" >      state.isAuthenticated = false;</span>
@@ -281,8 +281,8 @@ export const authSlice = createSlice({
 <span class="cstat-no" title="statement not covered" >      state.user = action.payload;</span>
 <span class="cstat-no" title="statement not covered" >      state.isAuthenticated = true;</span>
     },
-    clearError: (state) =&gt; {
-      state.error = null;
+    clearError: <span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; {
+<span class="cstat-no" title="statement not covered" >      state.error = null;</span>
     },
   },
 });
@@ -301,7 +301,7 @@ export const {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-12T03:07:22.672Z
+                at 2025-09-19T18:01:31.696Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

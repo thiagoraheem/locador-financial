@@ -2,17 +2,20 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { BrowserRouter } from 'react-router-dom';
 import { store } from '@/store';
 import { LoginPage } from './LoginPage';
-import { authApi } from '@/services/api';
+import { authApi } from '../../../services/api';
 
-// Mock do serviço de API
-jest.mock('@/services/api', () => ({
+// Mock da API de autenticação
+jest.mock('../../../services/api', () => ({
   authApi: {
-    login: jest.fn(),
-  },
+    login: jest.fn()
+  }
 }));
+
+const mockAuthApi = authApi as jest.Mocked<typeof authApi>;
 
 // Mock do i18next
 jest.mock('react-i18next', () => ({
@@ -76,11 +79,24 @@ describe('LoginPage', () => {
 
   test('submits form with valid credentials', async () => {
     const mockLoginResponse = {
-      access_token: 'mock-token',
-      user: { id: 1, username: 'testuser' },
+      data: {
+        access_token: 'fake-token',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        user_info: {
+          cod_funcionario: 1,
+          nome: 'Test User',
+          login: 'testuser',
+          is_active: true,
+        },
+      },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
     };
 
-    (authApi.login as jest.Mock).mockResolvedValue(mockLoginResponse);
+    mockAuthApi.login.mockResolvedValue(mockLoginResponse);
 
     render(
       <TestWrapper>
@@ -97,9 +113,9 @@ describe('LoginPage', () => {
     await userEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(authApi.login).toHaveBeenCalledWith({
-        username: 'testuser',
-        password: 'password123',
+      expect(mockAuthApi.login).toHaveBeenCalledWith({
+        login: 'testuser',
+        senha: 'password123',
       });
     });
   });
@@ -107,7 +123,7 @@ describe('LoginPage', () => {
   test('shows error message on login failure', async () => {
     const mockError = new Error('Credenciais inválidas');
 
-    (authApi.login as jest.Mock).mockRejectedValue(mockError);
+    mockAuthApi.login.mockRejectedValue(mockError);
 
     render(
       <TestWrapper>
