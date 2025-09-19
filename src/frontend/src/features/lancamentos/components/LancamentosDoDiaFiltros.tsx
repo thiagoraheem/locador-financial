@@ -9,25 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+
 import { Badge } from '@/components/ui/badge';
 import {
-  CalendarIcon,
   Filter,
   X,
   Search,
-  RotateCcw,
-  ChevronLeft,
-  ChevronRight
+  RotateCcw
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+
 
 import {
   LancamentosDoDiaFilter,
@@ -50,10 +40,7 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
   dataSelecionada
 }) => {
   const [filtrosLocais, setFiltrosLocais] = useState<LancamentosDoDiaFilter>(filtros);
-  const [dataCalendar, setDataCalendar] = useState<Date | undefined>(
-    dataSelecionada ? new Date(dataSelecionada) : new Date()
-  );
-  const [calendarOpen, setCalendarOpen] = useState(false);
+
 
   /**
    * Atualiza filtro local
@@ -83,18 +70,7 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
     onAplicarFiltros(filtrosLimpos);
   };
 
-  /**
-   * Altera a data selecionada
-   */
-  const alterarData = (data: Date | undefined) => {
-    if (data) {
-      const dataISO = format(data, 'yyyy-MM-dd');
-      setDataCalendar(data);
-      onAlterarData(dataISO);
-      atualizarFiltro('data', dataISO);
-      setCalendarOpen(false);
-    }
-  };
+
 
   /**
    * Remove um filtro específico
@@ -120,82 +96,14 @@ export const LancamentosDoDiaFiltros: React.FC<LancamentosDoDiaFiltrosProps> = (
 
   return (
     <div className="space-y-6">
-      {/* Seletor de Data com Navegação */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-        <div className="space-y-2">
-          <Label htmlFor="data">Data dos Lançamentos</Label>
-          <div className="flex items-center gap-2">
-            {/* Botão Dia Anterior */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 w-10 p-0"
-              onClick={() => {
-                if (dataCalendar) {
-                  const novaData = new Date(dataCalendar);
-                  novaData.setDate(novaData.getDate() - 1);
-                  alterarData(novaData);
-                }
-              }}
-              title="Dia anterior"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            {/* Seletor de Data */}
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal",
-                    !dataCalendar && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dataCalendar ? (
-                    format(dataCalendar, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dataCalendar}
-                  onSelect={alterarData}
-                  initialFocus
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
-            
-            {/* Botão Próximo Dia */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 w-10 p-0"
-              onClick={() => {
-                if (dataCalendar) {
-                  const novaData = new Date(dataCalendar);
-                  novaData.setDate(novaData.getDate() + 1);
-                  alterarData(novaData);
-                }
-              }}
-              title="Próximo dia"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {filtrosAtivos > 0 && (
-          <Badge variant="secondary" className="ml-auto">
+      {/* Cabeçalho dos Filtros */}
+      {filtrosAtivos > 0 && (
+        <div className="flex justify-end">
+          <Badge variant="secondary">
             {filtrosAtivos} filtro(s) ativo(s)
           </Badge>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Filtros Principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

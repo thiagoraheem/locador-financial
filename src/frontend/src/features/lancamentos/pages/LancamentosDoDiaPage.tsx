@@ -19,11 +19,17 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   FileSpreadsheet,
-  CheckCircle
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { format } from 'date-fns';
+import { format, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 // Componentes específicos (serão criados)
 import { LancamentosDoDiaFiltros } from '../components/LancamentosDoDiaFiltros';
@@ -160,6 +166,27 @@ export const LancamentosDoDiaPage: React.FC = () => {
         filtros: { ...prev.filtros, data: novaData },
         lancamentos_selecionados: [] // Limpa seleção ao mudar data
       }));
+    }
+  };
+
+  const navegarDiaAnterior = () => {
+    const dataAtual = new Date(state.data_selecionada);
+    const novaData = subDays(dataAtual, 1);
+    const novaDataString = format(novaData, 'yyyy-MM-dd');
+    alterarData(novaDataString);
+  };
+
+  const navegarProximoDia = () => {
+    const dataAtual = new Date(state.data_selecionada);
+    const novaData = addDays(dataAtual, 1);
+    const novaDataString = format(novaData, 'yyyy-MM-dd');
+    alterarData(novaDataString);
+  };
+
+  const selecionarDataCalendario = (data: Date | undefined) => {
+    if (data) {
+      const novaDataString = format(data, 'yyyy-MM-dd');
+      alterarData(novaDataString);
     }
   };
 
@@ -328,37 +355,87 @@ export const LancamentosDoDiaPage: React.FC = () => {
   return (
     <div className="space-y-6 p-6">
       {/* Cabeçalho da Página */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <CalendarDays className="h-8 w-8 text-primary" />
-            Lançamentos do Dia
-          </h1>
-          <p className="text-muted-foreground">
-            Visualize e gerencie todos os lançamentos financeiros do dia selecionado
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+              <CalendarDays className="h-8 w-8 text-primary" />
+              Lançamentos do Dia
+            </h1>
+            <p className="text-muted-foreground">
+              Visualize e gerencie todos os lançamentos financeiros do dia selecionado
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMostrarFiltros(!mostrarFiltros)}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Filtros
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={carregarDados}
+              disabled={state.loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${state.loading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+          </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm">
-            {format(new Date(state.data_selecionada), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-          </Badge>
+        {/* Navegador de Data Permanente */}
+        <div className="flex items-center justify-center sm:justify-start gap-2 p-4 bg-muted/30 rounded-lg border">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setMostrarFiltros(!mostrarFiltros)}
+            onClick={navegarDiaAnterior}
+            className="h-9 w-9 p-0"
+            title="Dia anterior"
           >
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
+            <ChevronLeft className="h-4 w-4" />
           </Button>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "min-w-[200px] justify-start text-left font-normal",
+                  !state.data_selecionada && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {state.data_selecionada ? (
+                  format(new Date(state.data_selecionada), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                ) : (
+                  <span>Selecione uma data</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={state.data_selecionada ? new Date(state.data_selecionada) : undefined}
+                onSelect={selecionarDataCalendario}
+                initialFocus
+                locale={ptBR}
+              />
+            </PopoverContent>
+          </Popover>
+          
           <Button
             variant="outline"
             size="sm"
-            onClick={carregarDados}
-            disabled={state.loading}
+            onClick={navegarProximoDia}
+            className="h-9 w-9 p-0"
+            title="Próximo dia"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${state.loading ? 'animate-spin' : ''}`} />
-            Atualizar
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
