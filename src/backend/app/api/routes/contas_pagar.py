@@ -23,29 +23,29 @@ router = APIRouter(prefix="/contas-pagar", tags=["contas a pagar"])
 def map_accounts_payable_to_response(conta) -> AccountsPayableResponse:
     """Mapeia o modelo AccountsPayable para o schema AccountsPayableResponse"""
     response_data = {
-        "CodEmpresa": conta.cod_empresa,
-        "CodFornecedor": conta.cod_favorecido,
-        "idConta": conta.cod_conta,
-        "CodCategoria": conta.cod_categoria,
-        "DataEmissao": conta.data_emissao,
-        "DataVencimento": conta.data_vencimento,
-        "DataPagamento": conta.data_pagamento,
-        "Valor": conta.valor_original,
-        "ValorPago": conta.valor_pago,
-        "Desconto": conta.valor_desconto,
-        "Juros": conta.valor_juros,
-        "Multa": conta.valor_multa,
-        "Status": "P" if conta.flg_pago else "A",  # Status baseado no flag de pagamento
-        "NumeroDocumento": conta.num_documento,
-        "NumParcela": conta.num_parcela if conta.num_parcela and conta.num_parcela > 0 else 1,
-        "TotalParcelas": conta.qtd_parcelas if conta.qtd_parcelas and conta.qtd_parcelas > 0 else 1,
-        "Observacao": conta.observacoes,
+        "CodEmpresa": conta.id_company,
+        "CodFornecedor": conta.id_customer,
+        "idConta": conta.id_bank_account,
+        "CodCategoria": conta.id_chart_of_accounts,
+        "DataEmissao": conta.issuance_date,
+        "DataVencimento": conta.due_date,
+        "DataPagamento": conta.payment_date,
+        "Valor": conta.amount,
+        "ValorPago": conta.paid_amount or 0,
+        "Desconto": conta.discount_amount or 0,
+        "Juros": conta.interest_amount or 0,
+        "Multa": conta.fine_amount or 0,
+        "Status": "P" if conta.payment_date else "A",  # Status baseado na data de pagamento
+        "NumeroDocumento": conta.document_number,
+        "NumParcela": conta.installment if conta.installment and conta.installment > 0 else 1,
+        "TotalParcelas": conta.total_installments if conta.total_installments and conta.total_installments > 0 else 1,
+        "Observacao": conta.description,
         "CodigoBarras": None,  # Campo não existe no modelo atual
         "LinhaDigitavel": None,  # Campo não existe no modelo atual
         "CodAccountsPayable": conta.id,
         "NomUsuario": "Sistema",  # Ajustar conforme necessário
-        "DtCreate": datetime.now(),  # Ajustar conforme campos de auditoria
-        "DtAlter": None,
+        "DtCreate": conta.date_create,  # Usar campo real de auditoria
+        "DtAlter": conta.date_update,
         "fornecedor_nome": getattr(conta, 'fornecedor_nome', None)  # Será preenchido pelo join com Favorecido
     }
     return AccountsPayableResponse(**response_data)

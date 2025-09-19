@@ -41,8 +41,8 @@ class FavorecidoUpdate(FavorecidoBase):
 class FavorecidoResponse(FavorecidoBase):
     """Schema para resposta de favorecido"""
     CodFavorecido: int
-    NomUsuario: str
-    DatCadastro: datetime
+    NomUsuario: Optional[str] = None
+    DatCadastro: Optional[datetime] = None
     NomUsuarioAlteracao: Optional[str] = None
     DatAlteracao: Optional[datetime] = None
     

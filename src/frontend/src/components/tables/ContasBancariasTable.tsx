@@ -51,9 +51,9 @@ export const ContasBancariasTable: React.FC<ContasBancariasTableProps> = ({ onEd
   // Filter contas based on search, status and type
   const filteredContas = contas.filter((conta) => {
     const matchesSearch = 
-      conta.NomConta.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conta.Agencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conta.Conta.toLowerCase().includes(searchTerm.toLowerCase());
+      (conta.NomConta?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (conta.Agencia?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (conta.Conta?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || conta.FlgAtivo === statusFilter;
     const matchesType = tipoFilter === 'all' || conta.TipoConta === tipoFilter;

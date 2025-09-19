@@ -3,21 +3,23 @@ import { AxiosResponse } from 'axios';
 
 // Types for Favorecidos
 export interface FavorecidoBase {
-  NomFavorecido: string;
-  TipoFavorecido: 'F' | 'J';
-  CPF_CNPJ: string;
-  Telefone: string;
-  Email: string;
-  Endereco: string;
-  FlgAtivo: 'S' | 'N';
+  DesFavorecido: string;
+  TipoFavorecido?: 'F' | 'J';
+  CPF?: string;
+  CNPJ?: string;
+  Telefone?: string;
+  Email?: string;
+  Endereco?: string;
+  FlgAtivo?: 'S' | 'N';
 }
 
 export interface FavorecidoCreate extends FavorecidoBase {}
 
 export interface FavorecidoUpdate {
-  NomFavorecido?: string;
+  DesFavorecido?: string;
   TipoFavorecido?: 'F' | 'J';
-  CPF_CNPJ?: string;
+  CPF?: string;
+  CNPJ?: string;
   Telefone?: string;
   Email?: string;
   Endereco?: string;
@@ -26,8 +28,13 @@ export interface FavorecidoUpdate {
 
 export interface FavorecidoResponse extends FavorecidoBase {
   CodFavorecido: number;
-  NomUsuario: string;
-  DtCreate: string;
+  NomUsuario?: string;
+  DatCadastro?: string;
+  DatAlteracao?: string;
+  // Propriedades de compatibilidade
+  NomFavorecido?: string;
+  CPF_CNPJ?: string;
+  DtCreate?: string;
   DtAlter?: string;
 }
 

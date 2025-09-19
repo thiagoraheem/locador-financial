@@ -14,9 +14,10 @@ import { Loader2 } from 'lucide-react';
 
 // Types for the form - adjust to match yup schema exactly
 interface FavorecidoFormData {
-  NomFavorecido: string;
+  DesFavorecido: string;
   TipoFavorecido: 'F' | 'J';
-  CPF_CNPJ: string;
+  CPF?: string;
+  CNPJ?: string;
   Telefone?: string;
   Email?: string;
   Endereco?: string;
@@ -34,9 +35,10 @@ interface FavorecidoFormProps {
 
 // Validation schema
 const favorecidoSchema = yup.object({
-  NomFavorecido: yup.string().required('validation.required').max(100, 'validation.max_length'),
+  DesFavorecido: yup.string().required('validation.required').max(100, 'validation.max_length'),
   TipoFavorecido: yup.string().oneOf(['F', 'J']).required('validation.required'),
-  CPF_CNPJ: yup.string().required('validation.required').max(18, 'validation.max_length'),
+  CPF: yup.string().max(14, 'validation.max_length'),
+  CNPJ: yup.string().max(18, 'validation.max_length'),
   Telefone: yup.string().max(20, 'validation.max_length'),
   Email: yup.string().email('validation.email').max(100, 'validation.max_length'),
   Endereco: yup.string().max(100, 'validation.max_length'),
@@ -62,9 +64,10 @@ export const FavorecidoForm: React.FC<FavorecidoFormProps> = ({
   } = useForm<FavorecidoFormData>({
     resolver: yupResolver(favorecidoSchema),
     defaultValues: {
-      NomFavorecido: '',
+      DesFavorecido: '',
       TipoFavorecido: 'F',
-      CPF_CNPJ: '',
+      CPF: '',
+      CNPJ: '',
       Telefone: '',
       Email: '',
       Endereco: '',
@@ -76,9 +79,10 @@ export const FavorecidoForm: React.FC<FavorecidoFormProps> = ({
   useEffect(() => {
     if (open && initialData) {
       reset({
-        NomFavorecido: initialData.NomFavorecido || '',
+        DesFavorecido: initialData.DesFavorecido || initialData.NomFavorecido || '',
         TipoFavorecido: initialData.TipoFavorecido || 'F',
-        CPF_CNPJ: initialData.CPF_CNPJ || '',
+        CPF: initialData.CPF || '',
+        CNPJ: initialData.CNPJ || '',
         Telefone: initialData.Telefone || '',
         Email: initialData.Email || '',
         Endereco: initialData.Endereco || '',
@@ -86,9 +90,10 @@ export const FavorecidoForm: React.FC<FavorecidoFormProps> = ({
       });
     } else if (open && !initialData) {
       reset({
-        NomFavorecido: '',
+        DesFavorecido: '',
         TipoFavorecido: 'F',
-        CPF_CNPJ: '',
+        CPF: '',
+        CNPJ: '',
         Telefone: '',
         Email: '',
         Endereco: '',
@@ -126,14 +131,14 @@ export const FavorecidoForm: React.FC<FavorecidoFormProps> = ({
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           {/* Nome do Favorecido */}
           <div className="space-y-2">
-            <Label htmlFor="NomFavorecido">{t('lancamentos.favorecido')}</Label>
+            <Label htmlFor="DesFavorecido">{t('lancamentos.favorecido')}</Label>
             <Controller
-              name="NomFavorecido"
+              name="DesFavorecido"
               control={control}
               render={({ field, fieldState: { error } }) => (
                 <>
                   <Input
-                    id="NomFavorecido"
+                    id="DesFavorecido"
                     {...field}
                     className={error ? 'border-red-500' : ''}
                   />
@@ -171,16 +176,39 @@ export const FavorecidoForm: React.FC<FavorecidoFormProps> = ({
               />
             </div>
 
-            {/* CPF/CNPJ */}
+            {/* CPF */}
             <div className="space-y-2">
-              <Label htmlFor="CPF_CNPJ">{t('clientes.cpf')}/{t('clientes.cnpj')}</Label>
+              <Label htmlFor="CPF">{t('clientes.cpf')}</Label>
               <Controller
-                name="CPF_CNPJ"
+                name="CPF"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <>
                     <Input
-                      id="CPF_CNPJ"
+                      id="CPF"
+                      {...field}
+                      className={error ? 'border-red-500' : ''}
+                    />
+                    {error && (
+                      <p className="text-sm text-red-500">{t(error.message || '')}</p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* CNPJ */}
+            <div className="space-y-2">
+              <Label htmlFor="CNPJ">{t('clientes.cnpj')}</Label>
+              <Controller
+                name="CNPJ"
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <>
+                    <Input
+                      id="CNPJ"
                       {...field}
                       className={error ? 'border-red-500' : ''}
                     />

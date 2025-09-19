@@ -198,12 +198,12 @@ export const FavorecidosTable: React.FC<FavorecidosTableProps> = ({ onEdit, onCr
             ) : (
               favorecidos.map((favorecido) => (
                 <TableRow key={favorecido.CodFavorecido}>
-                  <TableCell className="font-medium">{favorecido.NomFavorecido}</TableCell>
-                  <TableCell>{renderTipoFavorecido(favorecido.TipoFavorecido)}</TableCell>
-                  <TableCell>{favorecido.CPF_CNPJ}</TableCell>
-                  <TableCell>{favorecido.Telefone}</TableCell>
-                  <TableCell>{favorecido.Email}</TableCell>
-                  <TableCell>{renderStatus(favorecido.FlgAtivo)}</TableCell>
+                  <TableCell className="font-medium">{favorecido.DesFavorecido || favorecido.NomFavorecido || '-'}</TableCell>
+                  <TableCell>{renderTipoFavorecido(favorecido.TipoFavorecido || '')}</TableCell>
+                  <TableCell>{favorecido.CPF || favorecido.CNPJ || favorecido.CPF_CNPJ || '-'}</TableCell>
+                  <TableCell>{favorecido.Telefone || '-'}</TableCell>
+                  <TableCell>{favorecido.Email || '-'}</TableCell>
+                  <TableCell>{renderStatus(favorecido.FlgAtivo || 'N')}</TableCell>
                   <TableCell>{renderActions(favorecido)}</TableCell>
                 </TableRow>
               ))
